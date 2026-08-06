@@ -1,0 +1,25 @@
+# WordPress Core (don't track core files)
+wp-admin/
+wp-includes/
+
+# Large zip files
+*.zip
+*.tar.gz
+*.rar
+
+# WordPress uploads (media files)
+wp-content/uploads/
+
+# WordPress config (contains DB credentials - keep secret!)
+wp-config.php
+
+# RevSlider plugin zip
+wp-content/revslider.zip
+
+# Environment & OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Node modules (if any)
+node_modules/
