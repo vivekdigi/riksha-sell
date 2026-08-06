@@ -30,11 +30,11 @@ $states = array(
 <div class="sell-car-page" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f4f4f4; min-height: 100vh; padding-bottom: 60px;">
 
     <!-- ===== HERO BANNER ===== -->
-    <div class="sell-car-hero" style="background-color: var(--primary-color, #db2d2e); color: #fff; padding: 48px 0 40px;">
+    <div class="sell-car-hero" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 48px 0 40px;">
         <div class="container" style="max-width: 960px;">
             <p class="mb-1 fw-semibold" style="font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85;">RIKSHAWALE</p>
-            <h1 class="fw-black mb-2" style="font-size: 2.4rem; line-height: 1.1;">Sell Your Car</h1>
-            <p style="font-size: 0.92rem; opacity: 0.9; max-width: 560px;">
+            <h1 class="fw-black mb-2 text-white" style="font-size: 2.3rem; letter-spacing: -0.5px; line-height: 1.1;">Sell Your Car</h1>
+            <p style="font-size: 0.92rem; opacity: 0.85; max-width: 560px;" class="mb-0">
                 Share your vehicle details below and our team will review your car quickly. Designed in a compact style with proper mobile responsiveness.
             </p>
         </div>
