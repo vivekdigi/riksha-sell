@@ -1,88 +1,68 @@
 <?php
 /**
- * The template for displaying the footer
+ * The template for displaying the footer (Modern, Compact Layout)
  */
 ?>
 <style>
     .footer-custom {
-        background-color: <?php echo esc_attr( get_theme_mod( 'footer_bg_color', '#0b0b0b' ) ); ?> !important;
-        color: <?php echo esc_attr( get_theme_mod( 'footer_text_color', '#cccccc' ) ); ?> !important;
-        border-top: 1px solid rgba(255,255,255,0.05);
+        background-color: <?php echo esc_attr( get_theme_mod( 'footer_bg_color', '#090b0e' ) ); ?> !important;
+        color: <?php echo esc_attr( get_theme_mod( 'footer_text_color', '#94a3b8' ) ); ?> !important;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        font-family: var(--font-body, 'Inter', sans-serif);
     }
     .footer-custom h5 {
         color: #ffffff !important;
         position: relative;
-        padding-bottom: 12px;
+        padding-bottom: 8px;
         font-weight: 700;
-        letter-spacing: 0.5px;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        font-size: 0.95rem;
+        font-size: 0.78rem !important;
     }
     .footer-custom h5::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
-        width: 30px;
+        width: 22px;
         height: 2px;
-        background-color: var(--primary-color);
+        background-color: var(--primary-color, #db2d2e);
+        border-radius: 1px;
     }
     .footer-custom a {
-        color: <?php echo esc_attr( get_theme_mod( 'footer_text_color', '#cccccc' ) ); ?>;
+        color: <?php echo esc_attr( get_theme_mod( 'footer_text_color', '#94a3b8' ) ); ?>;
         text-decoration: none;
-        transition: all 0.3s ease;
+        font-size: 0.82rem !important;
+        transition: all 0.2s ease;
     }
     .footer-custom a:hover {
-        color: var(--primary-color) !important;
-        padding-left: 3px;
+        color: #ffffff !important;
+        padding-left: 4px;
     }
     .footer-custom p {
-        color: <?php echo esc_attr( get_theme_mod( 'footer_text_color', '#aaaaaa' ) ); ?>;
+        color: <?php echo esc_attr( get_theme_mod( 'footer_text_color', '#94a3b8' ) ); ?>;
+        font-size: 0.8rem !important;
+        line-height: 1.6;
     }
     .contact-icon-box {
-        width: 24px;
-        height: 24px;
-        background-color: transparent !important;
-        background: none !important;
-        color: var(--primary-color);
+        width: 20px;
+        height: 20px;
+        color: var(--primary-color, #db2d2e);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.05rem;
-        transition: all 0.3s ease;
-        border: none !important;
-        box-shadow: none !important;
-    }
-    .contact-icon-box:hover {
-        background-color: transparent !important;
-        color: var(--primary-color);
-        border: none !important;
-        transform: scale(1.15);
+        font-size: 0.85rem;
+        flex-shrink: 0;
     }
     .footer-tagline-box {
-        border-left: 3px solid var(--primary-color);
+        border-left: 2px solid var(--primary-color, #db2d2e);
         background-color: rgba(255,255,255,0.03);
-        font-size: 0.75rem;
+        font-size: 0.68rem !important;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: #ffffff;
-    }
-    .footer-social-icons a {
-        width: 36px;
-        height: 36px;
-        border-radius: 4px;
-        background-color: rgba(255,255,255,0.05);
-        color: #ffffff !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 8px;
-        transition: all 0.3s ease;
-    }
-    .footer-social-icons a:hover {
-        background-color: var(--primary-color);
-        padding-left: 0;
+        color: #e2e8f0;
+        border-radius: 0 4px 4px 0;
     }
     .footer-custom ul,
     .footer-custom ol {
@@ -92,23 +72,23 @@
     }
     .footer-custom li {
         list-style: none !important;
-        list-style-type: none !important;
+        margin-bottom: 0.45rem !important;
     }
     .footer-custom .custom-logo-link img,
     .footer-custom .custom-logo {
-        max-height: 35px !important;
+        max-height: 32px !important;
         width: auto !important;
         object-fit: contain !important;
         display: block;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
 </style>
 
 <footer class="footer-custom mt-auto">
     <div class="container py-5">
-        <div class="row g-4">
+        <div class="row g-4 justify-content-between">
             <!-- Column 1: Brand Info & Description -->
-            <div class="col-lg-3 col-md-6 mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
                 <?php 
                 $footer_logo_url = get_theme_mod( 'footer_logo' );
                 if ( $footer_logo_url ) {
@@ -121,14 +101,14 @@
                     the_custom_logo();
                 } else {
                 ?>
-                    <h3 class="fw-bold text-white mb-3">🛺 <?php bloginfo( 'name' ); ?></h3>
+                    <h4 class="fw-bold text-white mb-2" style="font-size: 1.1rem;">🛺 <?php bloginfo( 'name' ); ?></h4>
                 <?php 
                 }
                 ?>
-                <div class="footer-tagline-box my-3 px-3 py-2">
+                <div class="footer-tagline-box my-2 px-2 py-1">
                     <?php echo esc_html( get_theme_mod( 'footer_tagline', 'PREMIUM PRE-OWNED AUTOMOTIVE EXPERIENCE' ) ); ?>
                 </div>
-                <p class="small mb-4" style="line-height: 1.6;">
+                <p class="mb-0">
                     <?php echo esc_html( get_theme_mod( 'footer_description', 'Luxury, trust, and performance — handpicked pre-owned cars for buyers who expect more.' ) ); ?>
                 </p>
             </div>
@@ -138,11 +118,13 @@
                 <?php dynamic_sidebar( 'footer-widget-1' ); ?>
             <?php else : ?>
                 <!-- Default Quick Links -->
-                <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
-                    <h5 class="fw-bold mb-3">QUICK LINKS</h5>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="<?php echo esc_url( home_url('/inventory/') ); ?>">Sell a Car</a></li>
-                        <li class="mb-2"><a href="<?php echo esc_url( home_url('/contact/') ); ?>">Contact us</a></li>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <h5 class="mb-3">QUICK LINKS</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="<?php echo esc_url( home_url('/') ); ?>">Home</a></li>
+                        <li><a href="<?php echo esc_url( home_url('/about-us/') ); ?>">About us</a></li>
+                        <li><a href="<?php echo esc_url( home_url('/sell-a-car/') ); ?>">Sell a Car</a></li>
+                        <li><a href="<?php echo esc_url( home_url('/contact-us/') ); ?>">Contact us</a></li>
                     </ul>
                 </div>
             <?php endif; ?>
@@ -150,15 +132,14 @@
             <?php if ( is_active_sidebar( 'footer-widget-2' ) ) : ?>
                 <?php dynamic_sidebar( 'footer-widget-2' ); ?>
             <?php else : ?>
-                <!-- Default Brands -->
-                <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
-                    <h5 class="fw-bold mb-3">BRANDS</h5>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="#">Tata</a></li>
-                        <li class="mb-2"><a href="#">Mahindra</a></li>
-                        <li class="mb-2"><a href="#">Hyundai</a></li>
-                        <li class="mb-2"><a href="#">Audi</a></li>
-                        <li class="mb-2"><a href="#">Ford</a></li>
+                <!-- Default Models / Brands -->
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <h5 class="mb-3">MODELS</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">King Deluxe</a></li>
+                        <li><a href="#">Maxima Cargo</a></li>
+                        <li><a href="#">RE</a></li>
+                        <li><a href="#">Treo</a></li>
                     </ul>
                 </div>
             <?php endif; ?>
@@ -167,45 +148,45 @@
                 <?php dynamic_sidebar( 'footer-widget-3' ); ?>
             <?php else : ?>
                 <!-- Default Policies -->
-                <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
-                    <h5 class="fw-bold mb-3">POLICIES</h5>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="#">Privacy Policy</a></li>
-                        <li class="mb-2"><a href="#">Terms & Conditions</a></li>
-                        <li class="mb-2"><a href="#">Shipping policy</a></li>
+                <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                    <h5 class="mb-3">POLICIES</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="<?php echo esc_url( home_url('/privacy-policy/') ); ?>">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Shipping policy</a></li>
                     </ul>
                 </div>
             <?php endif; ?>
 
             <!-- Column 5: Contact Us -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <h5 class="fw-bold mb-3 text-white">CONTACT US</h5>
-                <ul class="list-unstyled footer-contact-list">
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="contact-icon-box me-3">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <h5 class="mb-3">CONTACT US</h5>
+                <ul class="list-unstyled">
+                    <li class="d-flex align-items-center gap-2 mb-2">
+                        <div class="contact-icon-box">
                             <i class="fa-solid fa-phone"></i>
                         </div>
                         <div>
-                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?>" class="small">
-                                <?php echo esc_html( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?>
+                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+91 97111-63000' ) ); ?>">
+                                <?php echo esc_html( get_theme_mod( 'topbar_phone', '+91 97111-63000' ) ); ?>
                             </a>
                         </div>
                     </li>
-                    <li class="d-flex align-items-center mb-3">
-                        <div class="contact-icon-box me-3">
+                    <li class="d-flex align-items-center gap-2 mb-2">
+                        <div class="contact-icon-box">
                             <i class="fa-solid fa-envelope"></i>
                         </div>
                         <div>
-                            <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>" class="small">
+                            <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>">
                                 <?php echo esc_html( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>
                             </a>
                         </div>
                     </li>
-                    <li class="d-flex align-items-start mb-3">
-                        <div class="contact-icon-box me-3 mt-1">
+                    <li class="d-flex align-items-start gap-2 mb-2">
+                        <div class="contact-icon-box mt-1">
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
-                        <div class="small lh-sm text-secondary">
+                        <div style="font-size: 0.81rem; color: #94a3b8; line-height: 1.5;">
                             <?php echo nl2br( esc_html( get_theme_mod( 'footer_address', "Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028" ) ) ); ?>
                         </div>
                     </li>
@@ -213,11 +194,11 @@
             </div>
         </div>
         
-        <hr class="my-4 border-secondary opacity-25">
+        <hr class="my-3 border-secondary opacity-25">
         
         <!-- Bottom Bar -->
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
-            <span class="small text-secondary">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <span style="font-size: 0.75rem; color: #64748b;">
                 <?php echo esc_html( get_theme_mod( 'footer_copyright_text', '© ' . date('Y') . ' Rikshawale. All rights reserved.' ) ); ?>
             </span>
         </div>
