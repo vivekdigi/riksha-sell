@@ -129,61 +129,6 @@ endif;
 ?>
 </div>
 
-<!-- 5a. Welcome & About Us Section -->
-<section class="welcome-section py-5 my-5 text-center">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10 reveal">
-                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.85rem; letter-spacing: 2px;"><?php echo esc_html( get_theme_mod( 'welcome_subtitle', 'Welcome to our website' ) ); ?></span>
-                <h2 class="display-5 fw-bold mt-2 mb-3" style="text-transform: uppercase; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'welcome_title', 'RIKSHAWALE' ) ); ?></h2>
-                <div class="gradient-divider"></div>
-                <p class="lead text-muted mb-5" style="font-size: 1rem; line-height: 1.8;">
-                    <?php echo nl2br( esc_html( get_theme_mod( 'welcome_description', 'Rikshawale is India\'s trusted marketplace for certified pre-owned three-wheelers. Every auto-rickshaw is thoroughly inspected, transparently priced, and comes with easy financing options and a 30-day warranty for complete peace of mind.' ) ) ); ?>
-                </p>
-            </div>
-        </div>
-
-        <!-- 4 Icon Box Grid -->
-        <div class="row g-4 justify-content-center mt-4">
-            <!-- Box 1 -->
-            <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-1">
-                <div class="feature-circle-box mx-auto mb-3">
-                    <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature1_icon', 'fa-solid fa-car-side' ) ); ?>"></i>
-                </div>
-                <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature1_title', 'ALL RIKSHAS' ) ); ?></h6>
-                <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature1_desc', 'Every riksha undergoes a rigorous 40-point inspection and quality certification before listing.' ) ); ?></p>
-            </div>
-            <!-- Box 2 -->
-            <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-2">
-                <div class="feature-circle-box mx-auto mb-3">
-                    <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature2_icon', 'fa-solid fa-headset' ) ); ?>"></i>
-                </div>
-                <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature2_title', 'FREE SUPPORT' ) ); ?></h6>
-                <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature2_desc', 'Our team is available 7 days a week to assist with financing, RC transfer, and after-sale support.' ) ); ?></p>
-            </div>
-            <!-- Box 3 -->
-            <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-3">
-                <div class="feature-circle-box mx-auto mb-3">
-                    <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature3_icon', 'fa-solid fa-hotel' ) ); ?>"></i>
-                </div>
-                <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature3_title', 'CERTIFIED' ) ); ?></h6>
-                <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature3_desc', 'Buy with confidence — every riksha comes with transparent pricing and a verified ownership history.' ) ); ?></p>
-            </div>
-            <!-- Box 4 -->
-            <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-4">
-                <div class="feature-circle-box mx-auto mb-3">
-                    <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature4_icon', 'fa-solid fa-wallet' ) ); ?>"></i>
-                </div>
-                <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature4_title', 'EASY FINANCE' ) ); ?></h6>
-                <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature4_desc', 'Low EMI options with instant loan approvals and flexible repayment plans for every budget.' ) ); ?></p>
-            </div>
-        </div>
-    </div>
-</section>
 
 <!-- === 1. Inventory Section === -->
 <section class="inventory-scroll-section py-3 my-1">
