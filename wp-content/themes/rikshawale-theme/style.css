@@ -1,0 +1,1465 @@
+/*
+Theme Name: Rikshawale Theme
+Theme URI: http://localhost/Rikhsawale
+Description: A custom WordPress theme for Rikshawale featuring Bootstrap 5, a dynamic slider, custom "riksha" post types, custom taxonomies, and customizable theme settings.
+Version: 1.0.0
+Author: Antigravity
+Author URI: https://github.com/google
+Text Domain: rikshawale-theme
+*/
+
+:root {
+    --primary-color: #db2d2e;
+    --primary-color-hover: #b82223;
+    --dark-color: #1a1a1a;
+    --light-color: #f6f6f6;
+    --border-color: #e5e5e5;
+    --text-color: #444444;
+    --title-color: #1a1a1a;
+    --font-heading: 'Montserrat', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+}
+
+/* Core resets & typography */
+body {
+    font-family: var(--font-body);
+    color: var(--text-color);
+    background-color: #ffffff;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand, .nav-link, .btn-primary-custom {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--title-color);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-color-hover);
+}
+
+/* Header Top Bar */
+.top-bar {
+    background-color: var(--dark-color);
+    color: #aaaaaa;
+    font-size: 0.85rem;
+    padding: 8px 0;
+    border-bottom: 1px solid #2d2d2d;
+}
+
+.top-bar a {
+    color: #aaaaaa;
+}
+
+.top-bar a:hover {
+    color: #ffffff;
+}
+
+.top-bar-socials a {
+    margin-left: 15px;
+    font-size: 0.9rem;
+}
+
+/* Navigation Styles */
+.navbar-custom {
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.navbar-custom .navbar-brand {
+    font-size: 1.75rem;
+    color: var(--dark-color) !important;
+}
+
+.navbar-custom .navbar-nav li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width: 992px) {
+    .navbar-custom .navbar-nav li {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}
+
+.navbar-custom .nav-link {
+    color: var(--dark-color) !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 10px 15px !important;
+    text-transform: uppercase;
+    position: relative;
+}
+
+.navbar-custom .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15px;
+    right: 15px;
+    height: 2px;
+    background-color: var(--primary-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.navbar-custom .nav-link:hover::after,
+.navbar-custom .active > .nav-link::after,
+.navbar-custom .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+.btn-add-car {
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    border-radius: 4px;
+    font-weight: 600;
+    padding: 8px 20px !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--primary-color);
+}
+
+.btn-add-car:hover {
+    background-color: transparent;
+    color: var(--primary-color) !important;
+}
+
+/* Hero Slider Section */
+.hero-slider {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-slider .carousel-item {
+    height: 600px;
+}
+
+.hero-slider .carousel-item img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+}
+
+.hero-slider .carousel-caption {
+    top: 30%;
+    bottom: auto;
+    text-align: left;
+    max-width: 750px;
+    z-index: 10;
+}
+
+.hero-slider h2 {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.hero-slider h2 span {
+    color: var(--primary-color);
+}
+
+.hero-slider p {
+    font-size: 1.25rem;
+    margin-bottom: 30px;
+}
+
+/* Floating Search Widget */
+.floating-search-container {
+    position: relative;
+    margin-top: -80px;
+    z-index: 10;
+    padding-bottom: 20px;
+}
+
+.floating-search-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    padding: 30px;
+    border-top: 5px solid var(--primary-color);
+}
+
+.floating-search-card h4 {
+    margin-bottom: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.25rem;
+}
+
+.floating-search-card select,
+.floating-search-card input {
+    height: 48px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.floating-search-card select:focus,
+.floating-search-card input:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+.btn-search-submit {
+    height: 48px;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-search-submit:hover {
+    background-color: var(--primary-color-hover);
+    border-color: var(--primary-color-hover);
+    color: #ffffff;
+}
+
+/* Brands Section */
+.brands-section {
+    background-color: var(--light-color);
+    padding: 60px 0;
+}
+
+.brand-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.brand-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transform: translateY(-3px);
+}
+
+.brand-card h5 {
+    margin: 0;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #555555;
+}
+
+.brand-card:hover h5 {
+    color: var(--primary-color);
+}
+
+/* Riksha Grid Cards */
+.riksha-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.riksha-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+}
+
+.riksha-card-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 230px;
+}
+
+.riksha-card-img-wrapper img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+    transition: transform 0.5s ease;
+}
+
+.riksha-card:hover .riksha-card-img-wrapper img {
+    transform: scale(1.08);
+}
+
+.riksha-price-tag {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 6px 15px;
+    font-family: var(--font-heading);
+    border-top-right-radius: 4px;
+    z-index: 5;
+}
+
+.riksha-card-body {
+    padding: 24px;
+}
+
+.riksha-card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.riksha-card-title a {
+    color: var(--dark-color);
+}
+
+.riksha-card-title a:hover {
+    color: var(--primary-color);
+}
+
+.riksha-card-specs {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+    margin: 15px 0;
+}
+
+.spec-item {
+    font-size: 0.85rem;
+    color: #666666;
+}
+
+.spec-item i {
+    color: var(--primary-color);
+    margin-right: 6px;
+}
+
+/* Why Choose Us & Icon Boxes */
+.icon-box-card {
+    border: none;
+    background: #ffffff;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.04);
+    padding: 40px 30px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.icon-box-card:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-5px);
+}
+
+.icon-box-card .icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(219, 45, 46, 0.1);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.icon-box-card:hover .icon-wrapper {
+    background-color: #ffffff;
+    color: var(--primary-color);
+}
+
+.icon-box-card h4 {
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.icon-box-card p {
+    color: #666666;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+}
+
+.icon-box-card:hover h4,
+.icon-box-card:hover p {
+    color: #ffffff;
+}
+
+/* Call to Action Bar */
+.cta-bar {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    padding: 60px 0;
+}
+
+.cta-bar h2 {
+    color: #ffffff;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.btn-cta-light {
+    background-color: #ffffff;
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 12px 30px;
+    border-radius: 4px;
+    border: 1px solid #ffffff;
+}
+
+.btn-cta-light:hover {
+    background-color: transparent;
+    color: #ffffff !important;
+}
+
+/* Testimonials */
+.testimonial-card {
+    background-color: var(--light-color);
+    padding: 40px;
+    border-radius: 8px;
+    position: relative;
+    border-left: 4px solid var(--primary-color);
+}
+
+.testimonial-card p {
+    font-style: italic;
+    font-size: 1.05rem;
+}
+
+.testimonial-author {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-top: 15px;
+}
+
+/* Footer Section */
+.footer-custom {
+    background-color: var(--dark-color);
+    color: #aaaaaa;
+    padding: 80px 0 30px;
+}
+
+.footer-custom h5 {
+    color: #ffffff;
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.footer-custom hr {
+    border-color: #2d2d2d;
+}
+
+/* Single Riksha page custom style */
+.riksha-specs-table {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.riksha-specs-table .row {
+    margin: 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.riksha-specs-table .row:last-child {
+    border-bottom: none;
+}
+
+.riksha-specs-label {
+    background-color: var(--light-color);
+    font-weight: 700;
+    padding: 12px 20px;
+    color: var(--dark-color);
+}
+
+.riksha-specs-value {
+    padding: 12px 20px;
+}
+
+/* Custom Logo Styling */
+.custom-logo-link img {
+    max-height: 35px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Responsive Overrides */
+@media (max-width: 991.98px) {
+    .hero-slider .carousel-item {
+        height: 450px;
+    }
+    .hero-slider h2 {
+        font-size: 2.25rem;
+    }
+    .floating-search-container {
+        margin-top: 20px;
+    }
+}
+
+/* Responsive Horizontal Scroll Inventory Carousel */
+.inventory-carousel-section {
+    padding: 60px 0;
+    background-color: #ffffff;
+}
+.inventory-carousel-section:nth-of-type(even) {
+    background-color: var(--light-color);
+}
+.inventory-carousel-wrapper {
+    display: flex;
+    overflow-x: auto;
+    gap: 24px;
+    padding: 15px 5px 30px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+.inventory-carousel-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+.inventory-carousel-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+.inventory-carousel-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+}
+.inventory-carousel-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.inventory-card {
+    flex: 0 0 300px;
+    width: 300px;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    flex-direction: column;
+}
+.inventory-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    border-color: rgba(0,0,0,0.08);
+}
+.inventory-card-img-wrapper {
+    position: relative;
+    height: 190px;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+.inventory-card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.inventory-card:hover .inventory-card-img-wrapper img {
+    transform: scale(1.08);
+}
+.inventory-price-tag {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+.inventory-card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.inventory-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    height: 2.8em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.inventory-card-title a {
+    color: var(--dark-color);
+}
+.inventory-card-title a:hover {
+    color: var(--primary-color);
+}
+.inventory-card-specs {
+    margin-top: auto;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #666;
+}
+.inventory-card-specs span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.inventory-card-specs i {
+    color: var(--primary-color);
+}
+
+/* Custom Testimonial Carousel Indicators */
+.carousel-indicators-custom {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 30px;
+}
+.carousel-indicators-custom .btn-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0.15);
+    border: none;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+.carousel-indicators-custom .btn-indicator.active {
+    background-color: var(--primary-color);
+    transform: scale(1.2);
+    width: 24px;
+    border-radius: 6px;
+}
+
+/* Split-Car Contact Banner Styling */
+.contact-split-banner {
+    background-color: #ffffff;
+    position: relative;
+}
+.split-car-left {
+    max-height: 200px;
+    object-fit: contain;
+    transform: scaleX(-1); /* Facing Left */
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.split-car-right {
+    max-height: 200px;
+    object-fit: contain;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.contact-split-banner:hover .split-car-left {
+    transform: scaleX(-1) translateX(-15px);
+}
+.contact-split-banner:hover .split-car-right {
+    transform: translateX(15px);
+}
+
+/* Feature Circle Box Styling */
+.feature-circle-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    color: #555555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid #eeeeee;
+}
+.feature-circle-box:hover {
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    transform: translateY(-5px);
+}
+.feature-circle-box i {
+    transition: color 0.3s ease;
+}
+.feature-circle-box:hover i {
+    color: #ffffff !important;
+}
+/* =========================================================
+   SCROLL REVEAL & MODERN ANIMATION SYSTEM
+   ========================================================= */
+
+/* --- Base state: hidden before revealed --- */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+.reveal.reveal-left {
+    transform: translateX(-60px);
+}
+.reveal.reveal-right {
+    transform: translateX(60px);
+}
+.reveal.reveal-scale {
+    transform: scale(0.88);
+    opacity: 0;
+}
+.reveal.reveal-flip {
+    transform: rotateX(20deg) translateY(30px);
+    opacity: 0;
+    perspective: 800px;
+}
+
+/* --- Visible state: triggered by JS IntersectionObserver --- */
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* --- Staggered delay helpers --- */
+.reveal-delay-1 { transition-delay: 0.10s; }
+.reveal-delay-2 { transition-delay: 0.20s; }
+.reveal-delay-3 { transition-delay: 0.30s; }
+.reveal-delay-4 { transition-delay: 0.40s; }
+.reveal-delay-5 { transition-delay: 0.55s; }
+
+/* =========================================================
+   FLOATING BACKGROUND BLOBS / DECORATIVE SHAPES
+   ========================================================= */
+
+
+/* =========================================================
+   GRADIENT ACCENT LINE DIVIDERS
+   ========================================================= */
+.gradient-divider {
+    height: 3px;
+    width: 60px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary-color), #ff6b35, var(--primary-color));
+    background-size: 200% auto;
+    animation: shimmerLine 3s linear infinite;
+    margin: 0 auto 1.5rem;
+}
+@keyframes shimmerLine {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* =========================================================
+   CARD HOVER LIFT & GLOW
+   ========================================================= */
+.icon-box-card,
+.testimonial-card,
+.riksha-card {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.icon-box-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(219, 45, 46, 0.12) !important;
+}
+.testimonial-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.10) !important;
+}
+.riksha-card:hover {
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.13) !important;
+}
+
+/* =========================================================
+   ICON WRAPPER PULSE RING
+   ========================================================= */
+.icon-wrapper {
+    position: relative;
+}
+.icon-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(219, 45, 46, 0.25);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.icon-box-card:hover .icon-wrapper::after {
+    opacity: 1;
+    transform: scale(1.12);
+}
+
+/* =========================================================
+   HERO SLIDER OVERLAY & IMAGE RENDERING
+   ========================================================= */
+.hero-slider .carousel-item::after {
+    display: none !important;
+}
+.hero-slider .carousel-item img,
+#rikshawaleCarousel .carousel-item img {
+    width: 100%;
+    max-height: 650px;
+    object-fit: cover;
+    object-position: center;
+    image-rendering: -webkit-optimize-contrast;
+    filter: none !important;
+}
+
+/* =========================================================
+   STICKY HEADER ANIMATION ON SCROLL
+   ========================================================= */
+.site-header.is-scrolled {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.97) !important;
+    transition: all 0.4s ease;
+}
+
+/* =========================================================
+   COUNTER NUMBER ANIMATION (for statistics)
+   ========================================================= */
+.stat-number {
+    display: inline-block;
+    font-size: 2.8rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+/* =========================================================
+   CURSOR GLOW TRAIL (desktop)
+   ========================================================= */
+#cursor-glow {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(219,45,46,0.35) 0%, transparent 70%);
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.08s linear, opacity 0.3s ease;
+    opacity: 0;
+}
+body:hover #cursor-glow {
+    opacity: 1;
+}
+
+/* =========================================================
+   SECTION ENTRY GRADIENT BACKGROUNDS
+   ========================================================= */
+.why-choose-us {
+}
+.testimonials {
+}
+
+/* =========================================================
+   SMOOTH PAGE LOADING BAR
+   ========================================================= */
+#page-loader-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary-color), #ff6b35);
+    z-index: 99999;
+    transition: width 0.3s ease;
+    border-radius: 0 2px 2px 0;
+}
+
+/* =========================================================
+   BUTTON SHIMMER EFFECT
+   ========================================================= */
+.btn-primary-custom,
+.btn-cta-light,
+.btn-add-car {
+    position: relative;
+    overflow: hidden;
+}
+.btn-primary-custom::before,
+.btn-cta-light::before,
+.btn-add-car::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 70%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+.btn-primary-custom:hover::before,
+.btn-cta-light:hover::before,
+.btn-add-car:hover::before {
+    left: 150%;
+}
+
+/* =========================================================
+   PROMO IMAGE SECTION (2-image, no text)
+   ========================================================= */
+.promo-image-section {}
+.promo-image-card {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease;
+    line-height: 0;
+}
+.promo-image-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 55px rgba(0,0,0,0.20);
+}
+.promo-image-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+.promo-image-card:hover img {
+    transform: scale(1.03);
+}
+
+
+/* =========================================================
+   VIDEO SECTION
+   ========================================================= */
+.video-section {
+}
+.video-grid-item {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 9/16;
+    background: #111;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease;
+}
+.video-grid-item:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 22px 55px rgba(0,0,0,0.22);
+}
+.video-grid-item video,
+.video-grid-item iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.video-play-btn {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px; height: 54px;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+.video-grid-item:hover .video-play-btn {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* =========================================================
+   TESTIMONIAL CARD WITH FEATURED IMAGE
+   ========================================================= */
+.testimonial-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.testimonial-img {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+}
+.testimonial-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+}
+.testimonial-card:hover .testimonial-img img {
+    transform: scale(1.05);
+}
+.testimonial-card-body {
+    padding: 16px 20px 20px;
+}
+
+/* =========================================================
+   GET IN TOUCH / CONTACT FORM
+   ========================================================= */
+.get-in-touch-section {
+}
+.get-in-touch-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--primary-color);
+}
+.git-contact-info-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 35px rgba(0,0,0,0.07);
+    border: 1px solid #f0f0f0;
+}
+.git-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+.git-info-row i {
+    width: 36px; height: 36px;
+    background: rgba(219,45,46,0.08);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.git-info-row a {
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.git-info-row a:hover {
+    color: var(--primary-color);
+}
+.git-info-row span {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+.git-input {
+    border: 1.5px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: #fafafa;
+}
+.git-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(219,45,46,0.08);
+    background: #fff;
+    outline: none;
+}
+.git-contact-form .btn-primary-custom {
+    background-color: var(--primary-color) !important;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 36px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+.git-contact-form .btn-primary-custom:hover {
+    background-color: var(--primary-color-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(219,45,46,0.25);
+}
+
+/* =========================================================
+   FAQ ACCORDION
+   ========================================================= */
+.faq-section {
+    background: linear-gradient(180deg, #fff 0%, #f9f9f9 100%);
+}
+.faq-accordion .accordion-item.faq-item {
+    border: none;
+    border-radius: 12px !important;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+}
+.faq-accordion .accordion-item.faq-item:last-child {
+    margin-bottom: 0;
+}
+.faq-btn {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--title-color);
+    background: #fff;
+    padding: 18px 22px;
+    border: none;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+}
+.faq-btn:not(.collapsed) {
+    color: var(--primary-color);
+    background: #fff;
+}
+.faq-btn::after {
+    background-image: none !important;
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.7rem;
+    color: var(--primary-color);
+    transform: none !important;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+.faq-btn:not(.collapsed)::after {
+    transform: rotate(180deg) !important;
+}
+/* =========================================================
+   EXACT 5-CARD ROW CAROUSEL SLIDER WITH NAVIGATION ARROWS
+   ========================================================= */
+.car-slider-wrapper {
+    position: relative;
+    padding: 0 10px;
+}
+.car-slider-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 16px;
+    padding: 10px 4px 20px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.car-slider-track::-webkit-scrollbar {
+    display: none;
+}
+.car-slider-item {
+    flex: 0 0 calc(20% - 13px);
+    min-width: calc(20% - 13px);
+    max-width: calc(20% - 13px);
+    scroll-snap-align: start;
+}
+@media (max-width: 1200px) {
+    .car-slider-item {
+        flex: 0 0 calc(25% - 12px);
+        min-width: calc(25% - 12px);
+        max-width: calc(25% - 12px);
+    }
+}
+@media (max-width: 992px) {
+    .car-slider-item {
+        flex: 0 0 calc(33.333% - 11px);
+        min-width: calc(33.333% - 11px);
+        max-width: calc(33.333% - 11px);
+    }
+}
+@media (max-width: 768px) {
+    .car-slider-item {
+        flex: 0 0 calc(50% - 8px);
+        min-width: calc(50% - 8px);
+        max-width: calc(50% - 8px);
+    }
+}
+@media (max-width: 480px) {
+    .car-slider-item {
+        flex: 0 0 85%;
+        min-width: 85%;
+        max-width: 85%;
+    }
+}
+
+/* Black Circular Navigation Arrows */
+.car-slider-arrow {
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+.car-slider-arrow:hover {
+    background: var(--primary-color, #db2d2e);
+    transform: translateY(-50%) scale(1.1);
+}
+.car-slider-prev {
+    left: -15px;
+}
+.car-slider-next {
+    right: -15px;
+}
+
+/* Exact Car Card Styling matching screenshot */
+.car-card-exact {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+    border: 1px solid #eaeaea;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.car-card-exact:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+.car-card-badge {
+    position: absolute;
+    top: 0;
+    right: 14px;
+    background: #a40000;
+    color: #ffffff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 0 0 6px 6px;
+    letter-spacing: 0.5px;
+    z-index: 2;
+}
+.car-card-img-link {
+    display: block;
+    width: 100%;
+    height: 170px;
+    overflow: hidden;
+    background: #f8f8f8;
+}
+.car-card-img-link img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.car-card-exact:hover .car-card-img-link img {
+    transform: scale(1.04);
+}
+.car-card-content {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+.car-card-name a {
+    color: #111111;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.car-card-name a:hover {
+    color: var(--primary-color, #db2d2e);
+}
+.car-card-bookmark-btn {
+    background: none;
+    border: none;
+    color: #a40000;
+    font-size: 0.95rem;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+}
+.car-tag-pill {
+    background: #f2f3f5;
+    color: #444444;
+    font-size: 0.70rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-right: 3px;
+}
+.car-card-price-main {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #111111;
+}
+.car-card-emi {
+    font-size: 0.72rem;
+    color: #777777;
+}
+.extra-small {
+    font-size: 0.72rem !important;
+}
+.fw-black {
+    font-weight: 900 !important;
+}
+.detail-thumb-box img {
+    transition: opacity 0.2s ease;
+}
+.detail-thumb-box:hover img {
+    opacity: 1 !important;
+}
+
+/* 4-Thumbnail Carousel Slider for Detail Page */
+.thumb-carousel-wrapper {
+    position: relative;
+    padding: 0 25px;
+    margin-bottom: 24px;
+}
+.thumb-carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 12px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+}
+.thumb-carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.thumb-carousel-item {
+    flex: 0 0 calc(25% - 9px);
+    min-width: calc(25% - 9px);
+    max-width: calc(25% - 9px);
+    height: 85px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease, transform 0.2s ease;
+    scroll-snap-align: start;
+    background: #ffffff;
+}
+.thumb-carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.thumb-carousel-item.active {
+    border-color: var(--primary-color, #db2d2e) !important;
+}
+.thumb-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+}
+.thumb-carousel-arrow:hover {
+    background: var(--primary-color, #db2d2e);
+    color: #ffffff;
+    border-color: var(--primary-color, #db2d2e);
+}
+.thumb-carousel-prev {
+    left: -5px;
+}
+.thumb-carousel-next {
+    right: -5px;
+}
+
+/* Team Slider (2 cards per row) */
+.team-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+.team-slider-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 10px 4px;
+}
+.team-slider-track::-webkit-scrollbar {
+    display: none;
+}
+.team-slider-item {
+    flex: 0 0 calc(50% - 12px);
+    min-width: calc(50% - 12px);
+}
+@media (max-width: 768px) {
+    .team-slider-item {
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
+}
+.team-slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e5e5e5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--dark-color, #1a1a1a);
+    transition: all 0.3s ease;
+}
+.team-slider-arrow:hover {
+    background: var(--primary-color, #db2d2e);
+    color: #ffffff;
+    border-color: var(--primary-color, #db2d2e);
+}
+.team-slider-prev {
+    left: -10px;
+}
+.team-slider-next {
+    right: -10px;
+}
+
