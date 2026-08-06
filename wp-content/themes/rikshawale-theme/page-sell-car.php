@@ -30,13 +30,12 @@ $states = array(
 <div class="sell-car-page" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f4f4f4; min-height: 100vh; padding-bottom: 60px;">
 
     <!-- ===== HERO BANNER ===== -->
-    <div class="sell-car-hero" style="background: linear-gradient(135deg, #8b0000 0%, #db2d2e 60%, #c0392b 100%); color: #fff; padding: 48px 0 40px;">
+    <div class="sell-car-hero" style="background-color: var(--primary-color, #db2d2e); color: #fff; padding: 48px 0 40px;">
         <div class="container" style="max-width: 960px;">
-            <p class="mb-1 fw-semibold" style="font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.75;">RIKSHAWALE</p>
+            <p class="mb-1 fw-semibold" style="font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85;">RIKSHAWALE</p>
             <h1 class="fw-black mb-2" style="font-size: 2.4rem; line-height: 1.1;">Sell Your Car</h1>
-            <p style="font-size: 0.92rem; opacity: 0.85; max-width: 560px;">
-                Share your vehicle details below and our team will review your car quickly.
-                Designed in a compact style with proper mobile responsiveness.
+            <p style="font-size: 0.92rem; opacity: 0.9; max-width: 560px;">
+                Share your vehicle details below and our team will review your car quickly. Designed in a compact style with proper mobile responsiveness.
             </p>
         </div>
     </div>
@@ -256,13 +255,13 @@ $states = array(
                 <!-- Form Footer: bullets + submit -->
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-2 border-top">
                     <div class="d-flex gap-4 flex-wrap">
-                        <span style="font-size:0.8rem; color:#555;"><span style="color:#db2d2e; font-size:10px;">●</span> Quick callback</span>
-                        <span style="font-size:0.8rem; color:#555;"><span style="color:#db2d2e; font-size:10px;">●</span> Verified team</span>
-                        <span style="font-size:0.8rem; color:#555;"><span style="color:#db2d2e; font-size:10px;">●</span> Compact mobile form</span>
+                        <span style="font-size:0.8rem; color:#555;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Quick callback</span>
+                        <span style="font-size:0.8rem; color:#555;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Verified team</span>
+                        <span style="font-size:0.8rem; color:#555;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Compact mobile form</span>
                     </div>
                     <button type="submit" id="sell-car-submit-btn"
                         style="background:#111; color:#fff; border:none; padding:13px 36px; font-size:0.92rem; font-weight:700; border-radius:6px; letter-spacing:1px; cursor:pointer; transition:background 0.2s;"
-                        onmouseover="this.style.background='#db2d2e'" onmouseout="this.style.background='#111'">
+                        onmouseover="this.style.background='var(--primary-color, #db2d2e)'" onmouseout="this.style.background='#111'">
                         SUBMIT DETAILS
                     </button>
                 </div>
@@ -292,7 +291,7 @@ $states = array(
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .sell-input:focus {
-    border-color: #db2d2e;
+    border-color: var(--primary-color, #db2d2e);
     box-shadow: 0 0 0 3px rgba(219,45,46,0.12);
     outline: none;
 }
@@ -312,7 +311,7 @@ $states = array(
     position: relative;
 }
 .sell-img-upload-box:hover {
-    border-color: #db2d2e;
+    border-color: var(--primary-color, #db2d2e);
     background: #fff5f5;
 }
 .sell-img-input {
