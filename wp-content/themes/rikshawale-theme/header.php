@@ -33,8 +33,8 @@
         .header-custom {
             background-color: #ffffff !important;
             border-bottom: 1px solid #eeeeee !important;
-            padding-top: 15px !important;
-            padding-bottom: 15px !important;
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
             transition: all 0.3s ease;
         }
         .header-custom .navbar-brand {
@@ -44,8 +44,8 @@
         .header-custom .nav-link {
             color: #222222 !important;
             font-weight: 600;
-            font-size: 0.95rem;
-            padding: 6px 16px !important;
+            font-size: 0.85rem;
+            padding: 4px 10px !important;
             text-transform: none;
             position: relative;
             font-family: var(--font-heading);
@@ -70,9 +70,9 @@
         .header-custom .nav-link::after {
             content: '';
             position: absolute;
-            bottom: 0;
-            left: 16px;
-            right: 16px;
+            bottom: -2px;
+            left: 10px;
+            right: 10px;
             height: 2px;
             background-color: var(--primary-color);
             transform: scaleX(0);
