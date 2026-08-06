@@ -349,13 +349,34 @@ while ( have_posts() ) : the_post();
                         </div>
                         <div class="card-body p-3 text-center">
                             <p class="small text-muted mb-3">"<?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>"</p>
-                            <h6 class="fw-bold text-dark mb-0"><?php the_title(); ?></h6>
+                            <h6 class="fw-bold text-dark mb-1"><?php the_title(); ?></h6>
+                            <!-- Verified Buyer Badge -->
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                                <span class="d-flex align-items-center gap-1" style="font-size: 0.78rem; color: #16a34a; font-weight: 600;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="12" r="12" fill="#16a34a"/>
+                                        <path d="M7 12.5L10.5 16L17 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Verified Buyer
+                                </span>
+                            </div>
+                            <!-- 5-Star Rating -->
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <span style="background:#1e3a8a; border-radius: 4px; padding: 3px 10px; display:inline-flex; gap:3px; align-items:center;">
+                                    <i class="fa-solid fa-star" style="color:#fff; font-size:11px;"></i>
+                                    <i class="fa-solid fa-star" style="color:#fff; font-size:11px;"></i>
+                                    <i class="fa-solid fa-star" style="color:#fff; font-size:11px;"></i>
+                                    <i class="fa-solid fa-star" style="color:#fff; font-size:11px;"></i>
+                                    <i class="fa-solid fa-star" style="color:#fff; font-size:11px;"></i>
+                                </span>
+                            </div>
                             <?php if ( has_excerpt() ) : ?>
                                 <span class="extra-small text-muted"><?php echo esc_html( get_the_excerpt() ); ?></span>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
+
                 <?php
                 endwhile;
                 wp_reset_postdata();
