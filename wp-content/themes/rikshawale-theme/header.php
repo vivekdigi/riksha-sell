@@ -202,9 +202,6 @@
                     echo '</ul>';
                 }
                 ?>
-                <div class="ms-lg-3 mt-3 mt-lg-0">
-                    <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?>" class="btn btn-add-car text-white fw-bold">Sell</a>
-                </div>
             </div>
         </div>
     </nav>
