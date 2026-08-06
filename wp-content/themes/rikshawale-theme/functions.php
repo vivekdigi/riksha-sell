@@ -333,6 +333,16 @@ function rikshawale_contact_customizer( $wp_customize ) {
 	) );
 
 	// Subtitle / Intro text
+	$wp_customize->add_setting( 'contact_form_title', array(
+		'default'           => 'Get in touch',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'contact_form_title', array(
+		'label'   => __( 'Form Title / Heading', 'rikshawale-theme' ),
+		'section' => 'rikshawale_contact_info_section',
+		'type'    => 'text',
+	) );
+
 	$wp_customize->add_setting( 'contact_intro_text', array(
 		'default'           => 'EliteCarz is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.',
 		'sanitize_callback' => 'sanitize_textarea_field',

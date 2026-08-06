@@ -14,7 +14,8 @@ $phone         = get_theme_mod( 'topbar_phone',         get_theme_mod( 'contact_
 $email         = get_theme_mod( 'topbar_email',         get_theme_mod( 'contact_email', 'EliteCarzIndia@gmail.com' ) );
 $address       = get_theme_mod( 'footer_address',       get_theme_mod( 'contact_address', 'Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028' ) );
 $working_hours = get_theme_mod( 'topbar_hours',          get_theme_mod( 'contact_working_hours', 'Mon-Sun: 11:00am - 7:00pm' ) );
-$intro_text    = get_theme_mod( 'footer_description',   get_theme_mod( 'contact_intro_text', 'EliteCarz is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.' ) );
+$form_title    = get_theme_mod( 'contact_form_title',   'Get in touch' );
+$intro_text    = get_theme_mod( 'contact_intro_text',    get_theme_mod( 'footer_description', 'EliteCarz is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.' ) );
 ?>
 
 <div class="contact-page-wrapper" style="font-family: var(--font-body, 'Inter', sans-serif); background: #ffffff; min-height: 80vh; padding: 60px 0;">
@@ -68,7 +69,7 @@ $intro_text    = get_theme_mod( 'footer_description',   get_theme_mod( 'contact_
             <!-- RIGHT COLUMN: Get In Touch Form -->
             <div class="col-lg-7 col-md-6">
                 <div class="contact-form-wrapper ps-lg-4">
-                    <h2 class="fw-bold text-dark mb-3" style="font-size: 2rem; letter-spacing: -0.5px;">Get in touch</h2>
+                    <h2 class="fw-bold text-dark mb-3" style="font-size: 2rem; letter-spacing: -0.5px;"><?php echo esc_html( $form_title ); ?></h2>
                     <p class="text-secondary mb-5" style="font-size: 0.95rem; line-height: 1.6; max-width: 580px;">
                         <?php echo esc_html( $intro_text ); ?>
                     </p>
