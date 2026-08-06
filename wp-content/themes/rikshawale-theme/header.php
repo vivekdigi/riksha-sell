@@ -31,18 +31,20 @@
             }
         }
         .header-custom {
-            background-color: #ffffff !important;
-            border-bottom: 1px solid #eeeeee !important;
+            background-color: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
             padding-top: 8px !important;
             padding-bottom: 8px !important;
             transition: all 0.3s ease;
         }
         .header-custom .navbar-brand {
-            color: #1a1a1a !important;
+            color: #ffffff !important;
         }
         .navbar-custom .navbar-nav a,
         .header-custom .nav-link {
-            color: #222222 !important;
+            color: #f8fafc !important;
             font-weight: 600;
             font-size: 0.85rem;
             padding: 4px 10px !important;
