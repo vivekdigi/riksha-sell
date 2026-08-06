@@ -172,14 +172,77 @@ function rikshawale_register_faq_cpt() {
 add_action( 'init', 'rikshawale_register_faq_cpt' );
 
 /**
- * AJAX Contact Form Handler
+ * Register Custom Post Type: Contact Enquiry
+ */
+function rikshawale_register_contact_enquiry_cpt() {
+	register_post_type( 'contact_enquiry', array(
+		'labels' => array(
+			'name'               => __( 'Contact Enquiries', 'rikshawale-theme' ),
+			'singular_name'      => __( 'Contact Enquiry', 'rikshawale-theme' ),
+			'menu_name'          => __( 'Contact Messages', 'rikshawale-theme' ),
+			'all_items'          => __( 'All Messages', 'rikshawale-theme' ),
+			'edit_item'          => __( 'View Message', 'rikshawale-theme' ),
+			'not_found'          => __( 'No enquiries found.', 'rikshawale-theme' ),
+		),
+		'public'            => false,
+		'show_ui'           => true,
+		'show_in_menu'      => true,
+		'menu_icon'         => 'dashicons-email-alt',
+		'menu_position'     => 10,
+		'capability_type'   => 'post',
+		'has_archive'       => false,
+		'hierarchical'      => false,
+		'supports'          => array( 'title' ),
+		'show_in_rest'      => false,
+	) );
+}
+add_action( 'init', 'rikshawale_register_contact_enquiry_cpt' );
+
+/**
+ * Admin Metabox for Contact Enquiry
+ */
+function rikshawale_add_contact_enquiry_metabox() {
+	add_meta_box(
+		'contact_enquiry_details',
+		__( 'Message Details', 'rikshawale-theme' ),
+		'rikshawale_render_contact_enquiry_metabox',
+		'contact_enquiry',
+		'normal',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'rikshawale_add_contact_enquiry_metabox' );
+
+function rikshawale_render_contact_enquiry_metabox( $post ) {
+	$name    = get_post_meta( $post->ID, '_contact_name', true );
+	$email   = get_post_meta( $post->ID, '_contact_email', true );
+	$phone   = get_post_meta( $post->ID, '_contact_phone', true );
+	$message = get_post_meta( $post->ID, '_contact_message', true );
+	?>
+	<div style="font-size: 14px; line-height: 1.6; padding: 10px;">
+		<p><strong>Name:</strong> <?php echo esc_html( $name ); ?></p>
+		<p><strong>Email:</strong> <a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></p>
+		<p><strong>Phone:</strong> <a href="tel:<?php echo esc_attr( $phone ); ?>"><?php echo esc_html( $phone ); ?></a></p>
+		<hr>
+		<p><strong>Message:</strong></p>
+		<div style="background: #f9f9f9; padding: 14px; border: 1px solid #e5e5e5; border-radius: 6px; white-space: pre-wrap; font-family: sans-serif; font-size: 14px;">
+			<?php echo esc_html( $message ); ?>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * AJAX Contact Form Handler (Saves to CPT contact_enquiry + Emails Admin)
  */
 function rikshawale_handle_contact_form() {
-	check_ajax_referer( 'rikshawale_contact_nonce', 'nonce' );
-	$name    = sanitize_text_field( $_POST['contact_name'] ?? '' );
-	$email   = sanitize_email( $_POST['contact_email'] ?? '' );
-	$phone   = sanitize_text_field( $_POST['contact_phone'] ?? '' );
-	$message = sanitize_textarea_field( $_POST['contact_message'] ?? '' );
+	if ( isset( $_POST['nonce'] ) ) {
+		check_ajax_referer( 'rikshawale_contact_nonce', 'nonce' );
+	}
+	$name    = sanitize_text_field( $_POST['contact_name'] ?? $_POST['name'] ?? '' );
+	$email   = sanitize_email( $_POST['contact_email'] ?? $_POST['email'] ?? '' );
+	$phone   = sanitize_text_field( $_POST['contact_phone'] ?? $_POST['phone'] ?? '' );
+	$message = sanitize_textarea_field( $_POST['contact_message'] ?? $_POST['message'] ?? '' );
 
 	if ( empty( $name ) || empty( $email ) || empty( $message ) ) {
 		wp_send_json_error( array( 'message' => 'Please fill all required fields.' ) );
@@ -188,20 +251,100 @@ function rikshawale_handle_contact_form() {
 		wp_send_json_error( array( 'message' => 'Please enter a valid email address.' ) );
 	}
 
+	// Create CPT entry in DB
+	$post_title = $name . ' — ' . date('d M Y H:i');
+	$post_id = wp_insert_post( array(
+		'post_type'   => 'contact_enquiry',
+		'post_title'  => $post_title,
+		'post_status' => 'publish',
+	) );
+
+	if ( ! is_wp_error( $post_id ) ) {
+		update_post_meta( $post_id, '_contact_name', $name );
+		update_post_meta( $post_id, '_contact_email', $email );
+		update_post_meta( $post_id, '_contact_phone', $phone );
+		update_post_meta( $post_id, '_contact_message', $message );
+	}
+
+	// Email Admin
 	$to      = get_option( 'admin_email' );
 	$subject = 'New Contact Enquiry from ' . $name . ' – ' . get_bloginfo( 'name' );
 	$body    = "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\n\nMessage:\n{$message}";
 	$headers = array( 'Content-Type: text/plain; charset=UTF-8', "Reply-To: {$name} <{$email}>" );
 
-	$sent = wp_mail( $to, $subject, $body, $headers );
-	if ( $sent ) {
-		wp_send_json_success( array( 'message' => 'Thank you! Your message has been sent.' ) );
-	} else {
-		wp_send_json_error( array( 'message' => 'Sorry, something went wrong. Please try again.' ) );
-	}
+	wp_mail( $to, $subject, $body, $headers );
+
+	wp_send_json_success( array( 'message' => 'Thank you! Your message has been sent successfully.' ) );
 }
 add_action( 'wp_ajax_rikshawale_contact', 'rikshawale_handle_contact_form' );
 add_action( 'wp_ajax_nopriv_rikshawale_contact', 'rikshawale_handle_contact_form' );
+
+/**
+ * Customizer Registration for Contact Page Info
+ */
+function rikshawale_contact_customizer( $wp_customize ) {
+	$wp_customize->add_section( 'rikshawale_contact_info_section', array(
+		'title'    => __( 'Contact Page Info', 'rikshawale-theme' ),
+		'priority' => 35,
+	) );
+
+	// Phone
+	$wp_customize->add_setting( 'contact_phone', array(
+		'default'           => '+91 97111-63000',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'contact_phone', array(
+		'label'   => __( 'Phone Number', 'rikshawale-theme' ),
+		'section' => 'rikshawale_contact_info_section',
+		'type'    => 'text',
+	) );
+
+	// Email
+	$wp_customize->add_setting( 'contact_email', array(
+		'default'           => 'EliteCarzIndia@gmail.com',
+		'sanitize_callback' => 'sanitize_email',
+	) );
+	$wp_customize->add_control( 'contact_email', array(
+		'label'   => __( 'E-mail Address', 'rikshawale-theme' ),
+		'section' => 'rikshawale_contact_info_section',
+		'type'    => 'email',
+	) );
+
+	// Address
+	$wp_customize->add_setting( 'contact_address', array(
+		'default'           => 'Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028',
+		'sanitize_callback' => 'sanitize_textarea_field',
+	) );
+	$wp_customize->add_control( 'contact_address', array(
+		'label'   => __( 'Address', 'rikshawale-theme' ),
+		'section' => 'rikshawale_contact_info_section',
+		'type'    => 'textarea',
+	) );
+
+	// Working Hours
+	$wp_customize->add_setting( 'contact_working_hours', array(
+		'default'           => 'Mon-Sun: 11:00am - 7:00pm',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'contact_working_hours', array(
+		'label'   => __( 'Working Time', 'rikshawale-theme' ),
+		'section' => 'rikshawale_contact_info_section',
+		'type'    => 'text',
+	) );
+
+	// Subtitle / Intro text
+	$wp_customize->add_setting( 'contact_intro_text', array(
+		'default'           => 'EliteCarz is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.',
+		'sanitize_callback' => 'sanitize_textarea_field',
+	) );
+	$wp_customize->add_control( 'contact_intro_text', array(
+		'label'   => __( 'Get In Touch Description', 'rikshawale-theme' ),
+		'section' => 'rikshawale_contact_info_section',
+		'type'    => 'textarea',
+	) );
+}
+add_action( 'customize_register', 'rikshawale_contact_customizer' );
+
 
 /**
 
