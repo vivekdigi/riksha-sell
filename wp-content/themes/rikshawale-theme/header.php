@@ -113,23 +113,23 @@
 
 <header>
     <!-- Top Marquee Ticker -->
-    <div class="header-marquee-ticker bg-dark text-white py-1 overflow-hidden" style="background-color: #111111 !important; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem; font-weight: 500;">
-        <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" style="line-height: 1.6;">
-            <span class="me-4">✅ Certified Vehicles</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">🔍 40-Point Inspection</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">🛡️ 30-Day Warranty</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">💳 Financing & RC Transfer</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">✅ Certified Vehicles</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">🔍 40-Point Inspection</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">🛡️ 30-Day Warranty</span>
-            <span class="me-4 text-muted">|</span>
-            <span class="me-4">💳 Financing & RC Transfer</span>
+    <div class="header-marquee-ticker bg-dark text-white overflow-hidden" style="background-color: #111111 !important; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem; font-weight: 500; padding: 4px 0;">
+        <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" style="line-height: 1.4;">
+            <span class="me-3">✅ Certified Vehicles</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">🔍 40-Point Inspection</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">🛡️ 30-Day Warranty</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">💳 Financing & RC Transfer</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">✅ Certified Vehicles</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">🔍 40-Point Inspection</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">🛡️ 30-Day Warranty</span>
+            <span class="me-3 text-muted">|</span>
+            <span class="me-3">💳 Financing & RC Transfer</span>
         </marquee>
     </div>
 
