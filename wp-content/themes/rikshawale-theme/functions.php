@@ -693,6 +693,7 @@ function rikshawale_render_inventory_metabox( $post ) {
     $fuel           = get_post_meta( $post->ID, '_car_fuel', true );
     $transmission   = get_post_meta( $post->ID, '_car_transmission', true );
     $badge          = get_post_meta( $post->ID, '_car_badge', true );
+    $video_url      = get_post_meta( $post->ID, '_car_video_url', true );
 
     // 5 Gallery Images
     $img1           = get_post_meta( $post->ID, '_car_gallery_image_1', true );
@@ -709,6 +710,13 @@ function rikshawale_render_inventory_metabox( $post ) {
         <tr>
             <th><label for="car_price"><?php _e( 'Selling Price', 'rikshawale-theme' ); ?></label></th>
             <td><input type="text" id="car_price" name="car_price" value="<?php echo esc_attr( $price ); ?>" class="regular-text" placeholder="e.g. ₹10.75 Lakh"></td>
+        </tr>
+        <tr>
+            <th><label for="car_video_url"><?php _e( '🎬 Banner Video URL (Auto-Play)', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_video_url" name="car_video_url" value="<?php echo esc_attr( $video_url ); ?>" class="regular-text" placeholder="Direct MP4 URL or YouTube Link (e.g. https://domain.com/video.mp4)">
+                <p class="description"><?php _e( 'Enter direct MP4 video link or YouTube URL to autoplay in vehicle banner slider.', 'rikshawale-theme' ); ?></p>
+            </td>
         </tr>
         <tr>
             <th><label for="car_badge"><?php _e( 'Ribbon Badge Tag', 'rikshawale-theme' ); ?></label></th>
@@ -865,6 +873,7 @@ function rikshawale_save_inventory_meta( $post_id ) {
     $fields = array(
         'car_price',
         'car_badge',
+        'car_video_url',
         'car_mfg_year',
         'car_reg_year',
         'car_owner_type',
@@ -1092,6 +1101,77 @@ function rikshawale_customize_register( $wp_customize ) {
 		'section'  => 'rikshawale_colors_section',
 		'settings' => 'theme_accent_color',
 	) ) );
+
+	/* ============================================================
+	   TYPOGRAPHY & UI/UX DESIGN SECTION
+	   ============================================================ */
+	$wp_customize->add_section( 'rikshawale_typography_section', array(
+		'title'       => __( 'Typography & Layout Styling', 'rikshawale-theme' ),
+		'priority'    => 28,
+		'description' => __( 'Customize Font Family, Body & Heading (H1-H6) Sizes, Line Heights, Letter Spacing, and Section Padding/Margins.', 'rikshawale-theme' ),
+	) );
+
+	// Font Family Select
+	$wp_customize->add_setting( 'typography_font_family', array(
+		'default'           => 'Montserrat, Roboto, sans-serif',
+		'sanitize_callback' => 'sanitize_text_field',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'typography_font_family', array(
+		'type'     => 'select',
+		'label'    => __( 'Primary Font Family', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_typography_section',
+		'settings' => 'typography_font_family',
+		'choices'  => array(
+			'Montserrat, Roboto, sans-serif' => 'Montserrat & Roboto (Default)',
+			'Inter, sans-serif'               => 'Inter',
+			'Poppins, sans-serif'             => 'Poppins',
+			'Outfit, sans-serif'              => 'Outfit',
+			'Roboto, sans-serif'              => 'Roboto',
+			'system-ui, -apple-system, sans-serif' => 'System Default',
+		),
+	) );
+
+	// Body Font Size
+	$wp_customize->add_setting( 'body_font_size', array( 'default' => '15px', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'body_font_size', array( 'type' => 'text', 'label' => __( 'Body Font Size (e.g. 15px)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
+	// Body Line Height
+	$wp_customize->add_setting( 'body_line_height', array( 'default' => '1.6', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'body_line_height', array( 'type' => 'text', 'label' => __( 'Body Line Height (e.g. 1.6)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
+	// Body Letter Spacing
+	$wp_customize->add_setting( 'body_letter_spacing', array( 'default' => '0px', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'body_letter_spacing', array( 'type' => 'text', 'label' => __( 'Body Letter Spacing (e.g. 0.2px)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
+	// H1 to H6 Sizes
+	$headings = array(
+		'h1_font_size' => array( 'H1 Font Size', '38px' ),
+		'h2_font_size' => array( 'H2 Font Size', '30px' ),
+		'h3_font_size' => array( 'H3 Font Size', '24px' ),
+		'h4_font_size' => array( 'H4 Font Size', '20px' ),
+		'h5_font_size' => array( 'H5 Font Size', '18px' ),
+		'h6_font_size' => array( 'H6 Font Size', '16px' ),
+	);
+	foreach ( $headings as $setting_key => $info ) {
+		$wp_customize->add_setting( $setting_key, array( 'default' => $info[1], 'sanitize_callback' => 'sanitize_text_field' ) );
+		$wp_customize->add_control( $setting_key, array( 'type' => 'text', 'label' => __( $info[0] . ' (e.g. ' . $info[1] . ')', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+	}
+
+	// Heading Line Height & Letter Spacing
+	$wp_customize->add_setting( 'heading_line_height', array( 'default' => '1.2', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'heading_line_height', array( 'type' => 'text', 'label' => __( 'Headings Line Height (e.g. 1.25)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
+	$wp_customize->add_setting( 'heading_letter_spacing', array( 'default' => '0px', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'heading_letter_spacing', array( 'type' => 'text', 'label' => __( 'Headings Letter Spacing (e.g. 0.5px)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
+	// UI/UX Section Spacing
+	$wp_customize->add_setting( 'section_padding_v', array( 'default' => '48px', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'section_padding_v', array( 'type' => 'text', 'label' => __( 'Section Vertical Padding (e.g. 48px)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
+	$wp_customize->add_setting( 'section_margin_b', array( 'default' => '32px', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'section_margin_b', array( 'type' => 'text', 'label' => __( 'Section Bottom Margin (e.g. 32px)', 'rikshawale-theme' ), 'section' => 'rikshawale_typography_section' ) );
+
 
 	// Add Section: Top Bar Customization
 	$wp_customize->add_section( 'rikshawale_topbar_section', array(
@@ -2331,3 +2411,72 @@ function rikshawale_approve_car_submission_handler() {
     ) );
 }
 add_action( 'wp_ajax_rikshawale_approve_submission', 'rikshawale_approve_car_submission_handler' );
+
+/* ============================================================
+   DYNAMIC TYPOGRAPHY & STYLING CSS OUTPUT IN WP_HEAD
+   ============================================================ */
+
+function rikshawale_output_customizer_css() {
+    $font_family      = get_theme_mod( 'typography_font_family', 'Montserrat, Roboto, sans-serif' );
+    $body_size        = get_theme_mod( 'body_font_size', '15px' );
+    $body_line_h      = get_theme_mod( 'body_line_height', '1.6' );
+    $body_letter_sp   = get_theme_mod( 'body_letter_spacing', '0px' );
+
+    $h1_size          = get_theme_mod( 'h1_font_size', '38px' );
+    $h2_size          = get_theme_mod( 'h2_font_size', '30px' );
+    $h3_size          = get_theme_mod( 'h3_font_size', '24px' );
+    $h4_size          = get_theme_mod( 'h4_font_size', '20px' );
+    $h5_size          = get_theme_mod( 'h5_font_size', '18px' );
+    $h6_size          = get_theme_mod( 'h6_font_size', '16px' );
+    $heading_line_h   = get_theme_mod( 'heading_line_height', '1.2' );
+    $heading_letter_sp= get_theme_mod( 'heading_letter_spacing', '0px' );
+
+    $header_bg        = get_theme_mod( 'header_bg_color', '#ffffff' );
+    $header_text      = get_theme_mod( 'header_text_color', '#1a1a1a' );
+    $footer_bg        = get_theme_mod( 'footer_bg_color', '#151515' );
+    $footer_text      = get_theme_mod( 'footer_text_color', '#aaaaaa' );
+
+    $sec_padding      = get_theme_mod( 'section_padding_v', '48px' );
+    $sec_margin       = get_theme_mod( 'section_margin_b', '32px' );
+    ?>
+    <style id="rikshawale-customizer-dynamic-css">
+        :root {
+            --font-body: <?php echo esc_attr($font_family); ?>;
+            --font-heading: <?php echo esc_attr($font_family); ?>;
+        }
+        body {
+            font-family: var(--font-body), 'Inter', sans-serif !important;
+            font-size: <?php echo esc_attr($body_size); ?> !important;
+            line-height: <?php echo esc_attr($body_line_h); ?> !important;
+            letter-spacing: <?php echo esc_attr($body_letter_sp); ?> !important;
+        }
+        h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            font-family: var(--font-heading), 'Inter', sans-serif !important;
+            line-height: <?php echo esc_attr($heading_line_h); ?> !important;
+            letter-spacing: <?php echo esc_attr($heading_letter_sp); ?> !important;
+        }
+        h1, .h1 { font-size: <?php echo esc_attr($h1_size); ?> !important; }
+        h2, .h2 { font-size: <?php echo esc_attr($h2_size); ?> !important; }
+        h3, .h3 { font-size: <?php echo esc_attr($h3_size); ?> !important; }
+        h4, .h4 { font-size: <?php echo esc_attr($h4_size); ?> !important; }
+        h5, .h5 { font-size: <?php echo esc_attr($h5_size); ?> !important; }
+        h6, .h6 { font-size: <?php echo esc_attr($h6_size); ?> !important; }
+
+        header, .navbar-custom, .site-header {
+            background-color: <?php echo esc_attr($header_bg); ?> !important;
+            color: <?php echo esc_attr($header_text); ?> !important;
+        }
+        footer, .footer-custom {
+            background-color: <?php echo esc_attr($footer_bg); ?> !important;
+            color: <?php echo esc_attr($footer_text); ?> !important;
+        }
+
+        .section-custom-space, section.py-5 {
+            padding-top: <?php echo esc_attr($sec_padding); ?> !important;
+            padding-bottom: <?php echo esc_attr($sec_padding); ?> !important;
+            margin-bottom: <?php echo esc_attr($sec_margin); ?> !important;
+        }
+    </style>
+    <?php
+}
+add_action( 'wp_head', 'rikshawale_output_customizer_css', 99 );

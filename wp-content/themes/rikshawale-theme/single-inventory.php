@@ -21,6 +21,8 @@ while ( have_posts() ) : the_post();
     $insurance    = 'Comprehensive';
     $color        = 'Grey';
 
+    $car_video_url = get_post_meta( $post_id, '_car_video_url', true );
+
     // Collect 5 gallery images
     $slides = array();
     if ( has_post_thumbnail() ) {
@@ -50,23 +52,50 @@ while ( have_posts() ) : the_post();
         <!-- TOP MAIN SECTION: Gallery on Left (col-lg-7), Purchase Card on Right (col-lg-5) -->
         <div class="row g-4 align-items-start mb-4">
             
-            <!-- LEFT COLUMN: Featured Image + 4-Thumbnail Carousel -->
+            <!-- LEFT COLUMN: Featured Image / Video + 4-Thumbnail Carousel -->
             <div class="col-lg-7">
-                <!-- 1. Main Featured Image -->
+                <!-- 1. Main Featured Image / Video Container -->
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
-                    <div class="position-relative bg-black text-center" style="height: 440px;">
-                        <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" alt="<?php the_title_attribute(); ?>">
+                    <div class="position-relative bg-black text-center" style="height: 440px;" id="mainDetailMediaFrame">
+                        <?php if ( $car_video_url ) : ?>
+                            <?php if ( strpos( $car_video_url, 'youtube.com' ) !== false || strpos( $car_video_url, 'youtu.be' ) !== false ) : 
+                                preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $car_video_url, $yt_match );
+                                $yt_id = $yt_match[1] ?? '';
+                            ?>
+                                <iframe id="mainDetailIframe" class="w-100 h-100 border-0" src="https://www.youtube.com/embed/<?php echo esc_attr($yt_id); ?>?autoplay=1&mute=1&loop=1&playlist=<?php echo esc_attr($yt_id); ?>" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" style="display:none;" alt="<?php the_title_attribute(); ?>">
+                                <video id="mainDetailVideo" class="w-100 h-100 object-fit-cover" style="display:none;" controls></video>
+                            <?php else : ?>
+                                <video id="mainDetailVideo" src="<?php echo esc_url($car_video_url); ?>" class="w-100 h-100 object-fit-cover" autoplay muted loop playsinline controls></video>
+                                <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" style="display:none;" alt="<?php the_title_attribute(); ?>">
+                                <iframe id="mainDetailIframe" class="w-100 h-100 border-0" style="display:none;"></iframe>
+                            <?php endif; ?>
+                        <?php else : ?>
+                            <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" alt="<?php the_title_attribute(); ?>">
+                            <video id="mainDetailVideo" class="w-100 h-100 object-fit-cover" style="display:none;" controls></video>
+                            <iframe id="mainDetailIframe" class="w-100 h-100 border-0" style="display:none;"></iframe>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- 2. 4-Thumbnail Carousel Row with Navigation Arrows -->
+                <!-- 2. Thumbnail Carousel Row with Video Thumbnail (if present) -->
                 <div class="thumb-carousel-wrapper">
                     <button type="button" class="thumb-carousel-arrow thumb-carousel-prev" onclick="scrollThumbCarousel(-1)" aria-label="Previous">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
                     <div class="thumb-carousel-track" id="thumbCarouselTrack">
+                        <?php if ( $car_video_url ) : ?>
+                            <div class="thumb-carousel-item active" onclick="playBannerVideo('<?php echo esc_url($car_video_url); ?>', this)" style="position:relative; background:#000;">
+                                <img src="<?php echo esc_url($slides[0]); ?>" alt="Video Thumbnail" style="opacity:0.6;">
+                                <span class="position-absolute top-50 start-50 translate-middle text-white text-center">
+                                    <i class="fa-solid fa-circle-play fs-4 d-block" style="color:var(--primary-color, #db2d2e);"></i>
+                                    <span style="font-size:8px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">VIDEO</span>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+
                         <?php foreach ( $slides as $idx => $slide_url ) : ?>
-                            <div class="thumb-carousel-item <?php echo $idx === 0 ? 'active' : ''; ?>" onclick="changeMainImage('<?php echo esc_url($slide_url); ?>', this)">
+                            <div class="thumb-carousel-item <?php echo (! $car_video_url && $idx === 0) ? 'active' : ''; ?>" onclick="changeMainImage('<?php echo esc_url($slide_url); ?>', this)">
                                 <img src="<?php echo esc_url($slide_url); ?>" alt="Thumb <?php echo $idx+1; ?>">
                             </div>
                         <?php endforeach; ?>
@@ -433,11 +462,43 @@ while ( have_posts() ) : the_post();
 
 <script>
 function changeMainImage(url, el) {
-    document.getElementById('mainDetailImage').src = url;
+    var img = document.getElementById('mainDetailImage');
+    var vid = document.getElementById('mainDetailVideo');
+    var iframe = document.getElementById('mainDetailIframe');
+
+    if (vid) { vid.pause(); vid.style.display = 'none'; }
+    if (iframe) { iframe.style.display = 'none'; }
+    if (img) { img.src = url; img.style.display = 'block'; }
+
     document.querySelectorAll('.thumb-carousel-item').forEach(function(b) {
         b.classList.remove('active');
     });
-    el.classList.add('active');
+    if (el) el.classList.add('active');
+}
+
+function playBannerVideo(url, el) {
+    var img = document.getElementById('mainDetailImage');
+    var vid = document.getElementById('mainDetailVideo');
+    var iframe = document.getElementById('mainDetailIframe');
+
+    if (img) img.style.display = 'none';
+
+    if (url.indexOf('youtube.com') !== -1 || url.indexOf('youtu.be') !== -1) {
+        if (vid) vid.style.display = 'none';
+        if (iframe) iframe.style.display = 'block';
+    } else {
+        if (iframe) iframe.style.display = 'none';
+        if (vid) {
+            vid.src = url;
+            vid.style.display = 'block';
+            vid.play();
+        }
+    }
+
+    document.querySelectorAll('.thumb-carousel-item').forEach(function(b) {
+        b.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
 }
 
 function scrollThumbCarousel(direction) {
