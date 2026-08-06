@@ -1836,3 +1836,345 @@ function rikshawale_footer_widgets_init() {
 }
 add_action( 'widgets_init', 'rikshawale_footer_widgets_init' );
 
+/* ============================================================
+   SELL A CAR — Custom Post Type: car_submission
+   ============================================================ */
+
+function rikshawale_register_car_submission_cpt() {
+    register_post_type( 'car_submission', array(
+        'labels' => array(
+            'name'               => __( 'Car Submissions', 'rikshawale-theme' ),
+            'singular_name'      => __( 'Car Submission', 'rikshawale-theme' ),
+            'menu_name'          => __( 'Sell Requests', 'rikshawale-theme' ),
+            'add_new_item'       => __( 'Add New Submission', 'rikshawale-theme' ),
+            'edit_item'          => __( 'Review Submission', 'rikshawale-theme' ),
+            'all_items'          => __( 'All Submissions', 'rikshawale-theme' ),
+            'not_found'          => __( 'No submissions found.', 'rikshawale-theme' ),
+        ),
+        'public'            => false,
+        'show_ui'           => true,
+        'show_in_menu'      => true,
+        'menu_icon'         => 'dashicons-car',
+        'menu_position'     => 9,
+        'capability_type'   => 'post',
+        'has_archive'       => false,
+        'hierarchical'      => false,
+        'supports'          => array( 'title', 'custom-fields' ),
+        'show_in_rest'      => false,
+    ) );
+}
+add_action( 'init', 'rikshawale_register_car_submission_cpt' );
+
+/* ============================================================
+   SELL A CAR — Front-end AJAX Form Handler
+   ============================================================ */
+
+function rikshawale_handle_sell_car_submission() {
+    // Verify nonce
+    if ( ! isset( $_POST['rikshawale_sell_car_nonce'] ) ||
+         ! wp_verify_nonce( $_POST['rikshawale_sell_car_nonce'], 'rikshawale_sell_car_action' ) ) {
+        wp_send_json_error( array( 'message' => 'Security check failed. Please refresh and try again.' ) );
+    }
+
+    // Sanitize text fields
+    $seller_name   = sanitize_text_field( $_POST['seller_name']   ?? '' );
+    $seller_phone  = sanitize_text_field( $_POST['seller_phone']  ?? '' );
+    $seller_wa     = sanitize_text_field( $_POST['seller_wa']     ?? '' );
+    $seller_city   = sanitize_text_field( $_POST['seller_city']   ?? '' );
+    $seller_reg_no = sanitize_text_field( $_POST['seller_reg_no'] ?? '' );
+    $seller_state  = sanitize_text_field( $_POST['seller_state']  ?? '' );
+
+    $mfg_year      = sanitize_text_field( $_POST['car_mfg_year']      ?? '' );
+    $reg_year      = sanitize_text_field( $_POST['car_reg_year']      ?? '' );
+    $owner_type    = sanitize_text_field( $_POST['car_owner_type']    ?? '' );
+    $brand_name    = sanitize_text_field( $_POST['car_brand_name']    ?? '' );
+    $model_name    = sanitize_text_field( $_POST['car_model_name']    ?? '' );
+    $variant       = sanitize_text_field( $_POST['car_variant']       ?? '' );
+    $driven_km     = sanitize_text_field( $_POST['car_driven_km']     ?? '' );
+    $fuel          = sanitize_text_field( $_POST['car_fuel']          ?? '' );
+    $transmission  = sanitize_text_field( $_POST['car_transmission']  ?? '' );
+    $exp_price     = sanitize_text_field( $_POST['car_expected_price']?? '' );
+
+    // Required field check
+    if ( empty($seller_name) || empty($seller_phone) || empty($brand_name) || empty($model_name) ) {
+        wp_send_json_error( array( 'message' => 'Please fill all required fields.' ) );
+    }
+
+    // Create the submission post (pending review)
+    $post_title = $brand_name . ' ' . $model_name . ' — ' . $seller_name;
+    $post_id = wp_insert_post( array(
+        'post_type'   => 'car_submission',
+        'post_title'  => $post_title,
+        'post_status' => 'pending',
+    ) );
+
+    if ( is_wp_error( $post_id ) ) {
+        wp_send_json_error( array( 'message' => 'Could not save submission. Please try again.' ) );
+    }
+
+    // Save all meta
+    $meta = array(
+        '_seller_name'         => $seller_name,
+        '_seller_phone'        => $seller_phone,
+        '_seller_whatsapp'     => $seller_wa,
+        '_seller_city'         => $seller_city,
+        '_seller_reg_no'       => $seller_reg_no,
+        '_seller_state'        => $seller_state,
+        '_car_mfg_year'        => $mfg_year,
+        '_car_reg_year'        => $reg_year,
+        '_car_owner_type'      => $owner_type,
+        '_car_brand_name'      => $brand_name,
+        '_car_model_name'      => $model_name,
+        '_car_variant'         => $variant,
+        '_car_driven_km'       => $driven_km,
+        '_car_fuel'            => $fuel,
+        '_car_transmission'    => $transmission,
+        '_car_expected_price'  => $exp_price,
+    );
+    foreach ( $meta as $key => $val ) {
+        update_post_meta( $post_id, $key, $val );
+    }
+
+    // Handle up to 5 image uploads
+    if ( ! function_exists( 'wp_handle_upload' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+    }
+
+    $upload_overrides = array( 'test_form' => false );
+    for ( $i = 1; $i <= 5; $i++ ) {
+        $file_key = 'car_image_' . $i;
+        if ( ! empty( $_FILES[ $file_key ]['name'] ) ) {
+            $uploaded = wp_handle_upload( $_FILES[ $file_key ], $upload_overrides );
+            if ( isset( $uploaded['url'] ) ) {
+                // Attach to post
+                $attachment_id = wp_insert_attachment( array(
+                    'post_mime_type' => $uploaded['type'],
+                    'post_title'     => sanitize_file_name( $_FILES[ $file_key ]['name'] ),
+                    'post_content'   => '',
+                    'post_status'    => 'inherit',
+                ), $uploaded['file'], $post_id );
+                if ( ! is_wp_error( $attachment_id ) ) {
+                    $attach_data = wp_generate_attachment_metadata( $attachment_id, $uploaded['file'] );
+                    wp_update_attachment_metadata( $attachment_id, $attach_data );
+                    update_post_meta( $post_id, '_car_gallery_image_' . $i, $uploaded['url'] );
+                    // Set first image as featured
+                    if ( $i === 1 ) {
+                        set_post_thumbnail( $post_id, $attachment_id );
+                    }
+                }
+            }
+        }
+    }
+
+    // Send admin notification email
+    $admin_email = get_option( 'admin_email' );
+    $subject = 'New Sell Car Request: ' . $post_title;
+    $body  = "New sell car submission received!\n\n";
+    $body .= "Seller: {$seller_name}\nPhone: {$seller_phone}\nWhatsApp: {$seller_wa}\nCity: {$seller_city}\nState: {$seller_state}\n\n";
+    $body .= "Vehicle: {$brand_name} {$model_name} {$variant}\nMfg Year: {$mfg_year}\nReg Year: {$reg_year}\nOwner: {$owner_type}\n";
+    $body .= "Driven: {$driven_km}\nFuel: {$fuel}\nTransmission: {$transmission}\nExpected Price: {$exp_price}\n\n";
+    $body .= "Review in admin: " . admin_url( 'post.php?post=' . $post_id . '&action=edit' );
+    wp_mail( $admin_email, $subject, $body );
+
+    wp_send_json_success( array(
+        'message' => 'Thank you! Your request has been submitted. Our team will contact you shortly.',
+    ) );
+}
+add_action( 'wp_ajax_rikshawale_sell_car',        'rikshawale_handle_sell_car_submission' );
+add_action( 'wp_ajax_nopriv_rikshawale_sell_car', 'rikshawale_handle_sell_car_submission' );
+
+/* ============================================================
+   SELL A CAR — Admin Review Metabox
+   ============================================================ */
+
+function rikshawale_add_car_submission_metabox() {
+    add_meta_box(
+        'car_submission_details',
+        __( 'Submission Details & Actions', 'rikshawale-theme' ),
+        'rikshawale_render_car_submission_metabox',
+        'car_submission',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'rikshawale_add_car_submission_metabox' );
+
+function rikshawale_render_car_submission_metabox( $post ) {
+    $m = function( $key ) use ( $post ) {
+        return esc_html( get_post_meta( $post->ID, $key, true ) );
+    };
+    $img_urls = array();
+    for ( $i = 1; $i <= 5; $i++ ) {
+        $img_urls[] = get_post_meta( $post->ID, '_car_gallery_image_' . $i, true );
+    }
+    ?>
+    <style>
+    .car-sub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .car-sub-field { background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 6px; padding: 10px 14px; }
+    .car-sub-field label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 3px; }
+    .car-sub-field strong { font-size: 14px; color: #1a1a1a; }
+    .car-sub-imgs { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+    .car-sub-imgs img { width: 120px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
+    #rikshawale-approve-btn { background: #16a34a; color: #fff; border: none; padding: 12px 28px; font-size: 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    #rikshawale-approve-btn:hover { background: #15803d; }
+    #rikshawale-approve-msg { margin-left: 14px; font-weight: 600; }
+    </style>
+
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🧑 Seller Information</h3>
+    <div class="car-sub-grid">
+        <div class="car-sub-field"><label>Name</label><strong><?php echo $m('_seller_name'); ?></strong></div>
+        <div class="car-sub-field"><label>Phone</label><strong><?php echo $m('_seller_phone'); ?></strong></div>
+        <div class="car-sub-field"><label>WhatsApp</label><strong><?php echo $m('_seller_whatsapp'); ?></strong></div>
+        <div class="car-sub-field"><label>City</label><strong><?php echo $m('_seller_city'); ?></strong></div>
+        <div class="car-sub-field"><label>State</label><strong><?php echo $m('_seller_state'); ?></strong></div>
+        <div class="car-sub-field"><label>Reg Number</label><strong><?php echo $m('_seller_reg_no'); ?></strong></div>
+    </div>
+
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🚗 Vehicle Details</h3>
+    <div class="car-sub-grid">
+        <div class="car-sub-field"><label>Brand</label><strong><?php echo $m('_car_brand_name'); ?></strong></div>
+        <div class="car-sub-field"><label>Model</label><strong><?php echo $m('_car_model_name'); ?></strong></div>
+        <div class="car-sub-field"><label>Variant</label><strong><?php echo $m('_car_variant'); ?></strong></div>
+        <div class="car-sub-field"><label>Mfg Year</label><strong><?php echo $m('_car_mfg_year'); ?></strong></div>
+        <div class="car-sub-field"><label>Reg Year</label><strong><?php echo $m('_car_reg_year'); ?></strong></div>
+        <div class="car-sub-field"><label>Owner Type</label><strong><?php echo $m('_car_owner_type'); ?></strong></div>
+        <div class="car-sub-field"><label>Driven (KM)</label><strong><?php echo $m('_car_driven_km'); ?></strong></div>
+        <div class="car-sub-field"><label>Fuel Type</label><strong><?php echo $m('_car_fuel'); ?></strong></div>
+        <div class="car-sub-field"><label>Transmission</label><strong><?php echo $m('_car_transmission'); ?></strong></div>
+        <div class="car-sub-field" style="grid-column: span 3;"><label>Expected Price</label><strong><?php echo $m('_car_expected_price'); ?></strong></div>
+    </div>
+
+    <?php if ( array_filter($img_urls) ) : ?>
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images</h3>
+    <div class="car-sub-imgs">
+        <?php foreach ( $img_urls as $url ) : if ( $url ) : ?>
+            <a href="<?php echo esc_url($url); ?>" target="_blank">
+                <img src="<?php echo esc_url($url); ?>" alt="Car Image">
+            </a>
+        <?php endif; endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <hr>
+    <p>
+        <button type="button" id="rikshawale-approve-btn"
+            data-post="<?php echo esc_attr($post->ID); ?>"
+            data-nonce="<?php echo wp_create_nonce('rikshawale_approve_submission'); ?>">
+            ✅ Approve &amp; Create Inventory Post
+        </button>
+        <span id="rikshawale-approve-msg"></span>
+    </p>
+
+    <script>
+    document.getElementById('rikshawale-approve-btn').addEventListener('click', function() {
+        var btn  = this;
+        var msg  = document.getElementById('rikshawale-approve-msg');
+        btn.disabled = true;
+        btn.textContent = 'Creating…';
+        var data = new FormData();
+        data.append('action',    'rikshawale_approve_submission');
+        data.append('post_id',   btn.dataset.post);
+        data.append('nonce',     btn.dataset.nonce);
+        fetch(ajaxurl, { method: 'POST', body: data })
+            .then(r => r.json())
+            .then(function(res) {
+                if (res.success) {
+                    msg.style.color = '#16a34a';
+                    msg.textContent = '✅ Inventory post created! ID #' + res.data.inventory_id;
+                    btn.textContent = 'Done!';
+                } else {
+                    msg.style.color = '#dc2626';
+                    msg.textContent = '❌ ' + (res.data.message || 'Error');
+                    btn.disabled = false;
+                    btn.textContent = 'Approve & Create Inventory Post';
+                }
+            });
+    });
+    </script>
+    <?php
+}
+
+/* ============================================================
+   SELL A CAR — Admin Approve → Create Inventory Post
+   ============================================================ */
+
+function rikshawale_approve_car_submission_handler() {
+    if ( ! current_user_can( 'edit_posts' ) ) {
+        wp_send_json_error( array( 'message' => 'Unauthorized.' ) );
+    }
+    if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'rikshawale_approve_submission' ) ) {
+        wp_send_json_error( array( 'message' => 'Security check failed.' ) );
+    }
+
+    $submission_id = intval( $_POST['post_id'] ?? 0 );
+    if ( ! $submission_id || get_post_type( $submission_id ) !== 'car_submission' ) {
+        wp_send_json_error( array( 'message' => 'Invalid submission.' ) );
+    }
+
+    $m = function( $key ) use ( $submission_id ) {
+        return get_post_meta( $submission_id, $key, true );
+    };
+
+    $brand     = $m('_car_brand_name');
+    $model     = $m('_car_model_name');
+    $variant   = $m('_car_variant');
+    $mfg_year  = $m('_car_mfg_year');
+
+    // Create inventory post
+    $inventory_id = wp_insert_post( array(
+        'post_type'   => 'inventory',
+        'post_title'  => trim( $brand . ' ' . $model . ' ' . $variant . ' ' . $mfg_year ),
+        'post_status' => 'draft',
+        'post_author' => get_current_user_id(),
+    ) );
+
+    if ( is_wp_error( $inventory_id ) ) {
+        wp_send_json_error( array( 'message' => 'Could not create inventory post.' ) );
+    }
+
+    // Copy all car meta
+    $meta_keys = array(
+        '_car_mfg_year', '_car_reg_year', '_car_owner_type',
+        '_car_brand_name', '_car_model_name', '_car_variant',
+        '_car_driven_km', '_car_fuel', '_car_transmission',
+        '_car_expected_price',
+        '_car_gallery_image_1', '_car_gallery_image_2', '_car_gallery_image_3',
+        '_car_gallery_image_4', '_car_gallery_image_5',
+    );
+    foreach ( $meta_keys as $key ) {
+        $val = $m( $key );
+        if ( $val ) {
+            update_post_meta( $inventory_id, $key, $val );
+            // Also set _car_price from expected price
+            if ( $key === '_car_expected_price' ) {
+                update_post_meta( $inventory_id, '_car_price', $val );
+            }
+        }
+    }
+
+    // Copy seller info as extra meta
+    update_post_meta( $inventory_id, '_submission_seller_name',  $m('_seller_name') );
+    update_post_meta( $inventory_id, '_submission_seller_phone', $m('_seller_phone') );
+    update_post_meta( $inventory_id, '_submission_id',           $submission_id );
+
+    // Set first gallery image as featured
+    $thumb_url = $m('_car_gallery_image_1');
+    if ( $thumb_url ) {
+        $attachment_id = attachment_url_to_postid( $thumb_url );
+        if ( $attachment_id ) {
+            set_post_thumbnail( $inventory_id, $attachment_id );
+        }
+    }
+
+    // Mark submission as published (approved)
+    wp_update_post( array( 'ID' => $submission_id, 'post_status' => 'publish' ) );
+    update_post_meta( $submission_id, '_approved_inventory_id', $inventory_id );
+
+    wp_send_json_success( array(
+        'inventory_id'  => $inventory_id,
+        'edit_url'      => admin_url( 'post.php?post=' . $inventory_id . '&action=edit' ),
+    ) );
+}
+add_action( 'wp_ajax_rikshawale_approve_submission', 'rikshawale_approve_car_submission_handler' );
