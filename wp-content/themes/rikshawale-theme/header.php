@@ -135,33 +135,7 @@
         </marquee>
     </div>
 
-    <!-- Top Bar -->
-    <div class="top-bar d-none d-lg-block">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="top-bar-info">
-                <?php if ( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ) : ?>
-                    <span class="me-3"><i class="fa-solid fa-phone text-primary"></i> <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?>"><?php echo esc_html( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?></a></span>
-                <?php endif; ?>
-                <?php if ( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ) : ?>
-                    <span class="me-3"><i class="fa-solid fa-envelope text-primary"></i> <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>"><?php echo esc_html( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?></a></span>
-                <?php endif; ?>
-                <?php if ( get_theme_mod( 'topbar_hours', 'Mon - Sat: 8:00 AM - 6:00 PM' ) ) : ?>
-                    <span><i class="fa-regular fa-clock text-primary"></i> <?php echo esc_html( get_theme_mod( 'topbar_hours', 'Mon - Sat: 8:00 AM - 6:00 PM' ) ); ?></span>
-                <?php endif; ?>
-            </div>
-            <div class="top-bar-socials">
-                <?php if ( get_theme_mod( 'topbar_facebook', '#' ) ) : ?>
-                    <a href="<?php echo esc_url( get_theme_mod( 'topbar_facebook', '#' ) ); ?>" target="_blank" class="me-2"><i class="fa-brands fa-facebook-f"></i></a>
-                <?php endif; ?>
-                <?php if ( get_theme_mod( 'topbar_twitter', '#' ) ) : ?>
-                    <a href="<?php echo esc_url( get_theme_mod( 'topbar_twitter', '#' ) ); ?>" target="_blank" class="me-2"><i class="fa-brands fa-twitter"></i></a>
-                <?php endif; ?>
-                <?php if ( get_theme_mod( 'topbar_instagram', '#' ) ) : ?>
-                    <a href="<?php echo esc_url( get_theme_mod( 'topbar_instagram', '#' ) ); ?>" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Navigation Menu -->
     <nav class="navbar navbar-expand-lg navbar-custom header-custom shadow-sm py-1">
