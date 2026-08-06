@@ -115,8 +115,8 @@
 
 <header>
     <!-- Top Marquee Ticker -->
-    <div class="header-marquee-ticker bg-dark text-white overflow-hidden" style="background-color: #111111 !important; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem; font-weight: 500; padding: 4px 0;">
-        <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" style="line-height: 1.4;">
+    <div class="header-marquee-ticker bg-dark text-white overflow-hidden" style="background-color: #111111 !important; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.78rem; font-weight: 500; padding: 1px 0;">
+        <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" style="line-height: 1.15;">
             <span class="me-3">✅ Certified Vehicles</span>
             <span class="me-3 text-muted">|</span>
             <span class="me-3">🔍 40-Point Inspection</span>
