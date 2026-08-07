@@ -2248,7 +2248,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Principal Color (Chart)
 	$wp_customize->add_setting( 'emi_principal_color', array(
-		'default'           => '#fecdd3',
+		'default'           => '#0ea5e9',
 		'sanitize_callback' => 'sanitize_hex_color',
 	) );
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'emi_principal_color', array(
@@ -2259,7 +2259,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Interest Color (Chart)
 	$wp_customize->add_setting( 'emi_interest_color', array(
-		'default'           => '#dc2626',
+		'default'           => '#fce4e4',
 		'sanitize_callback' => 'sanitize_hex_color',
 	) );
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'emi_interest_color', array(
