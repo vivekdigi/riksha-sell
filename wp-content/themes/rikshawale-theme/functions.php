@@ -3001,13 +3001,60 @@ function rikshawale_filter_subscriber_booking_views( $views ) {
 add_filter( 'views_edit-riksha_booking', 'rikshawale_filter_subscriber_booking_views' );
 
 /**
- * Hide "Add New" and unnecessary actions for Subscribers in WP Admin
+ * Hide "Add New", WordPress update banners, Personal Options, Elementor AI, and core clutter for Subscribers
  */
 function rikshawale_hide_subscriber_booking_actions() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		global $pagenow;
+		echo '<style>
+			.update-nag, .notice-warning, #wpadminbar .ab-icon, #footer-thankyou, #footer-upgrade, #screen-meta-links, #contextual-help-link-wrap, #wpfooter { display: none !important; }
+		</style>';
+
 		if ( $pagenow === 'edit.php' && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'riksha_booking' ) {
 			echo '<style>.page-title-action, .row-actions .inline, .row-actions .edit, .tablenav .actions, .bulkactions, ul.subsubsub { display: none !important; }</style>';
+		}
+
+		if ( $pagenow === 'profile.php' ) {
+			echo '<style>
+				body.profile-php h2,
+				body.profile-php .user-rich-editing-wrap,
+				body.profile-php .user-syntax-highlighting-wrap,
+				body.profile-php .user-admin-color-wrap,
+				body.profile-php .user-comment-shortcuts-wrap,
+				body.profile-php .show-admin-bar,
+				body.profile-php .user-language-wrap,
+				body.profile-php .user-nickname-wrap,
+				body.profile-php .user-url-wrap,
+				body.profile-php .user-description-wrap,
+				body.profile-php .user-profile-picture,
+				body.profile-php .user-sessions-wrap,
+				body.profile-php .application-passwords,
+				body.profile-php #elementor-ai-user-profile,
+				body.profile-php .user-admin-bar-front-wrap {
+					display: none !important;
+				}
+				body.profile-php #your-profile {
+					max-width: 650px;
+					background: #ffffff;
+					padding: 24px;
+					border-radius: 12px;
+					box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+					margin-top: 15px;
+				}
+				body.profile-php h1 {
+					font-weight: 700;
+					color: #0f172a;
+				}
+				body.profile-php table.form-table th {
+					font-weight: 600;
+					color: #334155;
+					width: 160px;
+				}
+				body.profile-php input.regular-text {
+					border-radius: 6px;
+					padding: 6px 12px;
+				}
+			</style>';
 		}
 	}
 }
