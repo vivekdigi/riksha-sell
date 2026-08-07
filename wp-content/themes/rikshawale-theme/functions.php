@@ -3324,3 +3324,219 @@ function rikshawale_ajax_get_user_bookings() {
 	wp_send_json_success( array( 'bookings' => $list ) );
 }
 add_action( 'wp_ajax_rikshawale_get_user_bookings', 'rikshawale_ajax_get_user_bookings' );
+
+/**
+ * 5. AJAX Handler for Riksha & Vehicle Inventory Left Sidebar Filtering
+ */
+function rikshawale_ajax_filter_inventory() {
+	check_ajax_referer( 'rikshawale_filter_nonce', 'nonce' );
+
+	$keyword       = sanitize_text_field( $_POST['keyword'] ?? '' );
+	$sort_by       = sanitize_text_field( $_POST['sort_by'] ?? 'date_desc' );
+	$brands        = isset( $_POST['brand'] ) ? array_map( 'sanitize_text_field', (array) $_POST['brand'] ) : array();
+	$fuels         = isset( $_POST['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_POST['fuel'] ) : array();
+	$years         = isset( $_POST['year'] ) ? array_map( 'sanitize_text_field', (array) $_POST['year'] ) : array();
+	$transmissions = isset( $_POST['transmission'] ) ? array_map( 'sanitize_text_field', (array) $_POST['transmission'] ) : array();
+	$owners        = isset( $_POST['owner'] ) ? array_map( 'sanitize_text_field', (array) $_POST['owner'] ) : array();
+	$colors        = isset( $_POST['color'] ) ? array_map( 'sanitize_text_field', (array) $_POST['color'] ) : array();
+	$price_min     = isset( $_POST['price_min'] ) && $_POST['price_min'] !== '' ? floatval( $_POST['price_min'] ) : 0;
+	$price_max     = isset( $_POST['price_max'] ) && $_POST['price_max'] !== '' ? floatval( $_POST['price_max'] ) : 0;
+
+	$args = array(
+		'post_type'      => 'inventory',
+		'posts_per_page' => 24,
+		'post_status'    => 'publish',
+	);
+
+	if ( ! empty( $keyword ) ) {
+		$args['s'] = $keyword;
+	}
+
+	// Sorting
+	switch ( $sort_by ) {
+		case 'price_asc':
+			$args['meta_key'] = '_car_price';
+			$args['orderby']  = 'meta_value_num';
+			$args['order']    = 'ASC';
+			break;
+		case 'price_desc':
+			$args['meta_key'] = '_car_price';
+			$args['orderby']  = 'meta_value_num';
+			$args['order']    = 'DESC';
+			break;
+		case 'year_desc':
+			$args['meta_key'] = '_car_mfg_year';
+			$args['orderby']  = 'meta_value_num';
+			$args['order']    = 'DESC';
+			break;
+		case 'mileage_asc':
+			$args['meta_key'] = '_car_driven_km';
+			$args['orderby']  = 'meta_value_num';
+			$args['order']    = 'ASC';
+			break;
+		default:
+			$args['orderby'] = 'date';
+			$args['order']   = 'DESC';
+			break;
+	}
+
+	// Meta Queries
+	$meta_query = array( 'relation' => 'AND' );
+
+	if ( ! empty( $brands ) ) {
+		$meta_query[] = array(
+			'key'     => '_car_brand_name',
+			'value'   => $brands,
+			'compare' => 'IN',
+		);
+	}
+
+	if ( ! empty( $fuels ) ) {
+		$meta_query[] = array(
+			'key'     => '_car_fuel',
+			'value'   => $fuels,
+			'compare' => 'IN',
+		);
+	}
+
+	if ( ! empty( $years ) ) {
+		$meta_query[] = array(
+			'relation' => 'OR',
+			array(
+				'key'     => '_car_mfg_year',
+				'value'   => $years,
+				'compare' => 'IN',
+			),
+			array(
+				'key'     => '_car_reg_year',
+				'value'   => $years,
+				'compare' => 'IN',
+			),
+		);
+	}
+
+	if ( ! empty( $transmissions ) ) {
+		$meta_query[] = array(
+			'key'     => '_car_transmission',
+			'value'   => $transmissions,
+			'compare' => 'IN',
+		);
+	}
+
+	if ( ! empty( $owners ) ) {
+		$meta_query[] = array(
+			'key'     => '_car_owner_type',
+			'value'   => $owners,
+			'compare' => 'IN',
+		);
+	}
+
+	if ( count( $meta_query ) > 1 ) {
+		$args['meta_query'] = $meta_query;
+	}
+
+	$query = new WP_Query( $args );
+
+	ob_start();
+	$count = 0;
+	$tags  = array();
+
+	foreach ( $brands as $b ) $tags[] = 'Brand: ' . $b;
+	foreach ( $fuels as $f ) $tags[] = 'Fuel: ' . $f;
+	foreach ( $years as $y ) $tags[] = 'Year: ' . $y;
+	foreach ( $transmissions as $t ) $tags[] = 'Trans: ' . $t;
+	if ( $price_min || $price_max ) $tags[] = 'Price: ₹' . number_format($price_min) . ' - ₹' . number_format($price_max);
+
+	if ( $query->have_posts() ) {
+		$count = $query->found_posts;
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$p_id    = get_the_ID();
+			$p_price = rikshawale_get_formatted_price( $p_id );
+			$p_year  = get_post_meta( $p_id, '_car_mfg_year', true ) ?: ( get_post_meta( $p_id, '_car_year', true ) ?: '2022' );
+			$p_fuel  = get_post_meta( $p_id, '_car_fuel', true ) ?: 'Electric';
+			$p_trans = get_post_meta( $p_id, '_car_transmission', true ) ?: 'Automatic';
+			$p_km    = get_post_meta( $p_id, '_car_driven_km', true ) ?: '15,000 km';
+			$p_badge = get_post_meta( $p_id, '_car_badge', true ) ?: 'LIMITED OFFER';
+			$thumb   = get_the_post_thumbnail_url( $p_id, 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
+			$title   = get_the_title();
+
+			$raw_p = preg_replace('/[^0-9]/', '', get_post_meta( $p_id, '_car_price', true ) );
+			$num_p = ( $raw_p && floatval($raw_p) > 0 ) ? floatval($raw_p) : 500000;
+			$loan_amt = $num_p * 0.80;
+			$rate_m   = (11.75 / 12) / 100;
+			$pow_m    = pow(1 + $rate_m, 60);
+			$est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
+			?>
+			<div class="col-lg-4 col-md-6">
+				<div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
+					<?php if ( $p_badge ) : ?>
+						<span class="car-card-badge position-absolute top-0 start-0 m-3 badge bg-danger z-2 shadow-sm rounded-pill px-3 py-2 extra-small uppercase"><?php echo esc_html($p_badge); ?></span>
+					<?php endif; ?>
+					<a href="<?php the_permalink(); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
+						<img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>" class="w-100 h-100 object-fit-cover transition-all">
+					</a>
+					<div class="card-body p-4 d-flex flex-column justify-content-between">
+						<div>
+							<h6 class="fw-bold text-dark text-truncate mb-2" title="<?php echo esc_attr($title); ?>">
+								<a href="<?php the_permalink(); ?>" class="text-dark text-decoration-none"><?php echo esc_html($title); ?></a>
+							</h6>
+							<div class="d-flex flex-wrap gap-1 mb-3">
+								<span class="badge bg-light text-secondary border extra-small"><?php echo esc_html($p_year); ?></span>
+								<span class="badge bg-light text-secondary border extra-small"><?php echo esc_html($p_fuel); ?></span>
+								<span class="badge bg-light text-secondary border extra-small"><?php echo esc_html($p_trans); ?></span>
+								<span class="badge bg-light text-secondary border extra-small"><?php echo esc_html($p_km); ?></span>
+							</div>
+						</div>
+						<div class="pt-3 border-top mt-2">
+							<div class="d-flex align-items-baseline justify-content-between mb-2">
+								<div>
+									<span class="text-muted extra-small d-block">Selling Price</span>
+									<span class="fs-5 fw-black text-dark"><?php echo esc_html($p_price); ?></span>
+								</div>
+								<div class="text-end">
+									<span class="text-muted extra-small d-block">Starting EMI</span>
+									<span class="fw-bold text-danger small">₹<?php echo number_format($est_emi); ?>/m</span>
+								</div>
+							</div>
+							<div class="d-grid gap-2 d-flex mt-3">
+								<a href="<?php the_permalink(); ?>" class="btn btn-outline-dark btn-sm rounded-3 flex-grow-1 fw-bold">View Details</a>
+								<button type="button" class="btn btn-danger btn-sm rounded-3 fw-bold px-3" onclick="triggerVehicleBooking(<?php echo $p_id; ?>, '<?php echo esc_js($title); ?>', '<?php echo esc_js($p_price); ?>', '<?php echo esc_url($thumb); ?>')" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border:none;">
+									Book
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<?php
+		}
+		wp_reset_postdata();
+	} else {
+		?>
+		<div class="col-12 text-center py-5">
+			<div class="p-5 bg-white rounded-4 shadow-sm">
+				<i class="fa-solid fa-car-side fs-1 text-muted mb-3 d-block"></i>
+				<h5 class="fw-bold text-dark">No Vehicles Match Your Selected Filters</h5>
+				<p class="text-muted small">Try clearing some checkboxes or resetting all filters.</p>
+				<button type="button" class="btn btn-primary rounded-pill px-4" onclick="resetAllFilters()">Reset All Filters</button>
+			</div>
+		</div>
+		<?php
+	}
+
+	$html = ob_get_clean();
+
+	$tag_html = '';
+	foreach ( $tags as $t ) {
+		$tag_html .= '<span class="badge bg-primary-subtle text-primary border border-primary-subtle extra-small rounded-pill px-2 py-1 me-1 mb-1">' . esc_html($t) . '</span>';
+	}
+
+	wp_send_json_success( array(
+		'html'  => $html,
+		'count' => $count,
+		'tags'  => $tag_html,
+	) );
+}
+add_action( 'wp_ajax_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inventory' );
+add_action( 'wp_ajax_nopriv_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inventory' );
