@@ -742,6 +742,7 @@ function rikshawale_render_inventory_metabox( $post ) {
     $price           = get_post_meta( $post->ID, '_car_price', true );
     $currency_symbol = get_post_meta( $post->ID, '_car_currency_symbol', true ) ?: '₹';
     $custom_interest = get_post_meta( $post->ID, '_car_interest_rate', true );
+    $color           = get_post_meta( $post->ID, '_car_color', true );
     $mfg_year        = get_post_meta( $post->ID, '_car_mfg_year', true ) ?: get_post_meta( $post->ID, '_car_year', true );
     $reg_year        = get_post_meta( $post->ID, '_car_reg_year', true );
     $owner_type      = get_post_meta( $post->ID, '_car_owner_type', true );
@@ -782,6 +783,12 @@ function rikshawale_render_inventory_metabox( $post ) {
             <td>
                 <input type="text" id="car_interest_rate" name="car_interest_rate" value="<?php echo esc_attr( $custom_interest ); ?>" class="regular-text" placeholder="e.g. 11.75 or 9.5 (Default: Theme Option setting)">
                 <p class="description"><?php _e( 'Custom annual loan interest rate for this vehicle. If left empty, global Theme Option setting is used.', 'rikshawale-theme' ); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="car_color"><?php _e( 'Exterior Color', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_color" name="car_color" value="<?php echo esc_attr( $color ); ?>" class="regular-text" placeholder="e.g. White, Black, Red, Blue, Grey, Green, Yellow, Silver">
             </td>
         </tr>
         <tr>
@@ -947,6 +954,7 @@ function rikshawale_save_inventory_meta( $post_id ) {
         'car_price',
         'car_currency_symbol',
         'car_interest_rate',
+        'car_color',
         'car_badge',
         'car_video_url',
         'car_mfg_year',
@@ -3333,6 +3341,7 @@ function rikshawale_ajax_filter_inventory() {
 
 	$keyword       = sanitize_text_field( $_POST['keyword'] ?? '' );
 	$sort_by       = sanitize_text_field( $_POST['sort_by'] ?? 'date_desc' );
+	$paged         = isset( $_POST['paged'] ) ? max( 1, intval( $_POST['paged'] ) ) : 1;
 	$brands        = isset( $_POST['brand'] ) ? array_map( 'sanitize_text_field', (array) $_POST['brand'] ) : array();
 	$fuels         = isset( $_POST['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_POST['fuel'] ) : array();
 	$years         = isset( $_POST['year'] ) ? array_map( 'sanitize_text_field', (array) $_POST['year'] ) : array();
@@ -3344,7 +3353,8 @@ function rikshawale_ajax_filter_inventory() {
 
 	$args = array(
 		'post_type'      => 'inventory',
-		'posts_per_page' => 24,
+		'posts_per_page' => 12,
+		'paged'          => $paged,
 		'post_status'    => 'publish',
 	);
 
@@ -3431,6 +3441,32 @@ function rikshawale_ajax_filter_inventory() {
 		);
 	}
 
+	if ( ! empty( $colors ) ) {
+		$meta_query[] = array(
+			'key'     => '_car_color',
+			'value'   => $colors,
+			'compare' => 'IN',
+		);
+	}
+
+	if ( $price_min > 0 || $price_max > 0 ) {
+		if ( $price_max > 0 && $price_max >= $price_min ) {
+			$meta_query[] = array(
+				'key'     => '_car_price',
+				'value'   => array( $price_min, $price_max ),
+				'type'    => 'NUMERIC',
+				'compare' => 'BETWEEN',
+			);
+		} elseif ( $price_min > 0 ) {
+			$meta_query[] = array(
+				'key'     => '_car_price',
+				'value'   => $price_min,
+				'type'    => 'NUMERIC',
+				'compare' => '>=',
+			);
+		}
+	}
+
 	if ( count( $meta_query ) > 1 ) {
 		$args['meta_query'] = $meta_query;
 	}
@@ -3438,17 +3474,20 @@ function rikshawale_ajax_filter_inventory() {
 	$query = new WP_Query( $args );
 
 	ob_start();
-	$count = 0;
-	$tags  = array();
+	$count     = 0;
+	$max_pages = 1;
+	$tags      = array();
 
 	foreach ( $brands as $b ) $tags[] = 'Brand: ' . $b;
 	foreach ( $fuels as $f ) $tags[] = 'Fuel: ' . $f;
 	foreach ( $years as $y ) $tags[] = 'Year: ' . $y;
 	foreach ( $transmissions as $t ) $tags[] = 'Trans: ' . $t;
+	foreach ( $colors as $c ) $tags[] = 'Color: ' . $c;
 	if ( $price_min || $price_max ) $tags[] = 'Price: ₹' . number_format($price_min) . ' - ₹' . number_format($price_max);
 
 	if ( $query->have_posts() ) {
-		$count = $query->found_posts;
+		$count     = $query->found_posts;
+		$max_pages = $query->max_num_pages;
 		while ( $query->have_posts() ) {
 			$query->the_post();
 			$p_id    = get_the_ID();
@@ -3468,7 +3507,7 @@ function rikshawale_ajax_filter_inventory() {
 			$pow_m    = pow(1 + $rate_m, 60);
 			$est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
 			?>
-			<div class="col-lg-4 col-md-6">
+			<div class="col-lg-4 col-md-6 inventory-card-item">
 				<div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
 					<?php if ( $p_badge ) : ?>
 						<span class="car-card-badge position-absolute top-0 start-0 m-3 badge bg-danger z-2 shadow-sm rounded-pill px-3 py-2 extra-small uppercase"><?php echo esc_html($p_badge); ?></span>
@@ -3533,9 +3572,10 @@ function rikshawale_ajax_filter_inventory() {
 	}
 
 	wp_send_json_success( array(
-		'html'  => $html,
-		'count' => $count,
-		'tags'  => $tag_html,
+		'html'      => $html,
+		'count'     => $count,
+		'max_pages' => $max_pages,
+		'tags'      => $tag_html,
 	) );
 }
 add_action( 'wp_ajax_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inventory' );

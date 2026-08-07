@@ -19,7 +19,7 @@ while ( have_posts() ) : the_post();
     $transmission = get_post_meta( $post_id, '_car_transmission', true ) ?: 'Automatic';
     $rto          = get_post_meta( $post_id, '_car_exterior', true ) ?: 'UP';
     $insurance    = 'Comprehensive';
-    $color        = 'Grey';
+    $color        = get_post_meta( $post_id, '_car_color', true ) ?: 'Grey';
 
     $car_video_url = get_post_meta( $post_id, '_car_video_url', true );
 

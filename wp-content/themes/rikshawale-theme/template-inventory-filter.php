@@ -1,18 +1,18 @@
 <?php
 /**
  * Template Name: Riksha Inventory Filter Page
- * Description: Interactive Riksha & Vehicle Inventory Filter Page with Left Sidebar Checkboxes & AJAX Filtering.
+ * Description: Interactive Riksha & Vehicle Inventory Filter Page with Left Sidebar Checkboxes, Price Range Sliders, Animated Loader & AJAX Filtering.
  */
 
 get_header();
 
 // Fetch unique meta values from published inventory posts for filter choices
-$all_brands       = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
-$all_fuels        = array( 'Electric', 'CNG', 'Diesel', 'Petrol', 'LPG', 'Hybrid' );
+$all_brands        = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
+$all_fuels         = array( 'Electric', 'CNG', 'Diesel', 'Petrol', 'LPG', 'Hybrid' );
 $all_transmissions = array( 'Automatic', 'Manual' );
-$all_owners       = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' );
-$all_years        = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018' );
-$all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
+$all_owners        = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' );
+$all_years         = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018' );
+$all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
 ?>
 
 <div class="inventory-filter-page bg-light min-vh-100 py-4" style="font-family: var(--font-body, 'Inter', sans-serif);">
@@ -32,15 +32,15 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                 <!-- Quick Search Input -->
                 <div class="bg-white rounded-4 p-2 shadow-sm d-flex align-items-center gap-2 max-w-500">
                     <i class="fa-solid fa-magnifying-glass text-muted ms-2"></i>
-                    <input type="text" id="inventoryKeywordSearch" class="form-control border-0 shadow-none ps-0" placeholder="Search by model, brand, or specs... (e.g. Treo, CNG, Bajaj)">
-                    <button type="button" class="btn btn-primary rounded-3 px-4 fw-bold flex-shrink-0" onclick="triggerFilterAjax()" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border: none;">
+                    <input type="text" id="inventoryKeywordSearch" class="form-control border-0 shadow-none ps-0" placeholder="Search by model, brand, or specs... (e.g. Treo, CNG, Bajaj)" onkeyup="onSearchKeyup(event)">
+                    <button type="button" class="btn btn-primary rounded-3 px-4 fw-bold flex-shrink-0" onclick="triggerFilterAjax(1)" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border: none;">
                         Search
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4 align-items-start">
+        <div class="row g-4 align-items-start position-relative">
             
             <!-- LEFT SIDEBAR FILTERS (col-lg-3 col-md-4) -->
             <div class="col-lg-3 col-md-4">
@@ -53,55 +53,64 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                         </button>
                     </div>
 
-                    <form id="rikshaFilterForm" onsubmit="event.preventDefault(); triggerFilterAjax();">
+                    <form id="rikshaFilterForm" onsubmit="event.preventDefault(); triggerFilterAjax(1);">
                         
-                        <!-- 1. BRAND / MAKE FILTER -->
+                        <!-- 1. PRICE RANGE SLIDER & INPUTS -->
+                        <div class="filter-group mb-4 pb-3 border-bottom">
+                            <h6 class="fw-bold text-dark small mb-2">Price Range (₹)</h6>
+                            <div class="d-flex justify-content-between extra-small fw-bold text-muted mb-2">
+                                <span>Min: <strong class="text-dark" id="priceMinLabel">₹0</strong></span>
+                                <span>Max: <strong class="text-dark" id="priceMaxLabel">₹25,00,000</strong></span>
+                            </div>
+                            <!-- Interactive Range Slider -->
+                            <div class="mb-3">
+                                <label class="form-label extra-small text-muted mb-1">Max Price Limit:</label>
+                                <input type="range" class="form-range" id="priceSliderRange" min="50000" max="25000000" step="50000" value="25000000" oninput="onPriceSliderInput(this.value)" onchange="triggerFilterAjax(1)">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_min" id="priceMinInput" placeholder="Min ₹" onchange="triggerFilterAjax(1)">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_max" id="priceMaxInput" placeholder="Max ₹" onchange="triggerFilterAjax(1)">
+                                </div>
+                            </div>
+                            <div class="filter-checkbox-list">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="0-100000" id="pr_1" onchange="triggerFilterAjax(1)">
+                                    <label class="form-check-label small text-dark" for="pr_1">Under ₹1 Lakh</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="100000-300000" id="pr_2" onchange="triggerFilterAjax(1)">
+                                    <label class="form-check-label small text-dark" for="pr_2">₹1 Lakh - ₹3 Lakhs</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="300000-500000" id="pr_3" onchange="triggerFilterAjax(1)">
+                                    <label class="form-check-label small text-dark" for="pr_3">₹3 Lakhs - ₹5 Lakhs</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="500000-1000000" id="pr_4" onchange="triggerFilterAjax(1)">
+                                    <label class="form-check-label small text-dark" for="pr_4">₹5 Lakhs - ₹10 Lakhs</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="1000000-99999999" id="pr_5" onchange="triggerFilterAjax(1)">
+                                    <label class="form-check-label small text-dark" for="pr_5">Above ₹10 Lakhs</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. BRAND / MAKE FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Brand / Make</h6>
                             <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
                                 <?php foreach ( $all_brands as $brand ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="brand[]" value="<?php echo esc_attr($brand); ?>" id="brand_<?php echo sanitize_title($brand); ?>" onchange="triggerFilterAjax()">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="brand[]" value="<?php echo esc_attr($brand); ?>" id="brand_<?php echo sanitize_title($brand); ?>" onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="brand_<?php echo sanitize_title($brand); ?>">
                                             <?php echo esc_html($brand); ?>
                                         </label>
                                     </div>
                                 <?php endforeach; ?>
-                            </div>
-                        </div>
-
-                        <!-- 2. PRICE RANGE FILTER -->
-                        <div class="filter-group mb-4 pb-3 border-bottom">
-                            <h6 class="fw-bold text-dark small mb-3">Price Range (₹)</h6>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_min" id="priceMinInput" placeholder="Min ₹" onchange="triggerFilterAjax()">
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_max" id="priceMaxInput" placeholder="Max ₹" onchange="triggerFilterAjax()">
-                                </div>
-                            </div>
-                            <div class="filter-checkbox-list">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="0-100000" id="pr_1" onchange="triggerFilterAjax()">
-                                    <label class="form-check-label small text-dark" for="pr_1">Under ₹1 Lakh</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="100000-300000" id="pr_2" onchange="triggerFilterAjax()">
-                                    <label class="form-check-label small text-dark" for="pr_2">₹1 Lakh - ₹3 Lakhs</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="300000-500000" id="pr_3" onchange="triggerFilterAjax()">
-                                    <label class="form-check-label small text-dark" for="pr_3">₹3 Lakhs - ₹5 Lakhs</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="500000-1000000" id="pr_4" onchange="triggerFilterAjax()">
-                                    <label class="form-check-label small text-dark" for="pr_4">₹5 Lakhs - ₹10 Lakhs</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="1000000-99999999" id="pr_5" onchange="triggerFilterAjax()">
-                                    <label class="form-check-label small text-dark" for="pr_5">Above ₹10 Lakhs</label>
-                                </div>
                             </div>
                         </div>
 
@@ -111,7 +120,7 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_fuels as $fuel ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="fuel[]" value="<?php echo esc_attr($fuel); ?>" id="fuel_<?php echo sanitize_title($fuel); ?>" onchange="triggerFilterAjax()">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="fuel[]" value="<?php echo esc_attr($fuel); ?>" id="fuel_<?php echo sanitize_title($fuel); ?>" onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="fuel_<?php echo sanitize_title($fuel); ?>">
                                             <?php if ($fuel === 'Electric') echo '⚡ '; elseif ($fuel === 'CNG') echo '🌱 '; ?>
                                             <?php echo esc_html($fuel); ?>
@@ -127,7 +136,7 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             <div class="filter-checkbox-list max-h-160 overflow-auto pe-1">
                                 <?php foreach ( $all_years as $year ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="year[]" value="<?php echo esc_attr($year); ?>" id="year_<?php echo sanitize_title($year); ?>" onchange="triggerFilterAjax()">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="year[]" value="<?php echo esc_attr($year); ?>" id="year_<?php echo sanitize_title($year); ?>" onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="year_<?php echo sanitize_title($year); ?>">
                                             <?php echo esc_html($year); ?>
                                         </label>
@@ -142,7 +151,7 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_transmissions as $trans ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="transmission[]" value="<?php echo esc_attr($trans); ?>" id="trans_<?php echo sanitize_title($trans); ?>" onchange="triggerFilterAjax()">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="transmission[]" value="<?php echo esc_attr($trans); ?>" id="trans_<?php echo sanitize_title($trans); ?>" onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="trans_<?php echo sanitize_title($trans); ?>">
                                             <?php echo esc_html($trans); ?>
                                         </label>
@@ -157,7 +166,7 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_owners as $owner ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="owner[]" value="<?php echo esc_attr($owner); ?>" id="owner_<?php echo sanitize_title($owner); ?>" onchange="triggerFilterAjax()">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="owner[]" value="<?php echo esc_attr($owner); ?>" id="owner_<?php echo sanitize_title($owner); ?>" onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="owner_<?php echo sanitize_title($owner); ?>">
                                             <?php echo esc_html($owner); ?>
                                         </label>
@@ -166,13 +175,13 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             </div>
                         </div>
 
-                        <!-- 7. COLOR FILTER -->
+                        <!-- 7. COLOR ATTRIBUTE FILTER -->
                         <div class="filter-group mb-2">
-                            <h6 class="fw-bold text-dark small mb-3">Color</h6>
+                            <h6 class="fw-bold text-dark small mb-3">Exterior Color</h6>
                             <div class="d-flex flex-wrap gap-2">
                                 <?php foreach ( $all_colors as $color ) : ?>
                                     <div class="form-check p-0 mb-0">
-                                        <input type="checkbox" class="btn-check" name="color[]" value="<?php echo esc_attr($color); ?>" id="col_<?php echo sanitize_title($color); ?>" onchange="triggerFilterAjax()" autocomplete="off">
+                                        <input type="checkbox" class="btn-check" name="color[]" value="<?php echo esc_attr($color); ?>" id="col_<?php echo sanitize_title($color); ?>" onchange="triggerFilterAjax(1)" autocomplete="off">
                                         <label class="btn btn-outline-secondary btn-sm rounded-pill extra-small px-3 py-1" for="col_<?php echo sanitize_title($color); ?>">
                                             <?php echo esc_html($color); ?>
                                         </label>
@@ -186,8 +195,17 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
             </div>
 
             <!-- RIGHT MAIN INVENTORY LIST (col-lg-9 col-md-8) -->
-            <div class="col-lg-9 col-md-8">
+            <div class="col-lg-9 col-md-8 position-relative">
                 
+                <!-- FILTER SEARCH ANIMATED LOADING SPINNER OVERLAY -->
+                <div id="filterLoadingOverlay" class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-none flex-column align-items-center justify-content-center rounded-4" style="z-index: 20; backdrop-filter: blur(3px); min-height: 400px;">
+                    <div class="p-4 bg-white rounded-4 shadow-lg text-center border">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3.2rem; height: 3.2rem; border-width: 0.25em;"></div>
+                        <h6 class="fw-bold text-dark mb-1">Filtering Vehicles...</h6>
+                        <span class="text-muted extra-small">Searching matching rikshas</span>
+                    </div>
+                </div>
+
                 <!-- TOP BAR CONTROLS -->
                 <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -197,7 +215,7 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                         </div>
                         <div class="d-flex align-items-center gap-2 ms-auto">
                             <label class="small text-muted fw-bold text-nowrap mb-0">Sort By:</label>
-                            <select id="filterSortBy" class="form-select form-select-sm rounded-3 shadow-none border" onchange="triggerFilterAjax()" style="min-width: 170px;">
+                            <select id="filterSortBy" class="form-select form-select-sm rounded-3 shadow-none border" onchange="triggerFilterAjax(1)" style="min-width: 170px;">
                                 <option value="date_desc">Newest Arrivals</option>
                                 <option value="price_asc">Price: Low to High</option>
                                 <option value="price_desc">Price: High to Low</option>
@@ -210,13 +228,12 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
 
                 <!-- DYNAMIC AJAX INVENTORY GRID CONTAINER -->
                 <div id="inventoryFilterResults" class="row g-4">
-                    <!-- Default initial PHP query render -->
+                    <!-- Default initial PHP query render (12 posts per page) -->
                     <?php
-                    $paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
                     $initial_query = new WP_Query( array(
                         'post_type'      => 'inventory',
                         'posts_per_page' => 12,
-                        'paged'          => $paged,
+                        'paged'          => 1,
                         'post_status'    => 'publish',
                     ) );
 
@@ -232,7 +249,6 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             $thumb   = get_the_post_thumbnail_url( $p_id, 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
                             $title   = get_the_title();
 
-                            // Estimate starting EMI
                             $raw_p = preg_replace('/[^0-9]/', '', get_post_meta( $p_id, '_car_price', true ) );
                             $num_p = ( $raw_p && floatval($raw_p) > 0 ) ? floatval($raw_p) : 500000;
                             $loan_amt = $num_p * 0.80;
@@ -240,7 +256,7 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                             $pow_m    = pow(1 + $rate_m, 60);
                             $est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
                     ?>
-                    <div class="col-lg-4 col-md-6">
+                    <div class="col-lg-4 col-md-6 inventory-card-item">
                         <div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
                             <?php if ( $p_badge ) : ?>
                                 <span class="car-card-badge position-absolute top-0 start-0 m-3 badge bg-danger z-2 shadow-sm rounded-pill px-3 py-2 extra-small uppercase"><?php echo esc_html($p_badge); ?></span>
@@ -297,6 +313,17 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
                     <?php endif; ?>
                 </div>
 
+                <!-- AJAX LOAD MORE VEHICLES BUTTON (AFTER 12 POSTS) -->
+                <div class="text-center mt-4 pt-3" id="loadMoreContainer" style="<?php echo ($initial_query->max_num_pages > 1) ? '' : 'display:none;'; ?>">
+                    <button type="button" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold shadow-sm" id="btnLoadMore" onclick="loadNextPageVehicles()">
+                        <span id="loadMoreText"><i class="fa-solid fa-rotate me-2"></i> Load More Vehicles</span>
+                        <span id="loadMoreSpinner" class="d-none">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Loading vehicles...
+                        </span>
+                    </button>
+                </div>
+
             </div>
         </div>
 
@@ -304,7 +331,27 @@ $all_colors       = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Ye
 </div>
 
 <script>
-function triggerFilterAjax() {
+var currentPage = 1;
+var maxPages = <?php echo intval($initial_query->max_num_pages ?: 1); ?>;
+var searchTimer = null;
+
+function onPriceSliderInput(val) {
+    var maxVal = parseInt(val) || 25000000;
+    jQuery('#priceMaxInput').val(maxVal);
+    jQuery('#priceMaxLabel').text('₹' + maxVal.toLocaleString('en-IN'));
+}
+
+function onSearchKeyup(e) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() {
+        triggerFilterAjax(1);
+    }, 400);
+}
+
+function triggerFilterAjax(page) {
+    if (!page) page = 1;
+    currentPage = page;
+
     var form = jQuery('#rikshaFilterForm');
     var keyword = jQuery('#inventoryKeywordSearch').val();
     var sortBy = jQuery('#filterSortBy').val();
@@ -313,9 +360,11 @@ function triggerFilterAjax() {
     formData.push({ name: 'action', value: 'rikshawale_filter_inventory' });
     formData.push({ name: 'keyword', value: keyword });
     formData.push({ name: 'sort_by', value: sortBy });
+    formData.push({ name: 'paged', value: currentPage });
     formData.push({ name: 'nonce', value: '<?php echo wp_create_nonce("rikshawale_filter_nonce"); ?>' });
 
-    jQuery('#inventoryFilterResults').css('opacity', '0.5');
+    // Show Filter Loading Spinner Overlay
+    jQuery('#filterLoadingOverlay').removeClass('d-none').addClass('d-flex');
 
     jQuery.ajax({
         url: '<?php echo admin_url("admin-ajax.php"); ?>',
@@ -323,25 +372,80 @@ function triggerFilterAjax() {
         data: formData,
         dataType: 'json',
         success: function(res) {
-            jQuery('#inventoryFilterResults').css('opacity', '1');
+            jQuery('#filterLoadingOverlay').removeClass('d-flex').addClass('d-none');
             if (res.success) {
-                jQuery('#inventoryFilterResults').html(res.data.html);
+                if (currentPage === 1) {
+                    jQuery('#inventoryFilterResults').html(res.data.html);
+                } else {
+                    jQuery('#inventoryFilterResults').append(res.data.html);
+                }
                 jQuery('#filterResultCount').text('Showing ' + res.data.count + ' vehicle' + (res.data.count === 1 ? '' : 's'));
                 jQuery('#activeFilterTags').html(res.data.tags);
+                
+                maxPages = res.data.max_pages || 1;
+                if (currentPage < maxPages) {
+                    jQuery('#loadMoreContainer').show();
+                } else {
+                    jQuery('#loadMoreContainer').hide();
+                }
             }
         },
         error: function() {
-            jQuery('#inventoryFilterResults').css('opacity', '1');
+            jQuery('#filterLoadingOverlay').removeClass('d-flex').addClass('d-none');
         }
     });
+}
+
+function loadNextPageVehicles() {
+    if (currentPage < maxPages) {
+        jQuery('#loadMoreText').addClass('d-none');
+        jQuery('#loadMoreSpinner').removeClass('d-none');
+        
+        var nextPage = currentPage + 1;
+        var form = jQuery('#rikshaFilterForm');
+        var keyword = jQuery('#inventoryKeywordSearch').val();
+        var sortBy = jQuery('#filterSortBy').val();
+
+        var formData = form.serializeArray();
+        formData.push({ name: 'action', value: 'rikshawale_filter_inventory' });
+        formData.push({ name: 'keyword', value: keyword });
+        formData.push({ name: 'sort_by', value: sortBy });
+        formData.push({ name: 'paged', value: nextPage });
+        formData.push({ name: 'nonce', value: '<?php echo wp_create_nonce("rikshawale_filter_nonce"); ?>' });
+
+        jQuery.ajax({
+            url: '<?php echo admin_url("admin-ajax.php"); ?>',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(res) {
+                jQuery('#loadMoreText').removeClass('d-none');
+                jQuery('#loadMoreSpinner').addClass('d-none');
+                if (res.success) {
+                    currentPage = nextPage;
+                    jQuery('#inventoryFilterResults').append(res.data.html);
+                    maxPages = res.data.max_pages || 1;
+                    if (currentPage >= maxPages) {
+                        jQuery('#loadMoreContainer').hide();
+                    }
+                }
+            },
+            error: function() {
+                jQuery('#loadMoreText').removeClass('d-none');
+                jQuery('#loadMoreSpinner').addClass('d-none');
+            }
+        });
+    }
 }
 
 function resetAllFilters() {
     jQuery('#rikshaFilterForm')[0].reset();
     jQuery('#inventoryKeywordSearch').val('');
     jQuery('#filterSortBy').val('date_desc');
+    jQuery('#priceSliderRange').val(25000000);
+    jQuery('#priceMaxLabel').text('₹25,00,000');
     jQuery('.btn-check').prop('checked', false);
-    triggerFilterAjax();
+    triggerFilterAjax(1);
 }
 </script>
 
