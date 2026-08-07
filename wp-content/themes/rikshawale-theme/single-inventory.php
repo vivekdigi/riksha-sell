@@ -20,6 +20,7 @@ while ( have_posts() ) : the_post();
     $rto          = get_post_meta( $post_id, '_car_exterior', true ) ?: 'UP';
     $insurance    = 'Comprehensive';
     $color        = get_post_meta( $post_id, '_car_color', true ) ?: 'Grey';
+    $short_desc   = get_post_meta( $post_id, '_car_short_desc', true ) ?: ( has_excerpt($post_id) ? get_the_excerpt($post_id) : '' );
 
     $car_video_url = get_post_meta( $post_id, '_car_video_url', true );
 
@@ -139,6 +140,9 @@ while ( have_posts() ) : the_post();
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 90px; z-index: 10;">
                     <h4 class="fw-bold text-dark mb-1"><?php the_title(); ?></h4>
+                    <?php if ( ! empty( trim( $short_desc ) ) ) : ?>
+                        <p class="text-secondary small mb-2 fw-medium" style="line-height: 1.4; color: #475569;"><?php echo esc_html( $short_desc ); ?></p>
+                    <?php endif; ?>
                     <p class="text-muted small mb-3"><?php echo esc_html($driven_km . ' · ' . $fuel . ' · ' . $transmission); ?></p>
 
                     <div class="d-flex align-items-baseline justify-content-between mb-3 border-bottom pb-3">

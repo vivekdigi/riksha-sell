@@ -739,6 +739,7 @@ add_action( 'add_meta_boxes', 'rikshawale_add_inventory_metabox' );
 function rikshawale_render_inventory_metabox( $post ) {
     wp_nonce_field( 'rikshawale_save_inventory_meta', 'rikshawale_inventory_meta_nonce' );
 
+    $short_desc      = get_post_meta( $post->ID, '_car_short_desc', true );
     $price           = get_post_meta( $post->ID, '_car_price', true );
     $currency_symbol = get_post_meta( $post->ID, '_car_currency_symbol', true ) ?: '₹';
     $custom_interest = get_post_meta( $post->ID, '_car_interest_rate', true );
@@ -768,6 +769,13 @@ function rikshawale_render_inventory_metabox( $post ) {
     $owners        = array( '1st Owner' => '1st Owner', '2nd Owner' => '2nd Owner', '3rd Owner' => '3rd Owner', '4th+ Owner' => '4th+ Owner' );
     ?>
     <table class="form-table">
+        <tr>
+            <th><label for="car_short_desc"><?php _e( 'Short Description / Subtitle', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_short_desc" name="car_short_desc" value="<?php echo esc_attr( $short_desc ); ?>" class="regular-text" placeholder="e.g. 2024 Top Model | Mint Condition | Low Driven">
+                <p class="description"><?php _e( 'Subtitle displayed right after title on single vehicle page. If empty, nothing is shown.', 'rikshawale-theme' ); ?></p>
+            </td>
+        </tr>
         <tr>
             <th><label for="car_currency_symbol"><?php _e( 'Currency Symbol / Prefix', 'rikshawale-theme' ); ?></label></th>
             <td>
@@ -953,6 +961,7 @@ function rikshawale_save_inventory_meta( $post_id ) {
     }
 
     $fields = array(
+        'car_short_desc',
         'car_price',
         'car_currency_symbol',
         'car_interest_rate',
