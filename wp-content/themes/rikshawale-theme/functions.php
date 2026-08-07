@@ -2813,14 +2813,15 @@ add_action( 'init', 'rikshawale_register_booking_cpt' );
  */
 function rikshawale_booking_columns( $columns ) {
 	$new_cols = array(
-		'cb'             => '<input type="checkbox" />',
-		'title'          => __( 'Customer Name & Inquiry ID', 'rikshawale-theme' ),
-		'booking_phone'  => __( 'Phone Number', 'rikshawale-theme' ),
-		'booking_email'  => __( 'Email', 'rikshawale-theme' ),
-		'vehicle_title'  => __( 'Vehicle Booked', 'rikshawale-theme' ),
-		'booking_date'   => __( 'Preferred Date', 'rikshawale-theme' ),
-		'booking_status' => __( 'Status', 'rikshawale-theme' ),
-		'date'           => __( 'Submitted Date', 'rikshawale-theme' ),
+		'cb'                 => '<input type="checkbox" />',
+		'title'              => __( 'Customer Name & Inquiry ID', 'rikshawale-theme' ),
+		'booking_phone'      => __( 'Mobile No.', 'rikshawale-theme' ),
+		'booking_alt_phone'  => __( 'Alternate No.', 'rikshawale-theme' ),
+		'booking_email'      => __( 'Email', 'rikshawale-theme' ),
+		'vehicle_title'      => __( 'Vehicle Booked', 'rikshawale-theme' ),
+		'booking_date'       => __( 'Preferred Date', 'rikshawale-theme' ),
+		'booking_status'     => __( 'Status', 'rikshawale-theme' ),
+		'date'               => __( 'Submitted Date', 'rikshawale-theme' ),
 	);
 	return $new_cols;
 }
@@ -2831,6 +2832,10 @@ function rikshawale_booking_column_content( $column, $post_id ) {
 		case 'booking_phone':
 			$phone = get_post_meta( $post_id, '_booking_phone', true );
 			echo esc_html( $phone ?: '—' );
+			break;
+		case 'booking_alt_phone':
+			$alt_phone = get_post_meta( $post_id, '_booking_alt_phone', true );
+			echo esc_html( $alt_phone ?: '—' );
 			break;
 		case 'booking_email':
 			$email = get_post_meta( $post_id, '_booking_email', true );
@@ -2881,6 +2886,7 @@ function rikshawale_render_booking_metabox( $post ) {
 	$user_id   = get_post_meta( $post->ID, '_booking_user_id', true );
 	$user_obj  = $user_id ? get_userdata( $user_id ) : null;
 	$phone     = get_post_meta( $post->ID, '_booking_phone', true );
+	$alt_phone = get_post_meta( $post->ID, '_booking_alt_phone', true );
 	$email     = get_post_meta( $post->ID, '_booking_email', true );
 	$name      = get_post_meta( $post->ID, '_booking_name', true );
 	$city      = get_post_meta( $post->ID, '_booking_city', true );
@@ -2891,9 +2897,10 @@ function rikshawale_render_booking_metabox( $post ) {
 	$status    = get_post_meta( $post->ID, '_booking_status', true ) ?: 'Pending';
 	?>
 	<div style="font-size: 14px; line-height: 1.6; padding: 10px;">
-		<p><strong>Registered User:</strong> <?php echo $user_obj ? esc_html( $user_obj->display_name . ' (' . $user_obj->user_email . ')' ) : 'Guest/Customer'; ?></p>
+		<p><strong>Customer Account:</strong> <?php echo $user_obj ? esc_html( $user_obj->display_name . ' (' . $user_obj->user_email . ')' ) : 'Guest Submission'; ?></p>
 		<p><strong>Customer Name:</strong> <?php echo esc_html( $name ); ?></p>
-		<p><strong>Phone Number:</strong> <a href="tel:<?php echo esc_attr( $phone ); ?>"><?php echo esc_html( $phone ); ?></a></p>
+		<p><strong>Mobile Number:</strong> <a href="tel:<?php echo esc_attr( $phone ); ?>"><?php echo esc_html( $phone ); ?></a></p>
+		<p><strong>Alternate Number:</strong> <?php echo $alt_phone ? '<a href="tel:' . esc_attr( $alt_phone ) . '">' . esc_html( $alt_phone ) . '</a>' : 'N/A'; ?></p>
 		<p><strong>Email Address:</strong> <a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></p>
 		<p><strong>City / Location:</strong> <?php echo esc_html( $city ?: 'N/A' ); ?></p>
 		<hr>
@@ -3010,23 +3017,62 @@ function rikshawale_ajax_register() {
 add_action( 'wp_ajax_rikshawale_register', 'rikshawale_ajax_register' );
 add_action( 'wp_ajax_nopriv_rikshawale_register', 'rikshawale_ajax_register' );
 
-// 3. AJAX Vehicle Booking Submission
+// 3. AJAX Vehicle Booking Submission (Direct Guest Submission Supported!)
 function rikshawale_ajax_submit_booking() {
 	check_ajax_referer( 'rikshawale_booking_nonce', 'nonce' );
 
-	if ( ! is_user_logged_in() ) {
-		wp_send_json_error( array( 'message' => 'Please log in or register to submit a vehicle booking inquiry.' ) );
-	}
-
-	$user_id   = get_current_user_id();
+	$user_id   = is_user_logged_in() ? get_current_user_id() : 0;
 	$car_id    = intval( $_POST['car_id'] ?? 0 );
 	$car_title = sanitize_text_field( $_POST['car_title'] ?? 'Vehicle' );
 	$name      = sanitize_text_field( $_POST['booking_name'] ?? '' );
 	$phone     = sanitize_text_field( $_POST['booking_phone'] ?? '' );
+	$alt_phone = sanitize_text_field( $_POST['booking_alt_phone'] ?? '' );
 	$email     = sanitize_email( $_POST['booking_email'] ?? '' );
 	$city      = sanitize_text_field( $_POST['booking_city'] ?? '' );
 	$date      = sanitize_text_field( $_POST['booking_date'] ?? '' );
 	$message   = sanitize_textarea_field( $_POST['booking_message'] ?? '' );
+
+	if ( empty( $name ) || empty( $phone ) || empty( $email ) ) {
+		wp_send_json_error( array( 'message' => 'Name, Mobile number, and Email address are required.' ) );
+	}
+
+	$post_title = $name . ' — ' . $car_title . ' (' . date('d M Y') . ')';
+
+	$post_id = wp_insert_post( array(
+		'post_type'   => 'riksha_booking',
+		'post_title'  => $post_title,
+		'post_status' => 'publish',
+	) );
+
+	if ( is_wp_error( $post_id ) ) {
+		wp_send_json_error( array( 'message' => 'Failed to save booking. Please try again.' ) );
+	}
+
+	update_post_meta( $post_id, '_booking_user_id', $user_id );
+	update_post_meta( $post_id, '_booking_car_id', $car_id );
+	update_post_meta( $post_id, '_booking_car_title', $car_title );
+	update_post_meta( $post_id, '_booking_name', $name );
+	update_post_meta( $post_id, '_booking_phone', $phone );
+	update_post_meta( $post_id, '_booking_alt_phone', $alt_phone );
+	update_post_meta( $post_id, '_booking_email', $email );
+	update_post_meta( $post_id, '_booking_city', $city );
+	update_post_meta( $post_id, '_booking_date', $date );
+	update_post_meta( $post_id, '_booking_message', $message );
+	update_post_meta( $post_id, '_booking_status', 'Pending' );
+
+	// Email Admin Notification
+	$to      = get_option( 'admin_email' );
+	$subject = '🛺 New Vehicle Booking Inquiry: ' . $car_title . ' by ' . $name;
+	$body    = "Vehicle: {$car_title}\nCustomer Name: {$name}\nMobile No.: {$phone}\nAlternate No.: {$alt_phone}\nEmail: {$email}\nCity: {$city}\nPreferred Date: {$date}\n\nNotes:\n{$message}";
+	$headers = array( 'Content-Type: text/plain; charset=UTF-8', "Reply-To: {$name} <{$email}>" );
+	wp_mail( $to, $subject, $body, $headers );
+
+	wp_send_json_success( array(
+		'message' => 'Your vehicle booking inquiry has been submitted successfully! Our team will contact you shortly.',
+	) );
+}
+add_action( 'wp_ajax_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
+add_action( 'wp_ajax_nopriv_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
 
 	if ( empty( $name ) || empty( $phone ) || empty( $email ) ) {
 		wp_send_json_error( array( 'message' => 'Name, phone, and email are required to submit booking.' ) );

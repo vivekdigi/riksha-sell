@@ -300,23 +300,29 @@
                             <input type="text" class="form-control rounded-3" name="booking_name" id="bookingNameInput" required placeholder="Full Name">
                         </div>
                         <div class="col-6">
-                            <label class="form-label small fw-bold">Phone Number *</label>
-                            <input type="tel" class="form-control rounded-3" name="booking_phone" id="bookingPhoneInput" required placeholder="+91 Phone">
+                            <label class="form-label small fw-bold">Mobile Number *</label>
+                            <input type="tel" class="form-control rounded-3" name="booking_phone" id="bookingPhoneInput" required placeholder="Mobile No.">
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-6">
+                            <label class="form-label small fw-bold">Alternate Number</label>
+                            <input type="tel" class="form-control rounded-3" name="booking_alt_phone" id="bookingAltPhoneInput" placeholder="Alternate Mobile">
+                        </div>
+                        <div class="col-6">
                             <label class="form-label small fw-bold">Email Address *</label>
                             <input type="email" class="form-control rounded-3" name="booking_email" id="bookingEmailInput" required placeholder="email@domain.com">
                         </div>
+                    </div>
+                    <div class="row g-2 mb-2">
                         <div class="col-6">
                             <label class="form-label small fw-bold">City / State</label>
                             <input type="text" class="form-control rounded-3" name="booking_city" placeholder="e.g. Delhi">
                         </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small fw-bold">Preferred Test Drive / Visit Date</label>
-                        <input type="date" class="form-control rounded-3" name="booking_date">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Preferred Visit Date</label>
+                            <input type="date" class="form-control rounded-3" name="booking_date">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Additional Message or Inquiry</label>
@@ -347,19 +353,8 @@
 </div>
 
 <script>
-// Trigger Booking Modal or Auth Modal
+// Trigger Booking Modal
 function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
-    if (!rikshawale_ajax.is_logged_in) {
-        var authNotice = document.getElementById('authNotice');
-        if (authNotice) {
-            authNotice.className = 'alert alert-warning py-2 small mb-3';
-            authNotice.innerHTML = '<i class="fa-solid fa-lock me-1"></i> Please log in or register an account to book <strong>' + carTitle + '</strong>.';
-        }
-        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
-        authModal.show();
-        return;
-    }
-
     document.getElementById('bookingCarId').value = carId;
     document.getElementById('bookingCarTitleInput').value = carTitle;
     document.getElementById('bookingCarTitle').innerText = carTitle;
@@ -371,9 +366,11 @@ function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
         document.getElementById('bookingCarImg').style.display = 'none';
     }
 
-    document.getElementById('bookingNameInput').value = rikshawale_ajax.user_name || '';
-    document.getElementById('bookingEmailInput').value = rikshawale_ajax.user_email || '';
-    document.getElementById('bookingPhoneInput').value = rikshawale_ajax.user_phone || '';
+    if (rikshawale_ajax.is_logged_in) {
+        document.getElementById('bookingNameInput').value = rikshawale_ajax.user_name || '';
+        document.getElementById('bookingEmailInput').value = rikshawale_ajax.user_email || '';
+        document.getElementById('bookingPhoneInput').value = rikshawale_ajax.user_phone || '';
+    }
 
     var bookingNotice = document.getElementById('bookingNotice');
     if (bookingNotice) bookingNotice.className = 'alert d-none py-2 small mb-3';
