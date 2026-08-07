@@ -19,8 +19,17 @@ while ( have_posts() ) : the_post();
     $transmission = get_post_meta( $post_id, '_car_transmission', true ) ?: 'Automatic';
     $rto          = get_post_meta( $post_id, '_car_exterior', true ) ?: 'UP';
     $insurance    = 'Comprehensive';
-    $color        = get_post_meta( $post_id, '_car_color', true ) ?: 'Grey';
-    $short_desc   = get_post_meta( $post_id, '_car_short_desc', true ) ?: ( has_excerpt($post_id) ? get_the_excerpt($post_id) : '' );
+    $short_desc = get_post_meta( $post_id, '_car_short_desc', true );
+    if ( empty( $short_desc ) && has_excerpt( $post_id ) ) {
+        $short_desc = get_the_excerpt( $post_id );
+    }
+    if ( empty( $short_desc ) ) {
+        $post_obj = get_post( $post_id );
+        if ( $post_obj && ! empty( trim( $post_obj->post_content ) ) ) {
+            $clean_txt  = wp_strip_all_tags( $post_obj->post_content );
+            $short_desc = wp_trim_words( $clean_txt, 20, '...' );
+        }
+    }
 
     $car_video_url = get_post_meta( $post_id, '_car_video_url', true );
 
