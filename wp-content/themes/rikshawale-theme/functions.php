@@ -2799,18 +2799,7 @@ function rikshawale_register_booking_cpt() {
 		'show_in_menu'      => true,
 		'menu_icon'         => 'dashicons-calendar-alt',
 		'menu_position'     => 7,
-		'capability_type'   => array( 'riksha_booking', 'riksha_bookings' ),
-		'map_meta_cap'      => true,
-		'capabilities'      => array(
-			'edit_post'          => 'read',
-			'read_post'          => 'read',
-			'delete_post'        => 'manage_options',
-			'edit_posts'         => 'read',
-			'edit_others_posts'  => 'manage_options',
-			'publish_posts'      => 'read',
-			'read_private_posts' => 'read',
-			'read'               => 'read',
-		),
+		'capability_type'   => 'post',
 		'has_archive'       => false,
 		'hierarchical'      => false,
 		'supports'          => array( 'title' ),
@@ -2818,6 +2807,18 @@ function rikshawale_register_booking_cpt() {
 	) );
 }
 add_action( 'init', 'rikshawale_register_booking_cpt' );
+
+/**
+ * Grant Subscribers access to view Vehicle Bookings in WP Admin
+ */
+function rikshawale_grant_subscriber_booking_caps( $allcaps, $caps, $args, $user ) {
+	if ( is_admin() && in_array( 'subscriber', (array) $user->roles ) ) {
+		$allcaps['edit_posts'] = true;
+		$allcaps['read'] = true;
+	}
+	return $allcaps;
+}
+add_filter( 'user_has_cap', 'rikshawale_grant_subscriber_booking_caps', 10, 4 );
 
 /**
  * Filter Bookings in WP Admin for Subscribers (Only show their own bookings)
@@ -2832,25 +2833,35 @@ function rikshawale_filter_subscriber_bookings( $query ) {
 add_action( 'pre_get_posts', 'rikshawale_filter_subscriber_bookings' );
 
 /**
- * Hide Dashboard Menu for Subscriber Role and Redirect to Vehicle Bookings
+ * Hide Unnecessary Menus for Subscribers in WP Admin
  */
 function rikshawale_customize_subscriber_admin_menu() {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		remove_menu_page( 'index.php' ); // Hide Dashboard menu
+		remove_menu_page( 'index.php' );                  // Hide Dashboard
+		remove_menu_page( 'edit.php' );                   // Hide Posts
+		remove_menu_page( 'upload.php' );                 // Hide Media
+		remove_menu_page( 'edit.php?post_type=page' );    // Hide Pages
+		remove_menu_page( 'edit-comments.php' );          // Hide Comments
+		remove_menu_page( 'tools.php' );                  // Hide Tools
 	}
 }
 add_action( 'admin_menu', 'rikshawale_customize_subscriber_admin_menu', 999 );
 
-function rikshawale_redirect_subscriber_dashboard() {
-	if ( is_admin() && ! current_user_can( 'manage_options' ) ) {
+/**
+ * Redirect Subscriber from Dashboard to Vehicle Bookings
+ */
+function rikshawale_subscriber_admin_redirect() {
+	if ( is_admin() && ! current_user_can( 'manage_options' ) && ! wp_doing_ajax() ) {
 		global $pagenow;
-		if ( $pagenow === 'index.php' ) {
+		$post_type = $_GET['post_type'] ?? '';
+
+		if ( $pagenow === 'index.php' || ( $pagenow === 'edit.php' && $post_type !== 'riksha_booking' ) ) {
 			wp_redirect( admin_url( 'edit.php?post_type=riksha_booking' ) );
 			exit;
 		}
 	}
 }
-add_action( 'admin_init', 'rikshawale_redirect_subscriber_dashboard' );
+add_action( 'admin_init', 'rikshawale_subscriber_admin_redirect' );
 
 /**
  * Remove WordPress Logo and Links from Admin Bar
