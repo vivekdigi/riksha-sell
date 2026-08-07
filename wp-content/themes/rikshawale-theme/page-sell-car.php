@@ -27,13 +27,13 @@ $states = array(
 );
 ?>
 
-<div class="sell-car-page" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f4f4f4; min-height: 100vh; padding-bottom: 60px;">
+<div class="sell-car-page py-4 py-md-5" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f4f4f4; min-height: 100vh; padding-bottom: 60px;">
 
     <!-- ===== HERO BANNER ===== -->
-    <div class="sell-car-hero" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 48px 0 40px;">
-        <div class="container" style="max-width: 960px;">
-            <p class="mb-1 fw-semibold" style="font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85;">RIKSHAWALE</p>
-            <h1 class="fw-black mb-2 text-white" style="font-size: 2.3rem; letter-spacing: -0.5px; line-height: 1.1;">Sell Your Car</h1>
+    <div class="sell-car-hero shadow-sm mx-3 mx-lg-auto rounded-4 mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 50px 30px; max-width: 960px;">
+        <div class="container-fluid">
+            <p class="mb-1 fw-semibold" style="font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85; color: #0ea5e9;">RIKSHAWALE</p>
+            <h1 class="fw-black mb-2 text-white" style="font-size: 2.3rem; letter-spacing: -0.5px; line-height: 1.1;">Sell Your Car / Riksha</h1>
             <p style="font-size: 0.92rem; opacity: 0.85; max-width: 560px;" class="mb-0">
                 Share your vehicle details below and our team will review your car quickly. Designed in a compact style with proper mobile responsiveness.
             </p>
@@ -41,8 +41,8 @@ $states = array(
     </div>
 
     <!-- ===== MAIN CARD ===== -->
-    <div class="container" style="max-width: 960px; margin-top: -1px;">
-        <div class="bg-white rounded-bottom-4 shadow-sm px-4 px-md-5 py-4">
+    <div class="container" style="max-width: 960px; margin-top: 24px;">
+        <div class="bg-white rounded-4 shadow-sm px-4 px-md-5 py-4 py-md-5">
 
             <!-- Feature Pills -->
             <div class="row g-3 mb-4 pt-2">
