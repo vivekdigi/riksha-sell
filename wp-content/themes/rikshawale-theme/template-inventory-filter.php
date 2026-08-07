@@ -15,6 +15,51 @@ $all_years         = array( '2024', '2023', '2022', '2021', '2020', '2019', '201
 $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
 ?>
 
+<style>
+.dual-range-wrapper {
+    position: relative;
+    width: 100%;
+}
+.dual-range-input {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    top: 14px;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    z-index: 3;
+}
+.dual-range-input::-webkit-slider-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    pointer-events: auto;
+    -webkit-appearance: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    border: 2px solid #ffffff;
+    transition: transform 0.15s ease;
+}
+.dual-range-input::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: #1e3a8a;
+}
+.dual-range-input::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    pointer-events: auto;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    border: 2px solid #ffffff;
+}
+</style>
+
 <div class="inventory-filter-page bg-light min-vh-100 py-4" style="font-family: var(--font-body, 'Inter', sans-serif);">
     <div class="container" style="max-width: 1280px;">
         
@@ -55,24 +100,30 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
 
                     <form id="rikshaFilterForm" onsubmit="event.preventDefault(); triggerFilterAjax(1);">
                         
-                        <!-- 1. PRICE RANGE SLIDER & INPUTS -->
+                        <!-- 1. DUAL RANGE PRICE SLIDER & INPUTS -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-2">Price Range (₹)</h6>
-                            <div class="d-flex justify-content-between extra-small fw-bold text-muted mb-2">
-                                <span>Min: <strong class="text-dark" id="priceMinLabel">₹0</strong></span>
-                                <span>Max: <strong class="text-dark" id="priceMaxLabel">₹25,00,000</strong></span>
+                            <div class="d-flex justify-content-between extra-small fw-bold text-muted mb-1">
+                                <span>Min: <strong class="text-primary" id="priceMinLabel">₹0</strong></span>
+                                <span>Max: <strong class="text-primary" id="priceMaxLabel">₹2,50,00,000</strong></span>
                             </div>
-                            <!-- Interactive Range Slider -->
-                            <div class="mb-3">
-                                <label class="form-label extra-small text-muted mb-1">Max Price Limit:</label>
-                                <input type="range" class="form-range" id="priceSliderRange" min="50000" max="25000000" step="50000" value="25000000" oninput="onPriceSliderInput(this.value)" onchange="triggerFilterAjax(1)">
+                            
+                            <!-- Dual Drag Thumbs Slider Track -->
+                            <div class="dual-range-wrapper mb-3 position-relative" style="height: 35px; width: 100%;">
+                                <div class="slider-bg-track position-absolute w-100 rounded-pill" style="height: 6px; top: 14px; background: #e2e8f0;"></div>
+                                <div class="slider-active-track position-absolute rounded-pill" id="sliderActiveTrack" style="height: 6px; top: 14px; left: 0%; width: 100%; background: linear-gradient(90deg, #0ea5e9 0%, #1e3a8a 100%);"></div>
+                                <input type="range" class="dual-range-input" id="priceMinSlider" min="0" max="25000000" step="50000" value="0" oninput="updateDualPriceSlider('min')" onchange="triggerFilterAjax(1)">
+                                <input type="range" class="dual-range-input" id="priceMaxSlider" min="0" max="25000000" step="50000" value="25000000" oninput="updateDualPriceSlider('max')" onchange="triggerFilterAjax(1)">
                             </div>
+
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_min" id="priceMinInput" placeholder="Min ₹" onchange="triggerFilterAjax(1)">
+                                    <label class="extra-small text-muted mb-1">Min Price (₹)</label>
+                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_min" id="priceMinInput" placeholder="Min ₹" onchange="onManualPriceInputChange()">
                                 </div>
                                 <div class="col-6">
-                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_max" id="priceMaxInput" placeholder="Max ₹" onchange="triggerFilterAjax(1)">
+                                    <label class="extra-small text-muted mb-1">Max Price (₹)</label>
+                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_max" id="priceMaxInput" placeholder="Max ₹" onchange="onManualPriceInputChange()">
                                 </div>
                             </div>
                             <div class="filter-checkbox-list">
@@ -335,24 +386,73 @@ var currentPage = 1;
 var maxPages = <?php echo intval($initial_query->max_num_pages ?: 1); ?>;
 var searchTimer = null;
 
+function updateDualPriceSlider(caller) {
+    var minSlider = document.getElementById('priceMinSlider');
+    var maxSlider = document.getElementById('priceMaxSlider');
+    var minInput  = document.getElementById('priceMinInput');
+    var maxInput  = document.getElementById('priceMaxInput');
+    var activeTrk = document.getElementById('sliderActiveTrack');
+    var maxValTotal = 25000000;
+    var minGap = 50000;
+
+    var minVal = parseInt(minSlider.value) || 0;
+    var maxVal = parseInt(maxSlider.value) || maxValTotal;
+
+    if (maxVal - minVal < minGap) {
+        if (caller === 'min') {
+            minSlider.value = maxVal - minGap;
+            minVal = parseInt(minSlider.value);
+        } else {
+            maxSlider.value = minVal + minGap;
+            maxVal = parseInt(maxSlider.value);
+        }
+    }
+
+    if (minInput) minInput.value = minVal;
+    if (maxInput) maxInput.value = maxVal;
+
+    var lblMin = document.getElementById('priceMinLabel');
+    var lblMax = document.getElementById('priceMaxLabel');
+    if (lblMin) lblMin.innerText = '₹' + minVal.toLocaleString('en-IN');
+    if (lblMax) lblMax.innerText = '₹' + maxVal.toLocaleString('en-IN');
+
+    if (activeTrk) {
+        var pctMin = (minVal / maxValTotal) * 100;
+        var pctMax = (maxVal / maxValTotal) * 100;
+        activeTrk.style.left = pctMin + '%';
+        activeTrk.style.width = (pctMax - pctMin) + '%';
+    }
+}
+
+function onManualPriceInputChange() {
+    var minInput  = document.getElementById('priceMinInput');
+    var maxInput  = document.getElementById('priceMaxInput');
+    var minSlider = document.getElementById('priceMinSlider');
+    var maxSlider = document.getElementById('priceMaxSlider');
+
+    var minVal = parseInt(minInput.value) || 0;
+    var maxVal = parseInt(maxInput.value) || 25000000;
+
+    if (minSlider) minSlider.value = minVal;
+    if (maxSlider) maxSlider.value = maxVal;
+
+    updateDualPriceSlider();
+    triggerFilterAjax(1);
+}
+
 function onPriceCheckboxChange(el) {
     if (el.checked) {
         var val = el.value;
         var parts = val.split('-');
         if (parts.length === 2) {
-            jQuery('#priceMinInput').val(parts[0]);
-            jQuery('#priceMaxInput').val(parts[1]);
-            jQuery('#priceSliderRange').val(parts[1]);
-            jQuery('#priceMaxLabel').text('₹' + parseInt(parts[1]).toLocaleString('en-IN'));
+            var minSlider = document.getElementById('priceMinSlider');
+            var maxSlider = document.getElementById('priceMaxSlider');
+            if (minSlider) minSlider.value = parts[0];
+            if (maxSlider) maxSlider.value = parts[1];
+            updateDualPriceSlider();
         }
     }
     triggerFilterAjax(1);
-}
-
-function onPriceSliderInput(val) {
-    var maxVal = parseInt(val) || 25000000;
-    jQuery('#priceMaxInput').val(maxVal);
-    jQuery('#priceMaxLabel').text('₹' + maxVal.toLocaleString('en-IN'));
 }
 
 function onSearchKeyup(e) {
@@ -456,8 +556,11 @@ function resetAllFilters() {
     jQuery('#rikshaFilterForm')[0].reset();
     jQuery('#inventoryKeywordSearch').val('');
     jQuery('#filterSortBy').val('date_desc');
-    jQuery('#priceSliderRange').val(25000000);
-    jQuery('#priceMaxLabel').text('₹25,00,000');
+    var minSlider = document.getElementById('priceMinSlider');
+    var maxSlider = document.getElementById('priceMaxSlider');
+    if (minSlider) minSlider.value = 0;
+    if (maxSlider) maxSlider.value = 25000000;
+    updateDualPriceSlider();
     jQuery('.btn-check').prop('checked', false);
     triggerFilterAjax(1);
 }
