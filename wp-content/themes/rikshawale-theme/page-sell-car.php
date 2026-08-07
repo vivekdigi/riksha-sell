@@ -29,11 +29,11 @@ $states = array(
 
 <div class="sell-car-page py-4 py-md-5" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f8fafc; min-height: 100vh; padding-bottom: 60px;">
 
-    <!-- ===== MAIN FORM CONTAINER WITH LINEAR GRADIENT BACKGROUND ===== -->
+    <!-- ===== MAIN FORM CONTAINER WITH SIMPLE WHITE BACKGROUND & SHADOW ===== -->
     <div class="container" style="max-width: 960px;">
-        <div class="rounded-4 shadow-lg px-4 px-md-5 py-4 py-md-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0ea5e9 100%); border: 1px solid rgba(255,255,255,0.1);">
+        <div class="bg-white rounded-4 shadow-sm px-4 px-md-5 py-4 py-md-5">
             
-            <!-- Feature Pills in Glassmorphism Style -->
+            <!-- Feature Pills in Light Style -->
             <div class="row g-3 mb-4">
                 <?php
                 $pills = array(
@@ -44,9 +44,9 @@ $states = array(
                 );
                 foreach ( $pills as $pill ) : ?>
                 <div class="col-6 col-md-3">
-                    <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.8rem;">
-                        <strong class="d-block text-white mb-1" style="font-size: 0.83rem;"><?php echo esc_html($pill[0]); ?></strong>
-                        <span class="text-white-50 extra-small"><?php echo esc_html($pill[1]); ?></span>
+                    <div class="p-3 bg-light border rounded-3" style="font-size: 0.8rem;">
+                        <strong class="d-block text-dark mb-1" style="font-size: 0.83rem;"><?php echo esc_html($pill[0]); ?></strong>
+                        <span class="text-muted extra-small"><?php echo esc_html($pill[1]); ?></span>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -237,20 +237,20 @@ $states = array(
                 </div>
 
                 <!-- Disclaimer -->
-                <p style="font-size: 0.78rem; color: rgba(255,255,255,0.7); margin-bottom: 16px;">
+                <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 16px;">
                     By submitting this form, your details will be reviewed by the Rikshawale team for vehicle valuation and follow-up.
                 </p>
 
                 <!-- Form Footer: bullets + submit -->
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.15) !important;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top">
                     <div class="d-flex gap-4 flex-wrap">
-                        <span style="font-size:0.8rem; color: rgba(255,255,255,0.85);"><span style="color:#38bdf8; font-size:10px;">●</span> Quick callback</span>
-                        <span style="font-size:0.8rem; color: rgba(255,255,255,0.85);"><span style="color:#38bdf8; font-size:10px;">●</span> Verified team</span>
-                        <span style="font-size:0.8rem; color: rgba(255,255,255,0.85);"><span style="color:#38bdf8; font-size:10px;">●</span> Free inspection</span>
+                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Quick callback</span>
+                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Verified team</span>
+                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Free inspection</span>
                     </div>
                     <button type="submit" id="sell-car-submit-btn"
-                        class="btn btn-light rounded-3 px-5 py-3 fw-bold shadow-sm"
-                        style="color:#0f172a; font-size:0.95rem; letter-spacing:0.5px; border:none;">
+                        class="btn btn-dark rounded-3 px-5 py-3 fw-bold shadow-sm"
+                        style="font-size:0.95rem; letter-spacing:0.5px; background: #0f172a; border: none;">
                         SUBMIT DETAILS <i class="fa-solid fa-arrow-right ms-2"></i>
                     </button>
                 </div>
@@ -267,7 +267,7 @@ $states = array(
 .sell-label {
     font-size: 0.84rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #1e293b;
     margin-bottom: 5px;
     display: block;
 }
@@ -281,8 +281,8 @@ $states = array(
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .sell-input:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+    border-color: var(--primary-color, #db2d2e);
+    box-shadow: 0 0 0 3px rgba(219,45,46,0.15);
     outline: none;
 }
 .sell-img-upload-box {
@@ -292,17 +292,17 @@ $states = array(
     justify-content: center;
     width: 100%;
     height: 100px;
-    border: 2px dashed rgba(255, 255, 255, 0.35);
+    border: 2px dashed #cbd5e1;
     border-radius: 10px;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.08);
+    background: #f8fafc;
     transition: border-color 0.2s, background 0.2s;
     overflow: hidden;
     position: relative;
 }
 .sell-img-upload-box:hover {
-    border-color: #38bdf8;
-    background: rgba(255, 255, 255, 0.18);
+    border-color: var(--primary-color, #db2d2e);
+    background: #fff5f5;
 }
 .sell-img-input {
     position: absolute;
