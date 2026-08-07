@@ -33,12 +33,6 @@ $states = array(
     <div class="container" style="max-width: 960px;">
         <div class="rounded-4 shadow-lg px-4 px-md-5 py-4 py-md-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0ea5e9 100%); border: 1px solid rgba(255,255,255,0.1);">
             
-            <div class="mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.15) !important;">
-                <p class="mb-1 fw-semibold extra-small tracking-wider text-uppercase text-info opacity-90">RIKSHAWALE SELL PORTAL</p>
-                <h2 class="fw-black text-white display-6 mb-2">Sell Your Vehicle / Riksha</h2>
-                <p class="text-white-50 mb-0 small max-w-600">Share your vehicle details below for an instant quote & quick evaluation from our team.</p>
-            </div>
-
             <!-- Feature Pills in Glassmorphism Style -->
             <div class="row g-3 mb-4">
                 <?php
