@@ -762,6 +762,7 @@ function rikshawale_render_inventory_metabox( $post ) {
     $img4           = get_post_meta( $post->ID, '_car_gallery_image_4', true );
     $img5           = get_post_meta( $post->ID, '_car_gallery_image_5', true );
 
+    $colors_list   = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
     $transmissions = array( 'Automatic' => 'Automatic', 'Manual' => 'Manual' );
     $fuels         = array( 'Petrol' => 'Petrol', 'Diesel' => 'Diesel', 'Electric' => 'Electric', 'CNG' => 'CNG', 'LPG' => 'LPG', 'Hybrid' => 'Hybrid' );
     $owners        = array( '1st Owner' => '1st Owner', '2nd Owner' => '2nd Owner', '3rd Owner' => '3rd Owner', '4th+ Owner' => '4th+ Owner' );
@@ -786,13 +787,17 @@ function rikshawale_render_inventory_metabox( $post ) {
             </td>
         </tr>
         <tr>
-            <th><label for="car_color"><?php _e( 'Exterior Color (Color Picker)', 'rikshawale-theme' ); ?></label></th>
+            <th><label for="car_color"><?php _e( 'Exterior Color *', 'rikshawale-theme' ); ?></label></th>
             <td>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="color" id="car_color_picker" value="<?php echo esc_attr( ( $color && strpos($color, '#') === 0 ) ? $color : '#0ea5e9' ); ?>" style="width: 40px; height: 40px; padding: 2px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer;" onchange="document.getElementById('car_color').value = this.value;">
-                    <input type="text" id="car_color" name="car_color" value="<?php echo esc_attr( $color ); ?>" class="regular-text" placeholder="e.g. White, Black, Red, Blue, Grey, #0ea5e9" onchange="if(this.value.indexOf('#')===0){document.getElementById('car_color_picker').value=this.value;}">
-                </div>
-                <p class="description"><?php _e( 'Select color using color picker or type color name / hex code.', 'rikshawale-theme' ); ?></p>
+                <select id="car_color" name="car_color" class="regular-text" style="font-weight: 600;">
+                    <option value=""><?php _e( 'Choose Exterior Color', 'rikshawale-theme' ); ?></option>
+                    <?php foreach ( $colors_list as $c ) : ?>
+                        <option value="<?php echo esc_attr( $c ); ?>" <?php selected( strtolower( (string)$color ), strtolower( $c ) ); ?>>
+                            <?php echo esc_html( $c ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="description"><?php _e( 'Select vehicle exterior color matching frontend filter swatches (White, Black, Red, Blue, Grey, Green, Yellow, Silver).', 'rikshawale-theme' ); ?></p>
             </td>
         </tr>
         <tr>
@@ -3459,6 +3464,21 @@ function rikshawale_ajax_filter_inventory() {
 					}
 				}
 				if ( ! $range_matched ) {
+					continue;
+				}
+			}
+
+			// Filter by Color (case-insensitive)
+			if ( ! empty( $colors ) ) {
+				$p_color = trim( (string) get_post_meta( $pid, '_car_color', true ) );
+				$color_match = false;
+				foreach ( $colors as $c ) {
+					if ( strtolower( $p_color ) === strtolower( $c ) || ( ! empty( $p_color ) && strpos( strtolower( $p_color ), strtolower( $c ) ) !== false ) ) {
+						$color_match = true;
+						break;
+					}
+				}
+				if ( ! $color_match ) {
 					continue;
 				}
 			}
