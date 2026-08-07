@@ -2241,7 +2241,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 	$wp_customize->add_control( 'emi_default_tenure', array(
 		'label'       => __( 'Default Loan Tenure (Years)', 'rikshawale-theme' ),
-		'description' => __( 'Default loan tenure slider value in years (1 to 7 years)', 'rikshawale-theme' ),
+		'description' => __( 'Default loan tenure slider value in years (1 to 8 years)', 'rikshawale-theme' ),
 		'section'     => 'rikshawale_emi_calculator_section',
 		'type'        => 'number',
 	) );

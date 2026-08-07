@@ -251,7 +251,7 @@ while ( have_posts() ) : the_post();
                                     <span>Loan Tenure</span>
                                     <strong class="text-dark" id="tenureVal"><?php echo $default_tenure_yrs; ?> years</strong>
                                 </div>
-                                <input type="range" class="form-range" min="1" max="7" step="1" value="<?php echo $default_tenure_yrs; ?>" id="tenureRange" oninput="calculateEMI()" onchange="calculateEMI()">
+                                <input type="range" class="form-range" min="1" max="8" step="1" value="<?php echo $default_tenure_yrs; ?>" id="tenureRange" oninput="calculateEMI()" onchange="calculateEMI()">
                             </div>
 
                             <div class="p-3 border rounded-3 text-start" style="background-color: rgba(219, 45, 46, 0.05); border-color: rgba(219, 45, 46, 0.2) !important;">
