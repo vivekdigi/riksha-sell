@@ -2853,6 +2853,32 @@ function rikshawale_redirect_subscriber_dashboard() {
 add_action( 'admin_init', 'rikshawale_redirect_subscriber_dashboard' );
 
 /**
+ * Remove WordPress Logo and Links from Admin Bar
+ */
+function rikshawale_remove_wp_logo_admin_bar( $wp_admin_bar ) {
+	$wp_admin_bar->remove_node( 'wp-logo' ); // Removes WP Logo (WordPress.org, Documentation, Support, Feedback)
+	if ( ! current_user_can( 'manage_options' ) ) {
+		$wp_admin_bar->remove_node( 'site-name' );
+		$wp_admin_bar->remove_node( 'view-site' );
+		$wp_admin_bar->remove_node( 'updates' );
+		$wp_admin_bar->remove_node( 'comments' );
+		$wp_admin_bar->remove_node( 'new-content' );
+	}
+}
+add_action( 'admin_bar_menu', 'rikshawale_remove_wp_logo_admin_bar', 999 );
+
+/**
+ * Hide Admin Bar on Frontend for Non-Administrators
+ */
+function rikshawale_hide_admin_bar_for_subscribers( $show ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return false;
+	}
+	return $show;
+}
+add_filter( 'show_admin_bar', 'rikshawale_hide_admin_bar_for_subscribers' );
+
+/**
  * Custom Admin Columns for Vehicle Bookings
  */
 function rikshawale_booking_columns( $columns ) {
