@@ -786,16 +786,13 @@ function rikshawale_render_inventory_metabox( $post ) {
             </td>
         </tr>
         <tr>
-            <th><label for="car_color"><?php _e( 'Exterior Color', 'rikshawale-theme' ); ?></label></th>
+            <th><label for="car_color"><?php _e( 'Exterior Color (Color Picker)', 'rikshawale-theme' ); ?></label></th>
             <td>
-                <input type="text" id="car_color" name="car_color" value="<?php echo esc_attr( $color ); ?>" class="regular-text" placeholder="e.g. White, Black, Red, Blue, Grey, Green, Yellow, Silver">
-            </td>
-        </tr>
-        <tr>
-            <th><label for="car_video_url"><?php _e( '🎬 Banner Video URL (Auto-Play)', 'rikshawale-theme' ); ?></label></th>
-            <td>
-                <input type="text" id="car_video_url" name="car_video_url" value="<?php echo esc_attr( $video_url ); ?>" class="regular-text" placeholder="Direct MP4 URL or YouTube Link (e.g. https://domain.com/video.mp4)">
-                <p class="description"><?php _e( 'Enter direct MP4 video link or YouTube URL to autoplay in vehicle banner slider.', 'rikshawale-theme' ); ?></p>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="color" id="car_color_picker" value="<?php echo esc_attr( ( $color && strpos($color, '#') === 0 ) ? $color : '#0ea5e9' ); ?>" style="width: 40px; height: 40px; padding: 2px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer;" onchange="document.getElementById('car_color').value = this.value;">
+                    <input type="text" id="car_color" name="car_color" value="<?php echo esc_attr( $color ); ?>" class="regular-text" placeholder="e.g. White, Black, Red, Blue, Grey, #0ea5e9" onchange="if(this.value.indexOf('#')===0){document.getElementById('car_color_picker').value=this.value;}">
+                </div>
+                <p class="description"><?php _e( 'Select color using color picker or type color name / hex code.', 'rikshawale-theme' ); ?></p>
             </td>
         </tr>
         <tr>

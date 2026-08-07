@@ -228,12 +228,27 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
 
                         <!-- 7. COLOR ATTRIBUTE FILTER -->
                         <div class="filter-group mb-2">
-                            <h6 class="fw-bold text-dark small mb-3">Exterior Color</h6>
+                            <h6 class="fw-bold text-dark small mb-3">Exterior Color Swatches</h6>
                             <div class="d-flex flex-wrap gap-2">
-                                <?php foreach ( $all_colors as $color ) : ?>
+                                <?php 
+                                $color_hex_map = array(
+                                    'White'  => '#ffffff',
+                                    'Black'  => '#18181b',
+                                    'Red'    => '#ef4444',
+                                    'Blue'   => '#3b82f6',
+                                    'Grey'   => '#6b7280',
+                                    'Green'  => '#22c55e',
+                                    'Yellow' => '#eab308',
+                                    'Silver' => '#cbd5e1',
+                                );
+                                foreach ( $all_colors as $color ) : 
+                                    $hex = $color_hex_map[$color] ?? '#94a3b8';
+                                    $border_cls = ($color === 'White') ? 'border border-secondary' : '';
+                                ?>
                                     <div class="form-check p-0 mb-0">
                                         <input type="checkbox" class="btn-check" name="color[]" value="<?php echo esc_attr($color); ?>" id="col_<?php echo sanitize_title($color); ?>" onchange="triggerFilterAjax(1)" autocomplete="off">
-                                        <label class="btn btn-outline-secondary btn-sm rounded-pill extra-small px-3 py-1" for="col_<?php echo sanitize_title($color); ?>">
+                                        <label class="btn btn-outline-secondary btn-sm rounded-pill extra-small px-3 py-1 d-inline-flex align-items-center gap-2" for="col_<?php echo sanitize_title($color); ?>" style="cursor: pointer;">
+                                            <span class="d-inline-block rounded-circle <?php echo $border_cls; ?>" style="width: 13px; height: 13px; background-color: <?php echo $hex; ?>;"></span>
                                             <?php echo esc_html($color); ?>
                                         </label>
                                     </div>
