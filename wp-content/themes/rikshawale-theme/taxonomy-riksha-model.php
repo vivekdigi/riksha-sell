@@ -5,9 +5,10 @@
  */
 
 $queried = get_queried_object();
-if ( $queried && isset( $queried->name ) ) {
+if ( $queried && isset( $queried->slug ) ) {
+	$term_name = ! empty( $queried->name ) ? $queried->name : ucwords( str_replace( '-', ' ', $queried->slug ) );
 	if ( empty( $_GET['model'] ) ) {
-		$_GET['model'] = array( $queried->name );
+		$_GET['model'] = array( $term_name );
 	}
 }
 

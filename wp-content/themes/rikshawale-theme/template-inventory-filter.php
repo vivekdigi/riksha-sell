@@ -571,6 +571,12 @@ function resetAllFilters() {
     jQuery('.btn-check').prop('checked', false);
     triggerFilterAjax(1);
 }
+
+jQuery(document).ready(function($) {
+    if ($('.filter-checkbox:checked, .color-swatch-checkbox:checked').length > 0 || $('#inventoryKeywordSearch').val() !== '') {
+        triggerFilterAjax(1);
+    }
+});
 </script>
 
 <?php get_footer(); ?>
