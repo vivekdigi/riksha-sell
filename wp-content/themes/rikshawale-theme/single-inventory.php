@@ -227,23 +227,23 @@ while ( have_posts() ) : the_post();
 
                 <!-- 5. EMI Calculator Card -->
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" id="emi-calculator">
-                    <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-calculator me-2 text-primary"></i> EMI calculator</h5>
+                    <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-calculator me-2 text-danger"></i> EMI calculator</h5>
                     <div class="row g-4 align-items-center">
                         <div class="col-md-7">
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
-                                    <span>Loan Amount</span>
+                                    <span>Loan Amount (Max 80%)</span>
                                     <strong class="text-dark" id="loanAmountLabel">₹<?php echo number_format( $init_loan ); ?></strong>
                                 </div>
-                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_loan; ?>" id="loanAmountRange" oninput="onLoanAmountChange()">
+                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_loan; ?>" id="loanAmountRange" oninput="onLoanAmountChange()" onchange="onLoanAmountChange()">
                             </div>
 
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
-                                    <span>Down Payment</span>
+                                    <span>Down Payment (Min 20%)</span>
                                     <strong class="text-dark" id="downPaymentLabel">₹<?php echo number_format( $init_dp ); ?></strong>
                                 </div>
-                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_dp; ?>" id="downPaymentRange" oninput="onDownPaymentChange()">
+                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_dp; ?>" id="downPaymentRange" oninput="onDownPaymentChange()" onchange="onDownPaymentChange()">
                             </div>
 
                             <div class="mb-3">
@@ -251,21 +251,21 @@ while ( have_posts() ) : the_post();
                                     <span>Loan Tenure</span>
                                     <strong class="text-dark" id="tenureVal"><?php echo $default_tenure_yrs; ?> years</strong>
                                 </div>
-                                <input type="range" class="form-range" min="1" max="7" step="1" value="<?php echo $default_tenure_yrs; ?>" id="tenureRange" oninput="calculateEMI()">
+                                <input type="range" class="form-range" min="1" max="7" step="1" value="<?php echo $default_tenure_yrs; ?>" id="tenureRange" oninput="calculateEMI()" onchange="calculateEMI()">
                             </div>
 
-                            <div class="p-3 border rounded-3 text-start" style="background-color: rgba(14, 165, 233, 0.06); border-color: rgba(14, 165, 233, 0.2) !important;">
+                            <div class="p-3 border rounded-3 text-start" style="background-color: rgba(219, 45, 46, 0.05); border-color: rgba(219, 45, 46, 0.2) !important;">
                                 <span class="d-block text-muted small">Monthly EMI</span>
-                                <span class="fs-3 fw-bold text-primary" id="calculatedEMI">₹0</span>
+                                <span class="fs-3 fw-bold text-danger" id="calculatedEMI">₹0</span>
                             </div>
                         </div>
 
                         <div class="col-md-5 text-center">
-                            <!-- Donut Chart SVG (Dynamic Fill) -->
-                            <div class="position-relative d-inline-block mb-3" style="width: 140px; height: 140px;">
-                                <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
-                                    <path class="circle-bg" stroke="<?php echo esc_attr($interest_chart_col); ?>" stroke-width="3.8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path id="emiDonutProgress" class="circle" stroke="<?php echo esc_attr($principal_chart_col); ?>" stroke-dasharray="75, 100" stroke-width="3.8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" style="transition: stroke-dasharray 0.3s ease;" />
+                            <!-- Thick Semi-Circle Gauge Arch SVG -->
+                            <div class="position-relative d-inline-block mb-3" style="width: 220px; height: 110px; overflow: hidden;">
+                                <svg viewBox="0 0 36 20" class="w-100 h-100">
+                                    <path class="circle-bg" stroke="<?php echo esc_attr($interest_chart_col); ?>" stroke-width="5.5" fill="none" stroke-linecap="round" d="M 4 18 A 14 14 0 0 1 32 18" />
+                                    <path id="emiDonutProgress" class="circle" stroke="<?php echo esc_attr($principal_chart_col); ?>" stroke-dasharray="33 100" stroke-width="5.5" fill="none" stroke-linecap="round" d="M 4 18 A 14 14 0 0 1 32 18" style="transition: stroke-dasharray 0.3s ease;" />
                                 </svg>
                             </div>
                             <div class="text-start small">
@@ -292,30 +292,52 @@ while ( have_posts() ) : the_post();
 var emiVehiclePrice = <?php echo $numeric_price; ?>;
 var emiInterestRate = <?php echo $interest_rate; ?>;
 
+function formatINR(val) {
+    val = Math.round(val);
+    if (isNaN(val)) return '₹0';
+    return '₹' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function onLoanAmountChange() {
-    var loanVal = parseInt(document.getElementById('loanAmountRange').value) || 0;
+    var loanInput = document.getElementById('loanAmountRange');
+    if (!loanInput) return;
+    var loanVal = parseInt(loanInput.value) || 0;
     var dpVal = emiVehiclePrice - loanVal;
     if (dpVal < 0) dpVal = 0;
-    document.getElementById('downPaymentRange').value = dpVal;
+    var dpInput = document.getElementById('downPaymentRange');
+    if (dpInput) dpInput.value = dpVal;
     calculateEMI();
 }
 
 function onDownPaymentChange() {
-    var dpVal = parseInt(document.getElementById('downPaymentRange').value) || 0;
+    var dpInput = document.getElementById('downPaymentRange');
+    if (!dpInput) return;
+    var dpVal = parseInt(dpInput.value) || 0;
     var loanVal = emiVehiclePrice - dpVal;
     if (loanVal < 0) loanVal = 0;
-    document.getElementById('loanAmountRange').value = loanVal;
+    var loanInput = document.getElementById('loanAmountRange');
+    if (loanInput) loanInput.value = loanVal;
     calculateEMI();
 }
 
 function calculateEMI() {
-    var loanVal   = parseInt(document.getElementById('loanAmountRange').value) || 0;
-    var dpVal     = parseInt(document.getElementById('downPaymentRange').value) || 0;
-    var tenureYrs = parseInt(document.getElementById('tenureRange').value) || 1;
+    var loanInput   = document.getElementById('loanAmountRange');
+    var dpInput     = document.getElementById('downPaymentRange');
+    var tenureInput = document.getElementById('tenureRange');
+    if (!loanInput || !dpInput || !tenureInput) return;
 
-    document.getElementById('loanAmountLabel').innerText = '₹' + loanVal.toLocaleString('en-IN');
-    document.getElementById('downPaymentLabel').innerText = '₹' + dpVal.toLocaleString('en-IN');
-    document.getElementById('tenureVal').innerText = tenureYrs + (tenureYrs > 1 ? ' years' : ' year');
+    var loanVal   = parseInt(loanInput.value) || 0;
+    var dpVal     = parseInt(dpInput.value) || 0;
+    var tenureYrs = parseInt(tenureInput.value) || 1;
+
+    var lblLoan = document.getElementById('loanAmountLabel');
+    if (lblLoan) lblLoan.innerText = formatINR(loanVal);
+
+    var lblDP = document.getElementById('downPaymentLabel');
+    if (lblDP) lblDP.innerText = formatINR(dpVal);
+
+    var lblTenure = document.getElementById('tenureVal');
+    if (lblTenure) lblTenure.innerText = tenureYrs + (tenureYrs > 1 ? ' years' : ' year');
 
     var months = tenureYrs * 12;
     var monthlyRate = (emiInterestRate / 12) / 100;
@@ -331,40 +353,64 @@ function calculateEMI() {
     var totalInterest = totalPayment - loanVal;
     if (totalInterest < 0) totalInterest = 0;
 
-    var emiFormatted = '₹' + emi.toLocaleString('en-IN');
-    document.getElementById('calculatedEMI').innerText = emiFormatted;
+    var emiFormatted = formatINR(emi);
+    
+    var calcEMIEl = document.getElementById('calculatedEMI');
+    if (calcEMIEl) calcEMIEl.innerText = emiFormatted;
     
     var topEMIEl = document.getElementById('topStartingEMI');
-    if (topEMIEl) {
-        topEMIEl.innerText = emiFormatted + ' /m';
-    }
+    if (topEMIEl) topEMIEl.innerText = emiFormatted + ' /m';
 
-    document.getElementById('breakdownPrincipal').innerText = '₹' + loanVal.toLocaleString('en-IN');
-    document.getElementById('breakdownInterest').innerText = '₹' + totalInterest.toLocaleString('en-IN');
-    document.getElementById('breakdownTotal').innerText = '₹' + totalPayment.toLocaleString('en-IN');
+    var elP = document.getElementById('breakdownPrincipal');
+    if (elP) elP.innerText = formatINR(loanVal);
 
-    var principalPct = totalPayment > 0 ? (loanVal / totalPayment) * 100 : 0;
-    principalPct = Math.min(Math.max(principalPct, 0), 100);
+    var elI = document.getElementById('breakdownInterest');
+    if (elI) elI.innerText = formatINR(totalInterest);
+
+    var elT = document.getElementById('breakdownTotal');
+    if (elT) elT.innerText = formatINR(totalPayment);
+
+    // Thick Semi-Circle Gauge Arc Update (Arc length ~43.98)
+    var principalPct = totalPayment > 0 ? (loanVal / totalPayment) : 0.75;
+    var arcDash = (principalPct * 43.98).toFixed(1);
     
     var donutPath = document.getElementById('emiDonutProgress');
     if (donutPath) {
-        donutPath.setAttribute('stroke-dasharray', principalPct.toFixed(1) + ', 100');
+        donutPath.setAttribute('stroke-dasharray', arcDash + ' 100');
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    calculateEMI();
-});
+// Calculate immediately on script parse & DOM load
+calculateEMI();
+document.addEventListener('DOMContentLoaded', calculateEMI);
+window.addEventListener('load', calculateEMI);
 </script>
 
-                <!-- 6. Benefits Card -->
+                <!-- 6. Benefits Card (3 Pixel-Perfect Options) -->
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                    <h5 class="fw-bold text-dark mb-3">Benefits</h5>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="p-3 bg-light rounded-3 border text-center" style="min-width: 90px;">
-                            <i class="fa-solid fa-shield-halved fs-3 mb-1 d-block" style="color: var(--primary-color, #db2d2e);"></i>
-                            <strong class="d-block text-dark small">150+</strong>
-                            <span class="text-muted extra-small">Checkpoints</span>
+                    <h5 class="fw-bold text-dark mb-2">Benefits</h5>
+                    <div style="width: 35px; height: 3px; background: var(--primary-color, #db2d2e); border-radius: 2px;" class="mb-4"></div>
+                    <div class="row text-center g-3 align-items-center">
+                        <div class="col-4 border-end">
+                            <div class="mb-2">
+                                <i class="fa-solid fa-file-contract fs-2" style="color: var(--primary-color, #db2d2e);"></i>
+                            </div>
+                            <strong class="d-block text-dark fw-bold">Transfer</strong>
+                            <span class="text-muted small">Cost Included</span>
+                        </div>
+                        <div class="col-4 border-end">
+                            <div class="mb-2">
+                                <i class="fa-solid fa-shield-halved fs-2" style="color: var(--primary-color, #db2d2e);"></i>
+                            </div>
+                            <strong class="d-block text-dark fw-bold">Warranty</strong>
+                            <span class="text-muted small">Included</span>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <i class="fa-solid fa-thumbs-up fs-2" style="color: var(--primary-color, #db2d2e);"></i>
+                            </div>
+                            <strong class="d-block text-dark fw-bold">150+</strong>
+                            <span class="text-muted small">Checkpoints</span>
                         </div>
                     </div>
                 </div>
