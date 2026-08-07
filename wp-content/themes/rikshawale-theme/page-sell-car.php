@@ -27,37 +27,32 @@ $states = array(
 );
 ?>
 
-<div class="sell-car-page py-4 py-md-5" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f4f4f4; min-height: 100vh; padding-bottom: 60px;">
+<div class="sell-car-page py-4 py-md-5" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f8fafc; min-height: 100vh; padding-bottom: 60px;">
 
-    <!-- ===== HERO BANNER ===== -->
-    <div class="sell-car-hero shadow-sm mx-3 mx-lg-auto rounded-4 mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 50px 30px; max-width: 960px;">
-        <div class="container-fluid">
-            <p class="mb-1 fw-semibold" style="font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85; color: #0ea5e9;">RIKSHAWALE</p>
-            <h1 class="fw-black mb-2 text-white" style="font-size: 2.3rem; letter-spacing: -0.5px; line-height: 1.1;">Sell Your Car / Riksha</h1>
-            <p style="font-size: 0.92rem; opacity: 0.85; max-width: 560px;" class="mb-0">
-                Share your vehicle details below and our team will review your car quickly. Designed in a compact style with proper mobile responsiveness.
-            </p>
-        </div>
-    </div>
+    <!-- ===== MAIN FORM CONTAINER WITH LINEAR GRADIENT BACKGROUND ===== -->
+    <div class="container" style="max-width: 960px;">
+        <div class="rounded-4 shadow-lg px-4 px-md-5 py-4 py-md-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0ea5e9 100%); border: 1px solid rgba(255,255,255,0.1);">
+            
+            <div class="mb-4 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.15) !important;">
+                <p class="mb-1 fw-semibold extra-small tracking-wider text-uppercase text-info opacity-90">RIKSHAWALE SELL PORTAL</p>
+                <h2 class="fw-black text-white display-6 mb-2">Sell Your Vehicle / Riksha</h2>
+                <p class="text-white-50 mb-0 small max-w-600">Share your vehicle details below for an instant quote & quick evaluation from our team.</p>
+            </div>
 
-    <!-- ===== MAIN CARD ===== -->
-    <div class="container" style="max-width: 960px; margin-top: 24px;">
-        <div class="bg-white rounded-4 shadow-sm px-4 px-md-5 py-4 py-md-5">
-
-            <!-- Feature Pills -->
-            <div class="row g-3 mb-4 pt-2">
+            <!-- Feature Pills in Glassmorphism Style -->
+            <div class="row g-3 mb-4">
                 <?php
                 $pills = array(
-                    array( 'Fast Review',       'Compact form with quick vehicle details capture.' ),
-                    array( 'Verified Buying',   'Premium used car sourcing and inspection process.' ),
-                    array( 'Responsive Design', 'Clean, compact and mobile-friendly layout.' ),
-                    array( 'Brand Consistent',  'Black, white and red website-style appearance.' ),
+                    array( 'Fast Review',       'Quick vehicle details review' ),
+                    array( 'Verified Buying',   'Instant fair valuation' ),
+                    array( 'Instant Payment',   'Secure payment transfer' ),
+                    array( 'Zero Hassle',       'Free doorstep inspection' ),
                 );
                 foreach ( $pills as $pill ) : ?>
                 <div class="col-6 col-md-3">
-                    <div class="p-3 border rounded-3" style="font-size: 0.8rem;">
-                        <strong class="d-block text-dark mb-1" style="font-size: 0.83rem;"><?php echo esc_html($pill[0]); ?></strong>
-                        <span class="text-muted"><?php echo esc_html($pill[1]); ?></span>
+                    <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.8rem;">
+                        <strong class="d-block text-white mb-1" style="font-size: 0.83rem;"><?php echo esc_html($pill[0]); ?></strong>
+                        <span class="text-white-50 extra-small"><?php echo esc_html($pill[1]); ?></span>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -248,21 +243,21 @@ $states = array(
                 </div>
 
                 <!-- Disclaimer -->
-                <p style="font-size: 0.78rem; color: #999; margin-bottom: 16px;">
-                    By submitting this form, your details can be reviewed by the Rikshawale team for vehicle evaluation and follow-up.
+                <p style="font-size: 0.78rem; color: rgba(255,255,255,0.7); margin-bottom: 16px;">
+                    By submitting this form, your details will be reviewed by the Rikshawale team for vehicle valuation and follow-up.
                 </p>
 
                 <!-- Form Footer: bullets + submit -->
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-2 border-top">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.15) !important;">
                     <div class="d-flex gap-4 flex-wrap">
-                        <span style="font-size:0.8rem; color:#555;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Quick callback</span>
-                        <span style="font-size:0.8rem; color:#555;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Verified team</span>
-                        <span style="font-size:0.8rem; color:#555;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Compact mobile form</span>
+                        <span style="font-size:0.8rem; color: rgba(255,255,255,0.85);"><span style="color:#38bdf8; font-size:10px;">●</span> Quick callback</span>
+                        <span style="font-size:0.8rem; color: rgba(255,255,255,0.85);"><span style="color:#38bdf8; font-size:10px;">●</span> Verified team</span>
+                        <span style="font-size:0.8rem; color: rgba(255,255,255,0.85);"><span style="color:#38bdf8; font-size:10px;">●</span> Free inspection</span>
                     </div>
                     <button type="submit" id="sell-car-submit-btn"
-                        style="background:#111; color:#fff; border:none; padding:13px 36px; font-size:0.92rem; font-weight:700; border-radius:6px; letter-spacing:1px; cursor:pointer; transition:background 0.2s;"
-                        onmouseover="this.style.background='var(--primary-color, #db2d2e)'" onmouseout="this.style.background='#111'">
-                        SUBMIT DETAILS
+                        class="btn btn-light rounded-3 px-5 py-3 fw-bold shadow-sm"
+                        style="color:#0f172a; font-size:0.95rem; letter-spacing:0.5px; border:none;">
+                        SUBMIT DETAILS <i class="fa-solid fa-arrow-right ms-2"></i>
                     </button>
                 </div>
 
@@ -276,23 +271,24 @@ $states = array(
 
 <style>
 .sell-label {
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #ffffff;
     margin-bottom: 5px;
     display: block;
 }
 .sell-input {
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
     font-size: 0.88rem;
     padding: 10px 14px;
-    color: #333;
+    color: #0f172a;
+    background-color: #ffffff;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .sell-input:focus {
-    border-color: var(--primary-color, #db2d2e);
-    box-shadow: 0 0 0 3px rgba(219,45,46,0.12);
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
     outline: none;
 }
 .sell-img-upload-box {
@@ -302,17 +298,17 @@ $states = array(
     justify-content: center;
     width: 100%;
     height: 100px;
-    border: 2px dashed #ddd;
+    border: 2px dashed rgba(255, 255, 255, 0.35);
     border-radius: 10px;
     cursor: pointer;
-    background: #fafafa;
+    background: rgba(255, 255, 255, 0.08);
     transition: border-color 0.2s, background 0.2s;
     overflow: hidden;
     position: relative;
 }
 .sell-img-upload-box:hover {
-    border-color: var(--primary-color, #db2d2e);
-    background: #fff5f5;
+    border-color: #38bdf8;
+    background: rgba(255, 255, 255, 0.18);
 }
 .sell-img-input {
     position: absolute;
