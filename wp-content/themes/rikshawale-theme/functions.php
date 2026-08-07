@@ -2790,8 +2790,8 @@ function rikshawale_register_booking_cpt() {
 			'name'               => __( 'Vehicle Bookings', 'rikshawale-theme' ),
 			'singular_name'      => __( 'Vehicle Booking', 'rikshawale-theme' ),
 			'menu_name'          => __( '🛺 Vehicle Bookings', 'rikshawale-theme' ),
-			'all_items'          => __( 'All Bookings', 'rikshawale-theme' ),
-			'edit_item'          => __( 'Manage Booking Inquiry', 'rikshawale-theme' ),
+			'all_items'          => __( 'My Bookings / All Bookings', 'rikshawale-theme' ),
+			'edit_item'          => __( 'View Booking Inquiry', 'rikshawale-theme' ),
 			'not_found'          => __( 'No vehicle bookings found.', 'rikshawale-theme' ),
 		),
 		'public'            => false,
@@ -2799,7 +2799,18 @@ function rikshawale_register_booking_cpt() {
 		'show_in_menu'      => true,
 		'menu_icon'         => 'dashicons-calendar-alt',
 		'menu_position'     => 7,
-		'capability_type'   => 'post',
+		'capability_type'   => array( 'riksha_booking', 'riksha_bookings' ),
+		'map_meta_cap'      => true,
+		'capabilities'      => array(
+			'edit_post'          => 'read',
+			'read_post'          => 'read',
+			'delete_post'        => 'manage_options',
+			'edit_posts'         => 'read',
+			'edit_others_posts'  => 'manage_options',
+			'publish_posts'      => 'read',
+			'read_private_posts' => 'read',
+			'read'               => 'read',
+		),
 		'has_archive'       => false,
 		'hierarchical'      => false,
 		'supports'          => array( 'title' ),
@@ -2807,6 +2818,39 @@ function rikshawale_register_booking_cpt() {
 	) );
 }
 add_action( 'init', 'rikshawale_register_booking_cpt' );
+
+/**
+ * Filter Bookings in WP Admin for Subscribers (Only show their own bookings)
+ */
+function rikshawale_filter_subscriber_bookings( $query ) {
+	if ( is_admin() && $query->is_main_query() && $query->get( 'post_type' ) === 'riksha_booking' ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$query->set( 'author', get_current_user_id() );
+		}
+	}
+}
+add_action( 'pre_get_posts', 'rikshawale_filter_subscriber_bookings' );
+
+/**
+ * Hide Dashboard Menu for Subscriber Role and Redirect to Vehicle Bookings
+ */
+function rikshawale_customize_subscriber_admin_menu() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		remove_menu_page( 'index.php' ); // Hide Dashboard menu
+	}
+}
+add_action( 'admin_menu', 'rikshawale_customize_subscriber_admin_menu', 999 );
+
+function rikshawale_redirect_subscriber_dashboard() {
+	if ( is_admin() && ! current_user_can( 'manage_options' ) ) {
+		global $pagenow;
+		if ( $pagenow === 'index.php' ) {
+			wp_redirect( admin_url( 'edit.php?post_type=riksha_booking' ) );
+			exit;
+		}
+	}
+}
+add_action( 'admin_init', 'rikshawale_redirect_subscriber_dashboard' );
 
 /**
  * Custom Admin Columns for Vehicle Bookings
@@ -2912,13 +2956,23 @@ function rikshawale_render_booking_metabox( $post ) {
 		</div>
 		<hr>
 		<p>
-			<label for="booking_status"><strong>Update Booking Status:</strong></label><br>
-			<select name="booking_status" id="booking_status" style="width: 250px; padding: 6px; margin-top: 5px;">
-				<option value="Pending" <?php selected( $status, 'Pending' ); ?>>⏳ Pending</option>
-				<option value="Confirmed" <?php selected( $status, 'Confirmed' ); ?>>✅ Confirmed</option>
-				<option value="Completed" <?php selected( $status, 'Completed' ); ?>>🎉 Completed</option>
-				<option value="Cancelled" <?php selected( $status, 'Cancelled' ); ?>>❌ Cancelled</option>
-			</select>
+			<label for="booking_status"><strong>Booking Status:</strong></label><br>
+			<?php if ( current_user_can( 'manage_options' ) ) : ?>
+				<select name="booking_status" id="booking_status" style="width: 250px; padding: 6px; margin-top: 5px;">
+					<option value="Pending" <?php selected( $status, 'Pending' ); ?>>⏳ Pending</option>
+					<option value="Confirmed" <?php selected( $status, 'Confirmed' ); ?>>✅ Confirmed</option>
+					<option value="Completed" <?php selected( $status, 'Completed' ); ?>>🎉 Completed</option>
+					<option value="Cancelled" <?php selected( $status, 'Cancelled' ); ?>>❌ Cancelled</option>
+				</select>
+			<?php else : ?>
+				<?php 
+				$badge_bg = '#f59e0b';
+				if ( $status === 'Confirmed' ) $badge_bg = '#10b981';
+				if ( $status === 'Completed' ) $badge_bg = '#3b82f6';
+				if ( $status === 'Cancelled' ) $badge_bg = '#ef4444';
+				?>
+				<span style="background:<?php echo $badge_bg; ?>; color:#fff; padding:4px 12px; border-radius:12px; font-weight:600; font-size:12px; display:inline-block; margin-top:5px;"><?php echo esc_html($status); ?></span>
+			<?php endif; ?>
 		</p>
 	</div>
 	<?php
