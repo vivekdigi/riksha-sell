@@ -277,8 +277,8 @@
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-0 text-white p-4" style="background-color: var(--primary-color, #db2d2e) !important;">
-                <h5 class="modal-title fw-bold" id="bookingModalLabel"><i class="fa-solid fa-car-side me-2"></i> Vehicle Booking Inquiry</h5>
+            <div class="modal-header border-0 text-white p-4" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%) !important;">
+                <h5 class="modal-title fw-bold text-white mb-0" id="bookingModalLabel"><i class="fa-solid fa-car-side me-2"></i> Vehicle Booking Inquiry</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
@@ -328,7 +328,7 @@
                         <label class="form-label small fw-bold">Additional Message or Inquiry</label>
                         <textarea class="form-control rounded-3" name="booking_message" rows="2" placeholder="e.g. Interested in commercial finance options..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm" style="background-color: var(--primary-color, #db2d2e); border: none;">
+                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border: none;">
                         <i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking
                     </button>
                 </form>
@@ -341,8 +341,8 @@
 <div class="modal fade" id="myBookingsModal" tabindex="-1" aria-labelledby="myBookingsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-0 bg-dark text-white p-4">
-                <h5 class="modal-title fw-bold" id="myBookingsModalLabel"><i class="fa-solid fa-list-check me-2 text-primary"></i> My Vehicle Bookings</h5>
+            <div class="modal-header border-0 text-white p-4" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%) !important;">
+                <h5 class="modal-title fw-bold text-white mb-0" id="myBookingsModalLabel"><i class="fa-solid fa-list-check me-2"></i> My Vehicle Bookings</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4" id="myBookingsContent">
