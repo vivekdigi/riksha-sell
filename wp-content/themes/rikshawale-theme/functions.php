@@ -2212,12 +2212,12 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Default Annual Interest Rate (%)
 	$wp_customize->add_setting( 'emi_interest_rate', array(
-		'default'           => '9.5',
+		'default'           => '11.75',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 	$wp_customize->add_control( 'emi_interest_rate', array(
 		'label'       => __( 'Default Interest Rate (% per annum)', 'rikshawale-theme' ),
-		'description' => __( 'Annual bank loan interest rate used for EMI calculation (e.g. 9.5)', 'rikshawale-theme' ),
+		'description' => __( 'Annual bank loan interest rate used for EMI calculation (e.g. 11.75)', 'rikshawale-theme' ),
 		'section'     => 'rikshawale_emi_calculator_section',
 		'type'        => 'text',
 	) );
@@ -2236,7 +2236,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Default Tenure (Years)
 	$wp_customize->add_setting( 'emi_default_tenure', array(
-		'default'           => '3',
+		'default'           => '5',
 		'sanitize_callback' => 'absint',
 	) );
 	$wp_customize->add_control( 'emi_default_tenure', array(
@@ -2248,7 +2248,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Principal Color (Chart)
 	$wp_customize->add_setting( 'emi_principal_color', array(
-		'default'           => '#0ea5e9',
+		'default'           => '#fecdd3',
 		'sanitize_callback' => 'sanitize_hex_color',
 	) );
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'emi_principal_color', array(
@@ -2259,7 +2259,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Interest Color (Chart)
 	$wp_customize->add_setting( 'emi_interest_color', array(
-		'default'           => '#fce4e4',
+		'default'           => '#dc2626',
 		'sanitize_callback' => 'sanitize_hex_color',
 	) );
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'emi_interest_color', array(

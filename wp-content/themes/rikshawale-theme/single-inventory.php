@@ -261,11 +261,13 @@ while ( have_posts() ) : the_post();
                         </div>
 
                         <div class="col-md-5 text-center">
-                            <!-- Thick Semi-Circle Gauge Arch SVG -->
-                            <div class="position-relative d-inline-block mb-3" style="width: 220px; height: 110px; overflow: hidden;">
-                                <svg viewBox="0 0 36 20" class="w-100 h-100">
-                                    <path class="circle-bg" stroke="<?php echo esc_attr($interest_chart_col); ?>" stroke-width="5.5" fill="none" stroke-linecap="round" d="M 4 18 A 14 14 0 0 1 32 18" />
-                                    <path id="emiDonutProgress" class="circle" stroke="<?php echo esc_attr($principal_chart_col); ?>" stroke-dasharray="33 100" stroke-width="5.5" fill="none" stroke-linecap="round" d="M 4 18 A 14 14 0 0 1 32 18" style="transition: stroke-dasharray 0.3s ease;" />
+                            <!-- Thick Semi-Circle Gauge Arch SVG Matching Elitecarz -->
+                            <div class="position-relative d-inline-block mb-3" style="width: 250px; height: 125px; overflow: hidden;">
+                                <svg viewBox="0 0 100 55" class="w-100 h-100">
+                                    <!-- Light Pink Background Arc for Principal Amount -->
+                                    <path class="circle-bg" stroke="<?php echo esc_attr($principal_chart_col); ?>" stroke-width="12" fill="none" stroke-linecap="round" d="M 10 50 A 40 40 0 0 1 90 50" />
+                                    <!-- Vivid Red Foreground Arc for Total Interest (anchored on right) -->
+                                    <path id="emiGaugeInterest" class="circle" stroke="<?php echo esc_attr($interest_chart_col); ?>" stroke-width="12" fill="none" stroke-linecap="round" d="M 10 50 A 40 40 0 0 1 90 50" stroke-dasharray="0 94.7 31.0 200" style="transition: stroke-dasharray 0.3s ease;" />
                                 </svg>
                             </div>
                             <div class="text-start small">
@@ -370,13 +372,17 @@ function calculateEMI() {
     var elT = document.getElementById('breakdownTotal');
     if (elT) elT.innerText = formatINR(totalPayment);
 
-    // Thick Semi-Circle Gauge Arc Update (Arc length ~43.98)
+    // Thick Semi-Circle Gauge Arc Update matching Elitecarz (Arc length = 125.66)
+    var totalArc = 125.66;
     var principalPct = totalPayment > 0 ? (loanVal / totalPayment) : 0.75;
-    var arcDash = (principalPct * 43.98).toFixed(1);
-    
-    var donutPath = document.getElementById('emiDonutProgress');
-    if (donutPath) {
-        donutPath.setAttribute('stroke-dasharray', arcDash + ' 100');
+    var interestPct  = totalPayment > 0 ? (totalInterest / totalPayment) : 0.25;
+
+    var principalLen = (principalPct * totalArc).toFixed(1);
+    var interestLen  = (interestPct * totalArc).toFixed(1);
+
+    var gaugePath = document.getElementById('emiGaugeInterest');
+    if (gaugePath) {
+        gaugePath.setAttribute('stroke-dasharray', '0 ' + principalLen + ' ' + interestLen + ' 200');
     }
 }
 
