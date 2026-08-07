@@ -31,21 +31,19 @@
             }
         }
         .header-custom {
-            background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%) !important;
-            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2), inset 0 -3px 8px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+            background: #ffffff !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
             padding-top: 8px !important;
             padding-bottom: 8px !important;
             transition: all 0.3s ease;
         }
         .header-custom .navbar-brand {
-            color: #ffffff !important;
+            color: #0f172a !important;
         }
         .navbar-custom .navbar-nav a,
         .header-custom .nav-link {
-            color: #f8fafc !important;
+            color: #1e293b !important;
             font-weight: 600;
             font-size: 0.85rem;
             padding: 4px 10px !important;
@@ -56,7 +54,10 @@
             transition: all 0.3s ease;
         }
         .navbar-custom .navbar-nav a:hover,
-        .header-custom .nav-link:hover {
+        .header-custom .nav-link:hover,
+        .navbar-custom .navbar-nav .active > a,
+        .navbar-custom .navbar-nav a.active,
+        .navbar-custom .navbar-nav li.current-menu-item > a {
             color: var(--primary-color) !important;
         }
         .top-bar {
@@ -139,7 +140,7 @@
 
 
     <!-- Navigation Menu -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom header-custom shadow-sm py-1">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom header-custom shadow-sm py-1">
         <div class="container">
             <?php 
             if ( has_custom_logo() ) {
