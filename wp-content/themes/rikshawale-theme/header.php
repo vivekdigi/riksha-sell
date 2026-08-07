@@ -31,10 +31,11 @@
             }
         }
         .header-custom {
-            background-color: rgba(15, 23, 42, 0.85) !important;
+            background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%) !important;
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2), inset 0 -3px 8px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
             padding-top: 8px !important;
             padding-bottom: 8px !important;
             transition: all 0.3s ease;
@@ -138,7 +139,7 @@
 
 
     <!-- Navigation Menu -->
-    <nav class="navbar navbar-expand-lg navbar-custom header-custom shadow-sm py-1">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom header-custom shadow-sm py-1">
         <div class="container">
             <?php 
             if ( has_custom_logo() ) {

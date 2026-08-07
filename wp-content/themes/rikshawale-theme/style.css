@@ -68,13 +68,14 @@ a:hover {
 
 /* Navigation Styles */
 .navbar-custom {
-    background-color: #ffffff;
+    background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%);
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2), inset 0 -3px 8px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
 }
 
 .navbar-custom .navbar-brand {
     font-size: 1.75rem;
-    color: var(--dark-color) !important;
+    color: #ffffff !important;
 }
 
 .navbar-custom .navbar-nav li {
