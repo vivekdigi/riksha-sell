@@ -2776,3 +2776,337 @@ function rikshawale_output_customizer_css() {
     <?php
 }
 add_action( 'wp_head', 'rikshawale_output_customizer_css', 99 );
+
+/* ==========================================================================
+   USER AUTHENTICATION & VEHICLE BOOKING INQUIRY SYSTEM
+   ========================================================================== */
+
+/**
+ * Register Custom Post Type: Vehicle Booking Inquiries (riksha_booking)
+ */
+function rikshawale_register_booking_cpt() {
+	register_post_type( 'riksha_booking', array(
+		'labels' => array(
+			'name'               => __( 'Vehicle Bookings', 'rikshawale-theme' ),
+			'singular_name'      => __( 'Vehicle Booking', 'rikshawale-theme' ),
+			'menu_name'          => __( '🛺 Vehicle Bookings', 'rikshawale-theme' ),
+			'all_items'          => __( 'All Bookings', 'rikshawale-theme' ),
+			'edit_item'          => __( 'Manage Booking Inquiry', 'rikshawale-theme' ),
+			'not_found'          => __( 'No vehicle bookings found.', 'rikshawale-theme' ),
+		),
+		'public'            => false,
+		'show_ui'           => true,
+		'show_in_menu'      => true,
+		'menu_icon'         => 'dashicons-calendar-alt',
+		'menu_position'     => 7,
+		'capability_type'   => 'post',
+		'has_archive'       => false,
+		'hierarchical'      => false,
+		'supports'          => array( 'title' ),
+		'show_in_rest'      => false,
+	) );
+}
+add_action( 'init', 'rikshawale_register_booking_cpt' );
+
+/**
+ * Custom Admin Columns for Vehicle Bookings
+ */
+function rikshawale_booking_columns( $columns ) {
+	$new_cols = array(
+		'cb'             => '<input type="checkbox" />',
+		'title'          => __( 'Customer Name & Inquiry ID', 'rikshawale-theme' ),
+		'booking_phone'  => __( 'Phone Number', 'rikshawale-theme' ),
+		'booking_email'  => __( 'Email', 'rikshawale-theme' ),
+		'vehicle_title'  => __( 'Vehicle Booked', 'rikshawale-theme' ),
+		'booking_date'   => __( 'Preferred Date', 'rikshawale-theme' ),
+		'booking_status' => __( 'Status', 'rikshawale-theme' ),
+		'date'           => __( 'Submitted Date', 'rikshawale-theme' ),
+	);
+	return $new_cols;
+}
+add_filter( 'manage_riksha_booking_posts_columns', 'rikshawale_booking_columns' );
+
+function rikshawale_booking_column_content( $column, $post_id ) {
+	switch ( $column ) {
+		case 'booking_phone':
+			$phone = get_post_meta( $post_id, '_booking_phone', true );
+			echo esc_html( $phone ?: '—' );
+			break;
+		case 'booking_email':
+			$email = get_post_meta( $post_id, '_booking_email', true );
+			echo esc_html( $email ?: '—' );
+			break;
+		case 'vehicle_title':
+			$car_id    = get_post_meta( $post_id, '_booking_car_id', true );
+			$car_title = get_post_meta( $post_id, '_booking_car_title', true );
+			if ( $car_id && get_post( $car_id ) ) {
+				echo '<a href="' . get_edit_post_link( $car_id ) . '" target="_blank"><strong>' . esc_html( get_the_title( $car_id ) ) . '</strong></a>';
+			} else {
+				echo esc_html( $car_title ?: 'General Inquiry' );
+			}
+			break;
+		case 'booking_date':
+			$date = get_post_meta( $post_id, '_booking_date', true );
+			echo esc_html( $date ?: '—' );
+			break;
+		case 'booking_status':
+			$status = get_post_meta( $post_id, '_booking_status', true ) ?: 'Pending';
+			$badge_bg = '#f59e0b';
+			if ( $status === 'Confirmed' ) $badge_bg = '#10b981';
+			if ( $status === 'Completed' ) $badge_bg = '#3b82f6';
+			if ( $status === 'Cancelled' ) $badge_bg = '#ef4444';
+			echo '<span style="background:' . $badge_bg . '; color:#fff; padding:3px 10px; border-radius:12px; font-weight:600; font-size:11px;">' . esc_html( $status ) . '</span>';
+			break;
+	}
+}
+add_action( 'manage_riksha_booking_posts_custom_column', 'rikshawale_booking_column_content', 10, 2 );
+
+/**
+ * Admin Metabox for Booking Details
+ */
+function rikshawale_add_booking_metabox() {
+	add_meta_box(
+		'booking_details_mb',
+		__( 'Vehicle Booking & Customer Details', 'rikshawale-theme' ),
+		'rikshawale_render_booking_metabox',
+		'riksha_booking',
+		'normal',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'rikshawale_add_booking_metabox' );
+
+function rikshawale_render_booking_metabox( $post ) {
+	wp_nonce_field( 'rikshawale_save_booking_meta', 'booking_meta_nonce' );
+	$user_id   = get_post_meta( $post->ID, '_booking_user_id', true );
+	$user_obj  = $user_id ? get_userdata( $user_id ) : null;
+	$phone     = get_post_meta( $post->ID, '_booking_phone', true );
+	$email     = get_post_meta( $post->ID, '_booking_email', true );
+	$name      = get_post_meta( $post->ID, '_booking_name', true );
+	$city      = get_post_meta( $post->ID, '_booking_city', true );
+	$car_id    = get_post_meta( $post->ID, '_booking_car_id', true );
+	$car_title = get_post_meta( $post->ID, '_booking_car_title', true );
+	$b_date    = get_post_meta( $post->ID, '_booking_date', true );
+	$message   = get_post_meta( $post->ID, '_booking_message', true );
+	$status    = get_post_meta( $post->ID, '_booking_status', true ) ?: 'Pending';
+	?>
+	<div style="font-size: 14px; line-height: 1.6; padding: 10px;">
+		<p><strong>Registered User:</strong> <?php echo $user_obj ? esc_html( $user_obj->display_name . ' (' . $user_obj->user_email . ')' ) : 'Guest/Customer'; ?></p>
+		<p><strong>Customer Name:</strong> <?php echo esc_html( $name ); ?></p>
+		<p><strong>Phone Number:</strong> <a href="tel:<?php echo esc_attr( $phone ); ?>"><?php echo esc_html( $phone ); ?></a></p>
+		<p><strong>Email Address:</strong> <a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></p>
+		<p><strong>City / Location:</strong> <?php echo esc_html( $city ?: 'N/A' ); ?></p>
+		<hr>
+		<p><strong>Vehicle Booked:</strong> <?php echo $car_id ? '<a href="' . get_permalink( $car_id ) . '" target="_blank">' . esc_html( $car_title ) . '</a>' : esc_html( $car_title ); ?></p>
+		<p><strong>Preferred Booking Date:</strong> <?php echo esc_html( $b_date ?: 'N/A' ); ?></p>
+		<p><strong>Customer Notes/Message:</strong></p>
+		<div style="background: #f9f9f9; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; white-space: pre-wrap;">
+			<?php echo esc_html( $message ?: 'No additional notes provided.' ); ?>
+		</div>
+		<hr>
+		<p>
+			<label for="booking_status"><strong>Update Booking Status:</strong></label><br>
+			<select name="booking_status" id="booking_status" style="width: 250px; padding: 6px; margin-top: 5px;">
+				<option value="Pending" <?php selected( $status, 'Pending' ); ?>>⏳ Pending</option>
+				<option value="Confirmed" <?php selected( $status, 'Confirmed' ); ?>>✅ Confirmed</option>
+				<option value="Completed" <?php selected( $status, 'Completed' ); ?>>🎉 Completed</option>
+				<option value="Cancelled" <?php selected( $status, 'Cancelled' ); ?>>❌ Cancelled</option>
+			</select>
+		</p>
+	</div>
+	<?php
+}
+
+function rikshawale_save_booking_meta( $post_id ) {
+	if ( ! isset( $_POST['booking_meta_nonce'] ) || ! wp_verify_nonce( $_POST['booking_meta_nonce'], 'rikshawale_save_booking_meta' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( isset( $_POST['booking_status'] ) ) {
+		update_post_meta( $post_id, '_booking_status', sanitize_text_field( $_POST['booking_status'] ) );
+	}
+}
+add_action( 'save_post_riksha_booking', 'rikshawale_save_booking_meta' );
+
+
+/* --- AJAX AUTHENTICATION & BOOKING HANDLERS --- */
+
+// 1. AJAX Customer Login
+function rikshawale_ajax_login() {
+	check_ajax_referer( 'rikshawale_auth_nonce', 'nonce' );
+	$username = sanitize_text_field( $_POST['username'] ?? '' );
+	$password = $_POST['password'] ?? '';
+
+	if ( empty( $username ) || empty( $password ) ) {
+		wp_send_json_error( array( 'message' => 'Please enter both username/email and password.' ) );
+	}
+
+	$creds = array(
+		'user_login'    => $username,
+		'user_password' => $password,
+		'remember'      => true,
+	);
+
+	$user = wp_signon( $creds, is_ssl() );
+
+	if ( is_wp_error( $user ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid username/email or password.' ) );
+	}
+
+	wp_send_json_success( array(
+		'message'   => 'Login successful! Redirecting...',
+		'user_name' => $user->display_name,
+	) );
+}
+add_action( 'wp_ajax_rikshawale_login', 'rikshawale_ajax_login' );
+add_action( 'wp_ajax_nopriv_rikshawale_login', 'rikshawale_ajax_login' );
+
+// 2. AJAX Customer Registration
+function rikshawale_ajax_register() {
+	check_ajax_referer( 'rikshawale_auth_nonce', 'nonce' );
+	$name     = sanitize_text_field( $_POST['reg_name'] ?? '' );
+	$email    = sanitize_email( $_POST['reg_email'] ?? '' );
+	$phone    = sanitize_text_field( $_POST['reg_phone'] ?? '' );
+	$password = $_POST['reg_password'] ?? '';
+
+	if ( empty( $name ) || empty( $email ) || empty( $password ) ) {
+		wp_send_json_error( array( 'message' => 'Please complete all required fields.' ) );
+	}
+	if ( ! is_email( $email ) ) {
+		wp_send_json_error( array( 'message' => 'Please enter a valid email address.' ) );
+	}
+	if ( email_exists( $email ) ) {
+		wp_send_json_error( array( 'message' => 'An account with this email already exists. Please log in.' ) );
+	}
+
+	$username = sanitize_user( current( explode( '@', $email ) ) );
+	if ( username_exists( $username ) ) {
+		$username .= rand( 100, 999 );
+	}
+
+	$user_id = wp_create_user( $username, $password, $email );
+	if ( is_wp_error( $user_id ) ) {
+		wp_send_json_error( array( 'message' => $user_id->get_error_message() ) );
+	}
+
+	wp_update_user( array(
+		'ID'           => $user_id,
+		'display_name' => $name,
+		'first_name'   => $name,
+	) );
+	update_user_meta( $user_id, 'phone_number', $phone );
+
+	// Auto-login registered user
+	wp_set_current_user( $user_id );
+	wp_set_auth_cookie( $user_id, true );
+
+	wp_send_json_success( array(
+		'message'   => 'Account created successfully! You are now logged in.',
+		'user_name' => $name,
+	) );
+}
+add_action( 'wp_ajax_rikshawale_register', 'rikshawale_ajax_register' );
+add_action( 'wp_ajax_nopriv_rikshawale_register', 'rikshawale_ajax_register' );
+
+// 3. AJAX Vehicle Booking Submission
+function rikshawale_ajax_submit_booking() {
+	check_ajax_referer( 'rikshawale_booking_nonce', 'nonce' );
+
+	if ( ! is_user_logged_in() ) {
+		wp_send_json_error( array( 'message' => 'Please log in or register to submit a vehicle booking inquiry.' ) );
+	}
+
+	$user_id   = get_current_user_id();
+	$car_id    = intval( $_POST['car_id'] ?? 0 );
+	$car_title = sanitize_text_field( $_POST['car_title'] ?? 'Vehicle' );
+	$name      = sanitize_text_field( $_POST['booking_name'] ?? '' );
+	$phone     = sanitize_text_field( $_POST['booking_phone'] ?? '' );
+	$email     = sanitize_email( $_POST['booking_email'] ?? '' );
+	$city      = sanitize_text_field( $_POST['booking_city'] ?? '' );
+	$date      = sanitize_text_field( $_POST['booking_date'] ?? '' );
+	$message   = sanitize_textarea_field( $_POST['booking_message'] ?? '' );
+
+	if ( empty( $name ) || empty( $phone ) || empty( $email ) ) {
+		wp_send_json_error( array( 'message' => 'Name, phone, and email are required to submit booking.' ) );
+	}
+
+	$post_title = $name . ' — ' . $car_title . ' (' . date('d M Y') . ')';
+
+	$post_id = wp_insert_post( array(
+		'post_type'   => 'riksha_booking',
+		'post_title'  => $post_title,
+		'post_status' => 'publish',
+	) );
+
+	if ( is_wp_error( $post_id ) ) {
+		wp_send_json_error( array( 'message' => 'Failed to save booking. Please try again.' ) );
+	}
+
+	update_post_meta( $post_id, '_booking_user_id', $user_id );
+	update_post_meta( $post_id, '_booking_car_id', $car_id );
+	update_post_meta( $post_id, '_booking_car_title', $car_title );
+	update_post_meta( $post_id, '_booking_name', $name );
+	update_post_meta( $post_id, '_booking_phone', $phone );
+	update_post_meta( $post_id, '_booking_email', $email );
+	update_post_meta( $post_id, '_booking_city', $city );
+	update_post_meta( $post_id, '_booking_date', $date );
+	update_post_meta( $post_id, '_booking_message', $message );
+	update_post_meta( $post_id, '_booking_status', 'Pending' );
+
+	// Email Admin Notification
+	$to      = get_option( 'admin_email' );
+	$subject = '🛺 New Vehicle Booking Inquiry: ' . $car_title . ' by ' . $name;
+	$body    = "Vehicle: {$car_title}\nCustomer Name: {$name}\nPhone: {$phone}\nEmail: {$email}\nCity: {$city}\nPreferred Date: {$date}\n\nNotes:\n{$message}";
+	$headers = array( 'Content-Type: text/plain; charset=UTF-8', "Reply-To: {$name} <{$email}>" );
+	wp_mail( $to, $subject, $body, $headers );
+
+	wp_send_json_success( array(
+		'message' => 'Your vehicle booking inquiry has been submitted successfully! Our representative will contact you shortly.',
+	) );
+}
+add_action( 'wp_ajax_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
+
+// 4. AJAX Get Logged-in User Bookings
+function rikshawale_ajax_get_user_bookings() {
+	if ( ! is_user_logged_in() ) {
+		wp_send_json_error( array( 'message' => 'Unauthorized' ) );
+	}
+	$user_id = get_current_user_id();
+
+	$query = new WP_Query( array(
+		'post_type'      => 'riksha_booking',
+		'posts_per_page' => 20,
+		'post_status'    => 'publish',
+		'meta_key'       => '_booking_user_id',
+		'meta_value'     => $user_id,
+	) );
+
+	$list = array();
+	if ( $query->have_posts() ) {
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$p_id = get_the_ID();
+			$car_title = get_post_meta( $p_id, '_booking_car_title', true );
+			$car_id    = get_post_meta( $p_id, '_booking_car_id', true );
+			$status    = get_post_meta( $p_id, '_booking_status', true ) ?: 'Pending';
+			$date      = get_post_meta( $p_id, '_booking_date', true );
+			$created   = get_the_date( 'd M Y' );
+			$car_img   = ( $car_id && has_post_thumbnail( $car_id ) ) ? get_the_post_thumbnail_url( $car_id, 'thumbnail' ) : '';
+
+			$list[] = array(
+				'car_title' => $car_title,
+				'car_link'  => $car_id ? get_permalink( $car_id ) : '#',
+				'car_img'   => $car_img,
+				'status'    => $status,
+				'date'      => $date,
+				'created'   => $created,
+			);
+		}
+		wp_reset_postdata();
+	}
+
+	wp_send_json_success( array( 'bookings' => $list ) );
+}
+add_action( 'wp_ajax_rikshawale_get_user_bookings', 'rikshawale_ajax_get_user_bookings' );

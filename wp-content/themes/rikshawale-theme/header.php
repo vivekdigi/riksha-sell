@@ -180,7 +180,39 @@
                     echo '</ul>';
                 }
                 ?>
+                <div class="d-flex align-items-center gap-2 ms-lg-3 my-2 my-lg-0">
+                    <?php if ( is_user_logged_in() ) : 
+                        $current_u = wp_get_current_user();
+                    ?>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-dark dropdown-toggle rounded-pill px-3 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-user-circle me-1 text-primary"></i> <?php echo esc_html( $current_u->display_name ?: $current_u->user_login ); ?>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm rounded-3 border-0">
+                                <li><button class="dropdown-item py-2" type="button" data-bs-toggle="modal" data-bs-target="#myBookingsModal" onclick="fetchUserBookings()"><i class="fa-solid fa-calendar-check me-2 text-primary"></i> My Bookings</button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    <?php else : ?>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#authModal">
+                            <i class="fa-solid fa-user-lock me-1"></i> Login / Register
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </nav>
+
+    <script>
+    var rikshawale_ajax = {
+        url: "<?php echo esc_url( admin_url('admin-ajax.php') ); ?>",
+        auth_nonce: "<?php echo wp_create_nonce('rikshawale_auth_nonce'); ?>",
+        booking_nonce: "<?php echo wp_create_nonce('rikshawale_booking_nonce'); ?>",
+        is_logged_in: <?php echo is_user_logged_in() ? 'true' : 'false'; ?>,
+        user_name: "<?php echo is_user_logged_in() ? esc_js( wp_get_current_user()->display_name ) : ''; ?>",
+        user_email: "<?php echo is_user_logged_in() ? esc_js( wp_get_current_user()->user_email ) : ''; ?>",
+        user_phone: "<?php echo is_user_logged_in() ? esc_js( get_user_meta( get_current_user_id(), 'phone_number', true ) ) : ''; ?>"
+    };
+    </script>
 </header>

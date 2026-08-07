@@ -134,10 +134,10 @@ while ( have_posts() ) : the_post();
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', get_theme_mod('contact_phone', '919876543210')); ?>?text=Hi%2C%20I%20want%20to%20Book%20Now%20<?php echo urlencode(get_the_title()); ?>" target="_blank" class="btn btn-dark w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center">
+                            <button type="button" onclick="triggerVehicleBooking(<?php echo $post_id; ?>, '<?php echo esc_js(get_the_title()); ?>', '<?php echo esc_js($price_raw); ?>', '<?php echo esc_url($slides[0]); ?>')" class="btn btn-dark w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center">
                                 <span>Book Now</span>
-                                <span class="extra-small opacity-75 fw-normal">100% Refundable</span>
-                            </a>
+                                <span class="extra-small opacity-75 fw-normal">Submit Inquiry</span>
+                            </button>
                         </div>
                     </div>
                 </div>
