@@ -1080,9 +1080,169 @@ function rikshawale_save_riksha_meta( $post_id ) {
 add_action( 'save_post', 'rikshawale_save_riksha_meta' );
 
 /**
+ * Custom Drag and Drop Section Reorder Control for WP Customizer
+ */
+if ( class_exists( 'WP_Customize_Control' ) ) {
+    class Rikshawale_Section_Order_Control extends WP_Customize_Control {
+        public $type = 'rikshawale_section_order';
+        public $section_labels = array();
+
+        public function enqueue() {
+            wp_enqueue_script( 'jquery-ui-sortable' );
+        }
+
+        public function render_content() {
+            if ( empty( $this->section_labels ) ) {
+                return;
+            }
+
+            $current_order_str = $this->value();
+            if ( empty( $current_order_str ) ) {
+                $current_order = array_keys( $this->section_labels );
+            } else {
+                $current_order = explode( ',', $current_order_str );
+                foreach ( array_keys( $this->section_labels ) as $sec_key ) {
+                    if ( ! in_array( $sec_key, $current_order, true ) ) {
+                        $current_order[] = $sec_key;
+                    }
+                }
+            }
+            ?>
+            <div class="rikshawale-section-reorder-wrap">
+                <?php if ( ! empty( $this->label ) ) : ?>
+                    <span class="customize-control-title"><?php echo esc_html( $this->label ); ?></span>
+                <?php endif; ?>
+                <?php if ( ! empty( $this->description ) ) : ?>
+                    <span class="description customize-control-description"><?php echo esc_html( $this->description ); ?></span>
+                <?php endif; ?>
+
+                <ul class="rikshawale-sortable-sections-list">
+                    <?php foreach ( $current_order as $sec_id ) : 
+                        if ( isset( $this->section_labels[ $sec_id ] ) ) :
+                    ?>
+                        <li class="rikshawale-sortable-item" data-section-id="<?php echo esc_attr( $sec_id ); ?>">
+                            <span class="dashicons dashicons-menu drag-handle"></span>
+                            <span class="section-title"><?php echo esc_html( $this->section_labels[ $sec_id ] ); ?></span>
+                        </li>
+                    <?php endif; endforeach; ?>
+                </ul>
+
+                <input type="hidden" id="<?php echo esc_attr( $this->id ); ?>" <?php $this->link(); ?> value="<?php echo esc_attr( implode( ',', $current_order ) ); ?>" />
+            </div>
+
+            <style>
+            .rikshawale-sortable-sections-list {
+                margin: 12px 0 0 0;
+                padding: 0;
+                list-style: none;
+            }
+            .rikshawale-sortable-item {
+                background: #ffffff;
+                border: 1px solid #dcdcde;
+                border-radius: 6px;
+                padding: 10px 12px;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                cursor: grab;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                transition: all 0.2s ease;
+                user-select: none;
+            }
+            .rikshawale-sortable-item:hover {
+                border-color: #2271b1;
+                box-shadow: 0 2px 6px rgba(34,113,177,0.15);
+                background: #f6f7f7;
+            }
+            .rikshawale-sortable-item.ui-sortable-helper {
+                cursor: grabbing;
+                box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+                border-color: #2271b1;
+                background: #f0f6fc;
+            }
+            .rikshawale-sortable-item .drag-handle {
+                color: #8c8f94;
+                margin-right: 10px;
+                font-size: 18px;
+            }
+            .rikshawale-sortable-item .section-title {
+                font-weight: 600;
+                font-size: 13px;
+                color: #1d2327;
+            }
+            </style>
+
+            <script>
+            jQuery(document).ready(function($) {
+                $('.rikshawale-sortable-sections-list').sortable({
+                    handle: '.drag-handle, .section-title',
+                    placeholder: 'ui-state-highlight',
+                    axis: 'y',
+                    update: function(event, ui) {
+                        var container = $(this).closest('.rikshawale-section-reorder-wrap');
+                        var order = [];
+                        container.find('.rikshawale-sortable-item').each(function() {
+                            order.push($(this).data('section-id'));
+                        });
+                        var input = container.find('input[type="hidden"]');
+                        input.val(order.join(',')).trigger('change');
+                    }
+                });
+            });
+            </script>
+            <?php
+        }
+    }
+}
+
+/**
  * Theme Customizer settings for dynamic header and footer
  */
 function rikshawale_customize_register( $wp_customize ) {
+
+	// ------------------------------------------------------------
+	// DRAG & DROP HOMEPAGE SECTION REORDER SECTION
+	// ------------------------------------------------------------
+	$wp_customize->add_section( 'rikshawale_section_order_section', array(
+		'title'       => __( '🎯 Drag & Drop Homepage Sections', 'rikshawale-theme' ),
+		'priority'    => 20,
+		'description' => __( 'Drag and drop the section handles below to reorder top-to-bottom sections on your homepage in real-time!', 'rikshawale-theme' ),
+	) );
+
+	$section_labels = array(
+		'hero_slider'    => __( '1. Banner Slider Section', 'rikshawale-theme' ),
+		'search_filter'  => __( '2. Floating Search Widget', 'rikshawale-theme' ),
+		'page_content'   => __( '3. Page Content / Elementor Block', 'rikshawale-theme' ),
+		'about_us'       => __( '4. Welcome & About Us Section', 'rikshawale-theme' ),
+		'inventory'      => __( '5. Riksha Inventory Slider', 'rikshawale-theme' ),
+		'key_challenges' => __( '6. Key Challenges & Market Insight', 'rikshawale-theme' ),
+		'video_section'  => __( '7. 4-Video Autoplay Grid', 'rikshawale-theme' ),
+		'new_arrivals'   => __( '8. New Arrivals Slider', 'rikshawale-theme' ),
+		'contact_banner' => __( '9. Contact Support Split Banner', 'rikshawale-theme' ),
+		'our_team'       => __( '10. Meet Our Team Section', 'rikshawale-theme' ),
+		'why_choose'     => __( '11. Why Choose Rikshawale', 'rikshawale-theme' ),
+		'testimonials'   => __( '12. Customer Testimonials', 'rikshawale-theme' ),
+		'faq'            => __( '13. FAQ Accordion Section', 'rikshawale-theme' ),
+	);
+
+	$default_order = implode( ',', array_keys( $section_labels ) );
+
+	$wp_customize->add_setting( 'homepage_section_order', array(
+		'default'           => $default_order,
+		'sanitize_callback' => 'sanitize_text_field',
+		'transport'         => 'refresh',
+	) );
+
+	if ( class_exists( 'Rikshawale_Section_Order_Control' ) ) {
+		$wp_customize->add_control( new Rikshawale_Section_Order_Control( $wp_customize, 'homepage_section_order', array(
+			'label'          => __( 'Homepage Section Layout', 'rikshawale-theme' ),
+			'description'    => __( 'Drag and drop section handles up or down to change homepage section order.', 'rikshawale-theme' ),
+			'section'        => 'rikshawale_section_order_section',
+			'settings'       => 'homepage_section_order',
+			'section_labels' => $section_labels,
+		) ) );
+	}
+
 	// Add Section: Theme Styling & Colors
 	$wp_customize->add_section( 'rikshawale_colors_section', array(
 		'title'       => __( 'Theme Colors', 'rikshawale-theme' ),
