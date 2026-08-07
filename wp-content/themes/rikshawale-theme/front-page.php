@@ -268,7 +268,7 @@ foreach ( $section_order as $sec_key ) {
                             ) );
                             if ( $inv_query->have_posts() ) :
                                 while ( $inv_query->have_posts() ) : $inv_query->the_post();
-                                    $p_price = get_post_meta( get_the_ID(), '_car_price', true ) ?: get_post_meta( get_the_ID(), '_riksha_price', true );
+                                    $p_price = rikshawale_get_formatted_price( get_the_ID() );
                                     $p_year  = get_post_meta( get_the_ID(), '_car_year', true ) ?: get_post_meta( get_the_ID(), '_riksha_year', true );
                                     $p_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: get_post_meta( get_the_ID(), '_riksha_fuel', true );
                                     $p_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
@@ -492,7 +492,7 @@ foreach ( $section_order as $sec_key ) {
                             ) );
                             if ( $new_query->have_posts() ) :
                                 while ( $new_query->have_posts() ) : $new_query->the_post();
-                                    $p_price = get_post_meta( get_the_ID(), '_car_price', true ) ?: get_post_meta( get_the_ID(), '_riksha_price', true );
+                                    $p_price = rikshawale_get_formatted_price( get_the_ID() );
                                     $p_year  = get_post_meta( get_the_ID(), '_car_year', true ) ?: get_post_meta( get_the_ID(), '_riksha_year', true );
                                     $p_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: get_post_meta( get_the_ID(), '_riksha_fuel', true );
                                     $p_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';

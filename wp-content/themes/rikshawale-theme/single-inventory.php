@@ -7,7 +7,7 @@ get_header();
 
 while ( have_posts() ) : the_post();
     $post_id      = get_the_ID();
-    $price_raw    = get_post_meta( $post_id, '_car_price', true ) ?: '₹7,65,000';
+    $price_raw    = rikshawale_get_formatted_price( $post_id );
     $mfg_year     = get_post_meta( $post_id, '_car_mfg_year', true ) ?: ( get_post_meta( $post_id, '_car_year', true ) ?: '2018' );
     $reg_year     = get_post_meta( $post_id, '_car_reg_year', true ) ?: $mfg_year;
     $owner_type   = get_post_meta( $post_id, '_car_owner_type', true ) ?: '2nd';
@@ -309,7 +309,7 @@ while ( have_posts() ) : the_post();
                     ) );
                     if ( $rel_query->have_posts() ) :
                         while ( $rel_query->have_posts() ) : $rel_query->the_post();
-                            $r_price = get_post_meta( get_the_ID(), '_car_price', true ) ?: '₹13.75 Lakh';
+                            $r_price = rikshawale_get_formatted_price( get_the_ID() );
                             $r_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: 'Petrol';
                             $r_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
                             $r_thumb = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';

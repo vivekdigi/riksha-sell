@@ -739,18 +739,19 @@ add_action( 'add_meta_boxes', 'rikshawale_add_inventory_metabox' );
 function rikshawale_render_inventory_metabox( $post ) {
     wp_nonce_field( 'rikshawale_save_inventory_meta', 'rikshawale_inventory_meta_nonce' );
 
-    $price          = get_post_meta( $post->ID, '_car_price', true );
-    $mfg_year       = get_post_meta( $post->ID, '_car_mfg_year', true ) ?: get_post_meta( $post->ID, '_car_year', true );
-    $reg_year       = get_post_meta( $post->ID, '_car_reg_year', true );
-    $owner_type     = get_post_meta( $post->ID, '_car_owner_type', true );
-    $brand_name     = get_post_meta( $post->ID, '_car_brand_name', true );
-    $model_name     = get_post_meta( $post->ID, '_car_model_name', true );
-    $variant        = get_post_meta( $post->ID, '_car_variant', true );
-    $driven_km      = get_post_meta( $post->ID, '_car_driven_km', true ) ?: get_post_meta( $post->ID, '_car_mileage', true );
-    $fuel           = get_post_meta( $post->ID, '_car_fuel', true );
-    $transmission   = get_post_meta( $post->ID, '_car_transmission', true );
-    $badge          = get_post_meta( $post->ID, '_car_badge', true );
-    $video_url      = get_post_meta( $post->ID, '_car_video_url', true );
+    $price           = get_post_meta( $post->ID, '_car_price', true );
+    $currency_symbol = get_post_meta( $post->ID, '_car_currency_symbol', true ) ?: '₹';
+    $mfg_year        = get_post_meta( $post->ID, '_car_mfg_year', true ) ?: get_post_meta( $post->ID, '_car_year', true );
+    $reg_year        = get_post_meta( $post->ID, '_car_reg_year', true );
+    $owner_type      = get_post_meta( $post->ID, '_car_owner_type', true );
+    $brand_name      = get_post_meta( $post->ID, '_car_brand_name', true );
+    $model_name      = get_post_meta( $post->ID, '_car_model_name', true );
+    $variant         = get_post_meta( $post->ID, '_car_variant', true );
+    $driven_km       = get_post_meta( $post->ID, '_car_driven_km', true ) ?: get_post_meta( $post->ID, '_car_mileage', true );
+    $fuel            = get_post_meta( $post->ID, '_car_fuel', true );
+    $transmission    = get_post_meta( $post->ID, '_car_transmission', true );
+    $badge           = get_post_meta( $post->ID, '_car_badge', true );
+    $video_url       = get_post_meta( $post->ID, '_car_video_url', true );
 
     // 5 Gallery Images
     $img1           = get_post_meta( $post->ID, '_car_gallery_image_1', true );
@@ -765,8 +766,15 @@ function rikshawale_render_inventory_metabox( $post ) {
     ?>
     <table class="form-table">
         <tr>
+            <th><label for="car_currency_symbol"><?php _e( 'Currency Symbol / Prefix', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_currency_symbol" name="car_currency_symbol" value="<?php echo esc_attr( $currency_symbol ); ?>" class="regular-text" placeholder="e.g. ₹, Rs., $, € (Default: ₹)">
+                <p class="description"><?php _e( 'Symbol shown before price. Defaults to ₹ (Rupees) if left empty.', 'rikshawale-theme' ); ?></p>
+            </td>
+        </tr>
+        <tr>
             <th><label for="car_price"><?php _e( 'Selling Price', 'rikshawale-theme' ); ?></label></th>
-            <td><input type="text" id="car_price" name="car_price" value="<?php echo esc_attr( $price ); ?>" class="regular-text" placeholder="e.g. ₹10.75 Lakh"></td>
+            <td><input type="text" id="car_price" name="car_price" value="<?php echo esc_attr( $price ); ?>" class="regular-text" placeholder="e.g. 24,000 or ₹10.75 Lakh"></td>
         </tr>
         <tr>
             <th><label for="car_video_url"><?php _e( '🎬 Banner Video URL (Auto-Play)', 'rikshawale-theme' ); ?></label></th>
@@ -929,6 +937,7 @@ function rikshawale_save_inventory_meta( $post_id ) {
 
     $fields = array(
         'car_price',
+        'car_currency_symbol',
         'car_badge',
         'car_video_url',
         'car_mfg_year',
@@ -952,6 +961,39 @@ function rikshawale_save_inventory_meta( $post_id ) {
             update_post_meta( $post_id, '_' . $field, sanitize_text_field( $_POST[$field] ) );
         }
     }
+}
+add_action( 'save_post_inventory', 'rikshawale_save_inventory_meta' );
+
+/**
+ * Helper function to get formatted price with currency symbol
+ */
+function rikshawale_get_formatted_price( $post_id = 0 ) {
+    if ( ! $post_id ) {
+        $post_id = get_the_ID();
+    }
+    
+    $price = get_post_meta( $post_id, '_car_price', true );
+    if ( empty( $price ) ) {
+        $price = get_post_meta( $post_id, '_riksha_price', true );
+    }
+    
+    $symbol = get_post_meta( $post_id, '_car_currency_symbol', true );
+    if ( empty( $symbol ) ) {
+        $symbol = '₹';
+    }
+
+    if ( empty( $price ) ) {
+        return $symbol . ' 0';
+    }
+
+    $price = trim( $price );
+
+    // If price already contains currency symbol or Rs / INR / $, return as is
+    if ( preg_match( '/^(₹|Rs|RS|INR|\$|€|£)/u', $price ) ) {
+        return $price;
+    }
+
+    return $symbol . ' ' . $price;
 }
 add_action( 'save_post', 'rikshawale_save_inventory_meta' );
 
