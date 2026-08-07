@@ -13,6 +13,10 @@ $all_transmissions = array( 'Automatic', 'Manual' );
 $all_owners        = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' );
 $all_years         = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018' );
 $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
+
+$selected_colors = isset( $_GET['color'] ) ? array_map( 'sanitize_text_field', (array) $_GET['color'] ) : array();
+$selected_brands = isset( $_GET['brand'] ) ? array_map( 'sanitize_text_field', (array) $_GET['brand'] ) : array();
+$selected_fuels  = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_GET['fuel'] ) : array();
 ?>
 
 <style>
@@ -156,7 +160,7 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
                             <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
                                 <?php foreach ( $all_brands as $brand ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="brand[]" value="<?php echo esc_attr($brand); ?>" id="brand_<?php echo sanitize_title($brand); ?>" onchange="triggerFilterAjax(1)">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="brand[]" value="<?php echo esc_attr($brand); ?>" id="brand_<?php echo sanitize_title($brand); ?>" <?php checked( in_array( $brand, $selected_brands, true ) ); ?> onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="brand_<?php echo sanitize_title($brand); ?>">
                                             <?php echo esc_html($brand); ?>
                                         </label>
@@ -171,7 +175,7 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_fuels as $fuel ) : ?>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" name="fuel[]" value="<?php echo esc_attr($fuel); ?>" id="fuel_<?php echo sanitize_title($fuel); ?>" onchange="triggerFilterAjax(1)">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="fuel[]" value="<?php echo esc_attr($fuel); ?>" id="fuel_<?php echo sanitize_title($fuel); ?>" <?php checked( in_array( $fuel, $selected_fuels, true ) ); ?> onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="fuel_<?php echo sanitize_title($fuel); ?>">
                                             <?php if ($fuel === 'Electric') echo '⚡ '; elseif ($fuel === 'CNG') echo '🌱 '; ?>
                                             <?php echo esc_html($fuel); ?>
@@ -246,7 +250,7 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
                                     $border_cls = ($color === 'White') ? 'border border-secondary' : '';
                                 ?>
                                     <div class="form-check p-0 mb-0">
-                                        <input type="checkbox" class="btn-check" name="color[]" value="<?php echo esc_attr($color); ?>" id="col_<?php echo sanitize_title($color); ?>" onchange="triggerFilterAjax(1)" autocomplete="off">
+                                        <input type="checkbox" class="btn-check" name="color[]" value="<?php echo esc_attr($color); ?>" id="col_<?php echo sanitize_title($color); ?>" <?php checked( in_array( $color, $selected_colors, true ) ); ?> onchange="triggerFilterAjax(1)" autocomplete="off">
                                         <label class="btn btn-outline-secondary btn-sm rounded-pill extra-small px-3 py-1 d-inline-flex align-items-center gap-2" for="col_<?php echo sanitize_title($color); ?>" style="cursor: pointer;">
                                             <span class="d-inline-block rounded-circle <?php echo $border_cls; ?>" style="width: 13px; height: 13px; background-color: <?php echo $hex; ?>;"></span>
                                             <?php echo esc_html($color); ?>

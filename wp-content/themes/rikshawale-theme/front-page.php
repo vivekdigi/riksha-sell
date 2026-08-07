@@ -110,33 +110,44 @@ foreach ( $section_order as $sec_key ) {
                 <div class="container">
                     <div class="floating-search-card">
                         <h4><i class="fa fa-search text-primary me-2"></i> Find Your Dream Riksha</h4>
-                        <form action="<?php echo esc_url( get_post_type_archive_link( 'riksha' ) ); ?>" method="get">
+                        <form action="<?php echo esc_url( home_url( '/inventory/' ) ); ?>" method="get">
                             <div class="row g-3">
-                                <div class="col-md-4">
-                                    <select name="riksha_brand" class="form-select">
+                                <div class="col-md-3">
+                                    <select name="brand[]" class="form-select rounded-3">
                                         <option value=""><?php _e( 'All Brands / Makes', 'rikshawale-theme' ); ?></option>
                                         <?php 
-                                        $brands = get_terms( array( 'taxonomy' => 'riksha_brand', 'hide_empty' => false ) );
-                                        if ( ! is_wp_error( $brands ) && ! empty( $brands ) ) {
-                                            foreach ( $brands as $brand ) {
-                                                echo '<option value="' . esc_attr( $brand->slug ) . '">' . esc_html( $brand->name ) . '</option>';
-                                            }
+                                        $all_brands = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota' );
+                                        foreach ( $all_brands as $brand ) {
+                                            echo '<option value="' . esc_attr( $brand ) . '">' . esc_html( $brand ) . '</option>';
                                         }
                                         ?>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <select name="riksha_fuel" class="form-select">
+                                <div class="col-md-3">
+                                    <select name="fuel[]" class="form-select rounded-3">
                                         <option value=""><?php _e( 'All Power/Fuel Types', 'rikshawale-theme' ); ?></option>
-                                        <option value="Electric"><?php _e( 'Electric', 'rikshawale-theme' ); ?></option>
-                                        <option value="CNG"><?php _e( 'CNG', 'rikshawale-theme' ); ?></option>
+                                        <option value="Electric">⚡ <?php _e( 'Electric', 'rikshawale-theme' ); ?></option>
+                                        <option value="CNG">🌱 <?php _e( 'CNG', 'rikshawale-theme' ); ?></option>
                                         <option value="LPG"><?php _e( 'LPG', 'rikshawale-theme' ); ?></option>
                                         <option value="Petrol"><?php _e( 'Petrol', 'rikshawale-theme' ); ?></option>
                                         <option value="Diesel"><?php _e( 'Diesel', 'rikshawale-theme' ); ?></option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="submit" class="btn btn-search-submit"><i class="fa fa-sliders me-2"></i> Search Inventory</button>
+                                <div class="col-md-3">
+                                    <select name="color[]" class="form-select rounded-3">
+                                        <option value=""><?php _e( '🎨 All Exterior Colors', 'rikshawale-theme' ); ?></option>
+                                        <option value="White">⚪ White</option>
+                                        <option value="Black">⚫ Black</option>
+                                        <option value="Red">🔴 Red</option>
+                                        <option value="Blue">🔵 Blue</option>
+                                        <option value="Grey">🩶 Grey</option>
+                                        <option value="Green">🟢 Green</option>
+                                        <option value="Yellow">🟡 Yellow</option>
+                                        <option value="Silver">🔘 Silver</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-search-submit w-100 fw-bold rounded-3"><i class="fa fa-sliders me-2"></i> Filter Vehicles</button>
                                 </div>
                             </div>
                         </form>
