@@ -724,7 +724,34 @@ foreach ( $section_order as $sec_key ) {
                                         <?php endif; ?>
                                         <div class="testimonial-card-body">
                                             <p class="mb-2">"<?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>"</p>
-                                            <div class="testimonial-author text-primary">— <?php the_title(); ?><?php if ( has_excerpt() ) { echo ', ' . esc_html( get_the_excerpt() ); } ?></div>
+                                            <div class="testimonial-author text-primary d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                <span>— <?php the_title(); ?><?php 
+                                                    $t_desig = get_post_meta( get_the_ID(), '_testimonial_designation', true );
+                                                    if ( $t_desig ) {
+                                                        echo ', ' . esc_html( $t_desig );
+                                                    } elseif ( has_excerpt() ) {
+                                                        echo ', ' . esc_html( get_the_excerpt() );
+                                                    }
+                                                ?></span>
+                                                <?php if ( get_theme_mod( 'show_testimonial_stars', 1 ) ) : 
+                                                    $rating_val = floatval( get_post_meta( get_the_ID(), '_testimonial_rating', true ) ?: get_theme_mod( 'testimonial_default_rating', '5' ) );
+                                                    $full_stars  = floor( $rating_val );
+                                                    $has_half    = ( $rating_val - $full_stars ) >= 0.5;
+                                                    $star_color  = get_theme_mod( 'testimonial_star_color', '#ffc107' );
+                                                ?>
+                                                <span class="testimonial-stars-wrap ms-1 d-inline-flex align-items-center" style="color: <?php echo esc_attr( $star_color ); ?>; font-size: 0.9rem;" title="<?php echo esc_attr( $rating_val ); ?> Out of 5 Stars">
+                                                    <?php for ( $s = 1; $s <= 5; $s++ ) : 
+                                                        if ( $s <= $full_stars ) {
+                                                            echo '<i class="fa-solid fa-star me-1"></i>';
+                                                        } elseif ( $s == $full_stars + 1 && $has_half ) {
+                                                            echo '<i class="fa-solid fa-star-half-stroke me-1"></i>';
+                                                        } else {
+                                                            echo '<i class="fa-regular fa-star me-1" style="opacity:0.35;"></i>';
+                                                        }
+                                                    endfor; ?>
+                                                </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

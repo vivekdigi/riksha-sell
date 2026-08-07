@@ -136,6 +136,63 @@ function rikshawale_register_testimonial_cpt() {
 add_action( 'init', 'rikshawale_register_testimonial_cpt' );
 
 /**
+ * Admin Metabox for Testimonials (Star Rating & Designation)
+ */
+function rikshawale_add_testimonial_metabox() {
+	add_meta_box(
+		'testimonial_details_mb',
+		__( 'Testimonial Details & Star Rating', 'rikshawale-theme' ),
+		'rikshawale_render_testimonial_metabox',
+		'testimonial',
+		'normal',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'rikshawale_add_testimonial_metabox' );
+
+function rikshawale_render_testimonial_metabox( $post ) {
+	wp_nonce_field( 'rikshawale_save_testimonial_meta', 'testimonial_meta_nonce' );
+	$rating  = get_post_meta( $post->ID, '_testimonial_rating', true ) ?: '5';
+	$author_designation = get_post_meta( $post->ID, '_testimonial_designation', true );
+	?>
+	<div style="font-size: 14px; line-height: 1.6; padding: 10px;">
+		<p>
+			<label for="testimonial_rating"><strong><?php _e( 'Star Rating (1 to 5):', 'rikshawale-theme' ); ?></strong></label><br>
+			<select name="testimonial_rating" id="testimonial_rating" style="width: 100%; max-width: 300px; padding: 6px; margin-top: 4px;">
+				<option value="5" <?php selected( $rating, '5' ); ?>>⭐⭐⭐⭐⭐ (5 Stars)</option>
+				<option value="4.5" <?php selected( $rating, '4.5' ); ?>>⭐⭐⭐⭐½ (4.5 Stars)</option>
+				<option value="4" <?php selected( $rating, '4' ); ?>>⭐⭐⭐⭐ (4 Stars)</option>
+				<option value="3.5" <?php selected( $rating, '3.5' ); ?>>⭐⭐⭐½ (3.5 Stars)</option>
+				<option value="3" <?php selected( $rating, '3' ); ?>>⭐⭐⭐ (3 Stars)</option>
+				<option value="2" <?php selected( $rating, '2' ); ?>>⭐⭐ (2 Stars)</option>
+				<option value="1" <?php selected( $rating, '1' ); ?>>⭐ (1 Star)</option>
+			</select>
+		</p>
+		<p>
+			<label for="testimonial_designation"><strong><?php _e( 'Author Designation / Role / Location (e.g. Commercial Fleet Owner, Delhi):', 'rikshawale-theme' ); ?></strong></label><br>
+			<input type="text" name="testimonial_designation" id="testimonial_designation" value="<?php echo esc_attr( $author_designation ); ?>" style="width: 100%; max-width: 400px; padding: 6px; margin-top: 4px;" placeholder="e.g. Commercial Driver, Delhi">
+		</p>
+	</div>
+	<?php
+}
+
+function rikshawale_save_testimonial_meta( $post_id ) {
+	if ( ! isset( $_POST['testimonial_meta_nonce'] ) || ! wp_verify_nonce( $_POST['testimonial_meta_nonce'], 'rikshawale_save_testimonial_meta' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( isset( $_POST['testimonial_rating'] ) ) {
+		update_post_meta( $post_id, '_testimonial_rating', sanitize_text_field( $_POST['testimonial_rating'] ) );
+	}
+	if ( isset( $_POST['testimonial_designation'] ) ) {
+		update_post_meta( $post_id, '_testimonial_designation', sanitize_text_field( $_POST['testimonial_designation'] ) );
+	}
+}
+add_action( 'save_post_testimonial', 'rikshawale_save_testimonial_meta' );
+
+/**
  * Register Custom Post Type: FAQ
  */
 function rikshawale_register_faq_cpt() {
@@ -2059,6 +2116,49 @@ function rikshawale_customize_register( $wp_customize ) {
 		'section'  => 'rikshawale_extra_homepage_sections',
 		'settings' => 'testimonials_subtitle',
 	) );
+
+	// Testimonials Rating Stars Options
+	$wp_customize->add_setting( 'show_testimonial_stars', array(
+		'default'           => 1,
+		'sanitize_callback' => 'absint',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'show_testimonial_stars', array(
+		'type'     => 'checkbox',
+		'label'    => __( 'Show Review Star Rating', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_extra_homepage_sections',
+		'settings' => 'show_testimonial_stars',
+	) );
+
+	$wp_customize->add_setting( 'testimonial_default_rating', array(
+		'default'           => '5',
+		'sanitize_callback' => 'sanitize_text_field',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'testimonial_default_rating', array(
+		'type'     => 'select',
+		'label'    => __( 'Default Star Rating', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_extra_homepage_sections',
+		'settings' => 'testimonial_default_rating',
+		'choices'  => array(
+			'5'   => '5 Stars (⭐⭐⭐⭐⭐)',
+			'4.5' => '4.5 Stars (⭐⭐⭐⭐½)',
+			'4'   => '4 Stars (⭐⭐⭐⭐)',
+			'3.5' => '3.5 Stars (⭐⭐⭐½)',
+			'3'   => '3 Stars (⭐⭐⭐)',
+		),
+	) );
+
+	$wp_customize->add_setting( 'testimonial_star_color', array(
+		'default'           => '#ffc107',
+		'sanitize_callback' => 'sanitize_hex_color',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'testimonial_star_color', array(
+		'label'    => __( 'Review Star Rating Color', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_extra_homepage_sections',
+		'settings' => 'testimonial_star_color',
+	) ) );
 
 	/* =====================================================
 	   HOMEPAGE PANEL & THEME OPTIONS

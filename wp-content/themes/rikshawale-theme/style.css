@@ -450,6 +450,22 @@ a:hover {
     margin-top: 15px;
 }
 
+.testimonial-stars-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255, 193, 7, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 193, 7, 0.25);
+    transition: all 0.2s ease;
+}
+
+.testimonial-card:hover .testimonial-stars-wrap {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.25);
+}
+
 /* Footer Section */
 .footer-custom {
     background-color: var(--dark-color);
