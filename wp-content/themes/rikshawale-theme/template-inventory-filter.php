@@ -77,24 +77,24 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
                             </div>
                             <div class="filter-checkbox-list">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="0-100000" id="pr_1" onchange="triggerFilterAjax(1)">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="0-100000" id="pr_1" onchange="onPriceCheckboxChange(this)">
                                     <label class="form-check-label small text-dark" for="pr_1">Under ₹1 Lakh</label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="100000-300000" id="pr_2" onchange="triggerFilterAjax(1)">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="100000-300000" id="pr_2" onchange="onPriceCheckboxChange(this)">
                                     <label class="form-check-label small text-dark" for="pr_2">₹1 Lakh - ₹3 Lakhs</label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="300000-500000" id="pr_3" onchange="triggerFilterAjax(1)">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="300000-500000" id="pr_3" onchange="onPriceCheckboxChange(this)">
                                     <label class="form-check-label small text-dark" for="pr_3">₹3 Lakhs - ₹5 Lakhs</label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="500000-1000000" id="pr_4" onchange="triggerFilterAjax(1)">
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="500000-1000000" id="pr_4" onchange="onPriceCheckboxChange(this)">
                                     <label class="form-check-label small text-dark" for="pr_4">₹5 Lakhs - ₹10 Lakhs</label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="1000000-99999999" id="pr_5" onchange="triggerFilterAjax(1)">
-                                    <label class="form-check-label small text-dark" for="pr_5">Above ₹10 Lakhs</label>
+                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="1000000-25000000" id="pr_5" onchange="onPriceCheckboxChange(this)">
+                                    <label class="form-check-label small text-dark" for="pr_5">₹10 Lakhs - ₹2.5 Cr (Includes ₹11.75L)</label>
                                 </div>
                             </div>
                         </div>
@@ -334,6 +334,20 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
 var currentPage = 1;
 var maxPages = <?php echo intval($initial_query->max_num_pages ?: 1); ?>;
 var searchTimer = null;
+
+function onPriceCheckboxChange(el) {
+    if (el.checked) {
+        var val = el.value;
+        var parts = val.split('-');
+        if (parts.length === 2) {
+            jQuery('#priceMinInput').val(parts[0]);
+            jQuery('#priceMaxInput').val(parts[1]);
+            jQuery('#priceSliderRange').val(parts[1]);
+            jQuery('#priceMaxLabel').text('₹' + parseInt(parts[1]).toLocaleString('en-IN'));
+        }
+    }
+    triggerFilterAjax(1);
+}
 
 function onPriceSliderInput(val) {
     var maxVal = parseInt(val) || 25000000;

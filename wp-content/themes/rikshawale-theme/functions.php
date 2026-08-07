@@ -3348,13 +3348,13 @@ function rikshawale_ajax_filter_inventory() {
 	$transmissions = isset( $_POST['transmission'] ) ? array_map( 'sanitize_text_field', (array) $_POST['transmission'] ) : array();
 	$owners        = isset( $_POST['owner'] ) ? array_map( 'sanitize_text_field', (array) $_POST['owner'] ) : array();
 	$colors        = isset( $_POST['color'] ) ? array_map( 'sanitize_text_field', (array) $_POST['color'] ) : array();
+	$price_ranges  = isset( $_POST['price_range'] ) ? array_map( 'sanitize_text_field', (array) $_POST['price_range'] ) : array();
 	$price_min     = isset( $_POST['price_min'] ) && $_POST['price_min'] !== '' ? floatval( $_POST['price_min'] ) : 0;
 	$price_max     = isset( $_POST['price_max'] ) && $_POST['price_max'] !== '' ? floatval( $_POST['price_max'] ) : 0;
 
 	$args = array(
 		'post_type'      => 'inventory',
-		'posts_per_page' => 12,
-		'paged'          => $paged,
+		'posts_per_page' => -1, // Fetch candidates for clean numeric price filtering
 		'post_status'    => 'publish',
 	);
 
@@ -3362,35 +3362,7 @@ function rikshawale_ajax_filter_inventory() {
 		$args['s'] = $keyword;
 	}
 
-	// Sorting
-	switch ( $sort_by ) {
-		case 'price_asc':
-			$args['meta_key'] = '_car_price';
-			$args['orderby']  = 'meta_value_num';
-			$args['order']    = 'ASC';
-			break;
-		case 'price_desc':
-			$args['meta_key'] = '_car_price';
-			$args['orderby']  = 'meta_value_num';
-			$args['order']    = 'DESC';
-			break;
-		case 'year_desc':
-			$args['meta_key'] = '_car_mfg_year';
-			$args['orderby']  = 'meta_value_num';
-			$args['order']    = 'DESC';
-			break;
-		case 'mileage_asc':
-			$args['meta_key'] = '_car_driven_km';
-			$args['orderby']  = 'meta_value_num';
-			$args['order']    = 'ASC';
-			break;
-		default:
-			$args['orderby'] = 'date';
-			$args['order']   = 'DESC';
-			break;
-	}
-
-	// Meta Queries
+	// Meta Queries for non-price attributes
 	$meta_query = array( 'relation' => 'AND' );
 
 	if ( ! empty( $brands ) ) {
@@ -3449,34 +3421,84 @@ function rikshawale_ajax_filter_inventory() {
 		);
 	}
 
-	if ( $price_min > 0 || $price_max > 0 ) {
-		if ( $price_max > 0 && $price_max >= $price_min ) {
-			$meta_query[] = array(
-				'key'     => '_car_price',
-				'value'   => array( $price_min, $price_max ),
-				'type'    => 'NUMERIC',
-				'compare' => 'BETWEEN',
-			);
-		} elseif ( $price_min > 0 ) {
-			$meta_query[] = array(
-				'key'     => '_car_price',
-				'value'   => $price_min,
-				'type'    => 'NUMERIC',
-				'compare' => '>=',
-			);
-		}
-	}
-
 	if ( count( $meta_query ) > 1 ) {
 		$args['meta_query'] = $meta_query;
 	}
 
-	$query = new WP_Query( $args );
+	$all_query = new WP_Query( $args );
+
+	$matched_posts = array();
+
+	if ( $all_query->have_posts() ) {
+		while ( $all_query->have_posts() ) {
+			$all_query->the_post();
+			$pid = get_the_ID();
+
+			// Strip all commas, spaces, currency symbols to get pure numeric price
+			$raw_price = get_post_meta( $pid, '_car_price', true ) ?: get_post_meta( $pid, '_riksha_price', true );
+			$clean_val = floatval( preg_replace( '/[^0-9.]/', '', $raw_price ) );
+
+			// Filter by Min Price Input
+			if ( $price_min > 0 && $clean_val < $price_min ) {
+				continue;
+			}
+			// Filter by Max Price Input
+			if ( $price_max > 0 && $clean_val > $price_max ) {
+				continue;
+			}
+
+			// Filter by Price Range Checkboxes
+			if ( ! empty( $price_ranges ) ) {
+				$range_matched = false;
+				foreach ( $price_ranges as $pr ) {
+					$parts = explode( '-', $pr );
+					if ( count( $parts ) === 2 ) {
+						$r_min = floatval( $parts[0] );
+						$r_max = floatval( $parts[1] );
+						if ( $clean_val >= $r_min && $clean_val <= $r_max ) {
+							$range_matched = true;
+							break;
+						}
+					}
+				}
+				if ( ! $range_matched ) {
+					continue;
+				}
+			}
+
+			$matched_posts[] = array(
+				'id'         => $pid,
+				'price_num'  => $clean_val,
+				'year_num'   => floatval( get_post_meta( $pid, '_car_mfg_year', true ) ),
+				'driven_num' => floatval( preg_replace('/[^0-9.]/', '', get_post_meta( $pid, '_car_driven_km', true ) ) ),
+				'date'       => get_the_date( 'Y-m-d H:i:s' ),
+			);
+		}
+		wp_reset_postdata();
+	}
+
+	// Sorting
+	usort( $matched_posts, function( $a, $b ) use ( $sort_by ) {
+		if ( $sort_by === 'price_asc' ) {
+			return $a['price_num'] <=> $b['price_num'];
+		} elseif ( $sort_by === 'price_desc' ) {
+			return $b['price_num'] <=> $a['price_num'];
+		} elseif ( $sort_by === 'year_desc' ) {
+			return $b['year_num'] <=> $a['year_num'];
+		} elseif ( $sort_by === 'mileage_asc' ) {
+			return $a['driven_num'] <=> $b['driven_num'];
+		} else {
+			return strcmp( $b['date'], $a['date'] );
+		}
+	} );
+
+	$total_found = count( $matched_posts );
+	$per_page    = 12;
+	$max_pages   = max( 1, ceil( $total_found / $per_page ) );
+	$paged_posts = array_slice( $matched_posts, ( $paged - 1 ) * $per_page, $per_page );
 
 	ob_start();
-	$count     = 0;
-	$max_pages = 1;
-	$tags      = array();
+	$tags = array();
 
 	foreach ( $brands as $b ) $tags[] = 'Brand: ' . $b;
 	foreach ( $fuels as $f ) $tags[] = 'Fuel: ' . $f;
@@ -3485,12 +3507,9 @@ function rikshawale_ajax_filter_inventory() {
 	foreach ( $colors as $c ) $tags[] = 'Color: ' . $c;
 	if ( $price_min || $price_max ) $tags[] = 'Price: ₹' . number_format($price_min) . ' - ₹' . number_format($price_max);
 
-	if ( $query->have_posts() ) {
-		$count     = $query->found_posts;
-		$max_pages = $query->max_num_pages;
-		while ( $query->have_posts() ) {
-			$query->the_post();
-			$p_id    = get_the_ID();
+	if ( ! empty( $paged_posts ) ) {
+		foreach ( $paged_posts as $item ) {
+			$p_id    = $item['id'];
 			$p_price = rikshawale_get_formatted_price( $p_id );
 			$p_year  = get_post_meta( $p_id, '_car_mfg_year', true ) ?: ( get_post_meta( $p_id, '_car_year', true ) ?: '2022' );
 			$p_fuel  = get_post_meta( $p_id, '_car_fuel', true ) ?: 'Electric';
@@ -3498,10 +3517,9 @@ function rikshawale_ajax_filter_inventory() {
 			$p_km    = get_post_meta( $p_id, '_car_driven_km', true ) ?: '15,000 km';
 			$p_badge = get_post_meta( $p_id, '_car_badge', true ) ?: 'LIMITED OFFER';
 			$thumb   = get_the_post_thumbnail_url( $p_id, 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
-			$title   = get_the_title();
+			$title   = get_the_title( $p_id );
 
-			$raw_p = preg_replace('/[^0-9]/', '', get_post_meta( $p_id, '_car_price', true ) );
-			$num_p = ( $raw_p && floatval($raw_p) > 0 ) ? floatval($raw_p) : 500000;
+			$num_p    = $item['price_num'] > 0 ? $item['price_num'] : 500000;
 			$loan_amt = $num_p * 0.80;
 			$rate_m   = (11.75 / 12) / 100;
 			$pow_m    = pow(1 + $rate_m, 60);
@@ -3512,13 +3530,13 @@ function rikshawale_ajax_filter_inventory() {
 					<?php if ( $p_badge ) : ?>
 						<span class="car-card-badge position-absolute top-0 start-0 m-3 badge bg-danger z-2 shadow-sm rounded-pill px-3 py-2 extra-small uppercase"><?php echo esc_html($p_badge); ?></span>
 					<?php endif; ?>
-					<a href="<?php the_permalink(); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
-						<img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>" class="w-100 h-100 object-fit-cover transition-all">
+					<a href="<?php echo get_permalink($p_id); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
+						<img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($title); ?>" class="w-100 h-100 object-fit-cover transition-all">
 					</a>
 					<div class="card-body p-4 d-flex flex-column justify-content-between">
 						<div>
 							<h6 class="fw-bold text-dark text-truncate mb-2" title="<?php echo esc_attr($title); ?>">
-								<a href="<?php the_permalink(); ?>" class="text-dark text-decoration-none"><?php echo esc_html($title); ?></a>
+								<a href="<?php echo get_permalink($p_id); ?>" class="text-dark text-decoration-none"><?php echo esc_html($title); ?></a>
 							</h6>
 							<div class="d-flex flex-wrap gap-1 mb-3">
 								<span class="badge bg-light text-secondary border extra-small"><?php echo esc_html($p_year); ?></span>
@@ -3539,7 +3557,7 @@ function rikshawale_ajax_filter_inventory() {
 								</div>
 							</div>
 							<div class="d-grid gap-2 d-flex mt-3">
-								<a href="<?php the_permalink(); ?>" class="btn btn-outline-dark btn-sm rounded-3 flex-grow-1 fw-bold">View Details</a>
+								<a href="<?php echo get_permalink($p_id); ?>" class="btn btn-outline-dark btn-sm rounded-3 flex-grow-1 fw-bold">View Details</a>
 								<button type="button" class="btn btn-danger btn-sm rounded-3 fw-bold px-3" onclick="triggerVehicleBooking(<?php echo $p_id; ?>, '<?php echo esc_js($title); ?>', '<?php echo esc_js($p_price); ?>', '<?php echo esc_url($thumb); ?>')" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border:none;">
 									Book
 								</button>
@@ -3550,7 +3568,6 @@ function rikshawale_ajax_filter_inventory() {
 			</div>
 			<?php
 		}
-		wp_reset_postdata();
 	} else {
 		?>
 		<div class="col-12 text-center py-5">
@@ -3573,7 +3590,7 @@ function rikshawale_ajax_filter_inventory() {
 
 	wp_send_json_success( array(
 		'html'      => $html,
-		'count'     => $count,
+		'count'     => $total_found,
 		'max_pages' => $max_pages,
 		'tags'      => $tag_html,
 	) );
