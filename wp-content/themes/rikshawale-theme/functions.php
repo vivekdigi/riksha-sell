@@ -3074,46 +3074,6 @@ function rikshawale_ajax_submit_booking() {
 add_action( 'wp_ajax_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
 add_action( 'wp_ajax_nopriv_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
 
-	if ( empty( $name ) || empty( $phone ) || empty( $email ) ) {
-		wp_send_json_error( array( 'message' => 'Name, phone, and email are required to submit booking.' ) );
-	}
-
-	$post_title = $name . ' — ' . $car_title . ' (' . date('d M Y') . ')';
-
-	$post_id = wp_insert_post( array(
-		'post_type'   => 'riksha_booking',
-		'post_title'  => $post_title,
-		'post_status' => 'publish',
-	) );
-
-	if ( is_wp_error( $post_id ) ) {
-		wp_send_json_error( array( 'message' => 'Failed to save booking. Please try again.' ) );
-	}
-
-	update_post_meta( $post_id, '_booking_user_id', $user_id );
-	update_post_meta( $post_id, '_booking_car_id', $car_id );
-	update_post_meta( $post_id, '_booking_car_title', $car_title );
-	update_post_meta( $post_id, '_booking_name', $name );
-	update_post_meta( $post_id, '_booking_phone', $phone );
-	update_post_meta( $post_id, '_booking_email', $email );
-	update_post_meta( $post_id, '_booking_city', $city );
-	update_post_meta( $post_id, '_booking_date', $date );
-	update_post_meta( $post_id, '_booking_message', $message );
-	update_post_meta( $post_id, '_booking_status', 'Pending' );
-
-	// Email Admin Notification
-	$to      = get_option( 'admin_email' );
-	$subject = '🛺 New Vehicle Booking Inquiry: ' . $car_title . ' by ' . $name;
-	$body    = "Vehicle: {$car_title}\nCustomer Name: {$name}\nPhone: {$phone}\nEmail: {$email}\nCity: {$city}\nPreferred Date: {$date}\n\nNotes:\n{$message}";
-	$headers = array( 'Content-Type: text/plain; charset=UTF-8', "Reply-To: {$name} <{$email}>" );
-	wp_mail( $to, $subject, $body, $headers );
-
-	wp_send_json_success( array(
-		'message' => 'Your vehicle booking inquiry has been submitted successfully! Our representative will contact you shortly.',
-	) );
-}
-add_action( 'wp_ajax_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
-
 // 4. AJAX Get Logged-in User Bookings
 function rikshawale_ajax_get_user_bookings() {
 	if ( ! is_user_logged_in() ) {
