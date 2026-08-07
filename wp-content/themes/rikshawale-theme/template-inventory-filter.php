@@ -120,38 +120,9 @@ $selected_fuels  = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (a
                                 <input type="range" class="dual-range-input" id="priceMaxSlider" min="0" max="25000000" step="50000" value="25000000" oninput="updateDualPriceSlider('max')" onchange="triggerFilterAjax(1)">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="extra-small text-muted mb-1">Min Price (₹)</label>
-                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_min" id="priceMinInput" placeholder="Min ₹" onchange="onManualPriceInputChange()">
-                                </div>
-                                <div class="col-6">
-                                    <label class="extra-small text-muted mb-1">Max Price (₹)</label>
-                                    <input type="number" class="form-control form-control-sm rounded-2" name="price_max" id="priceMaxInput" placeholder="Max ₹" onchange="onManualPriceInputChange()">
-                                </div>
-                            </div>
-                            <div class="filter-checkbox-list">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="0-100000" id="pr_1" onchange="onPriceCheckboxChange(this)">
-                                    <label class="form-check-label small text-dark" for="pr_1">Under ₹1 Lakh</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="100000-300000" id="pr_2" onchange="onPriceCheckboxChange(this)">
-                                    <label class="form-check-label small text-dark" for="pr_2">₹1 Lakh - ₹3 Lakhs</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="300000-500000" id="pr_3" onchange="onPriceCheckboxChange(this)">
-                                    <label class="form-check-label small text-dark" for="pr_3">₹3 Lakhs - ₹5 Lakhs</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="500000-1000000" id="pr_4" onchange="onPriceCheckboxChange(this)">
-                                    <label class="form-check-label small text-dark" for="pr_4">₹5 Lakhs - ₹10 Lakhs</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input filter-checkbox" type="checkbox" name="price_range[]" value="1000000-25000000" id="pr_5" onchange="onPriceCheckboxChange(this)">
-                                    <label class="form-check-label small text-dark" for="pr_5">₹10 Lakhs - ₹2.5 Cr (Includes ₹11.75L)</label>
-                                </div>
-                            </div>
+                            <!-- Hidden Min/Max inputs submitted via AJAX -->
+                            <input type="hidden" name="price_min" id="priceMinInput" value="0">
+                            <input type="hidden" name="price_max" id="priceMaxInput" value="25000000">
                         </div>
 
                         <!-- 2. BRAND / MAKE FILTER -->
