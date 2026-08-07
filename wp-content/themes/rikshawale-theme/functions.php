@@ -2203,6 +2203,72 @@ function rikshawale_customize_register( $wp_customize ) {
 	) ) );
 
 	/* =====================================================
+	   EMI CALCULATOR SETTINGS
+	   ===================================================== */
+	$wp_customize->add_section( 'rikshawale_emi_calculator_section', array(
+		'title'    => __( '🧮 EMI Calculator Settings', 'rikshawale-theme' ),
+		'priority' => 32,
+	) );
+
+	// Default Annual Interest Rate (%)
+	$wp_customize->add_setting( 'emi_interest_rate', array(
+		'default'           => '9.5',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'emi_interest_rate', array(
+		'label'       => __( 'Default Interest Rate (% per annum)', 'rikshawale-theme' ),
+		'description' => __( 'Annual bank loan interest rate used for EMI calculation (e.g. 9.5)', 'rikshawale-theme' ),
+		'section'     => 'rikshawale_emi_calculator_section',
+		'type'        => 'text',
+	) );
+
+	// Minimum Down Payment %
+	$wp_customize->add_setting( 'emi_min_downpayment_pct', array(
+		'default'           => '20',
+		'sanitize_callback' => 'absint',
+	) );
+	$wp_customize->add_control( 'emi_min_downpayment_pct', array(
+		'label'       => __( 'Default Down Payment (%)', 'rikshawale-theme' ),
+		'description' => __( 'Default down payment percentage of total price (e.g. 20%)', 'rikshawale-theme' ),
+		'section'     => 'rikshawale_emi_calculator_section',
+		'type'        => 'number',
+	) );
+
+	// Default Tenure (Years)
+	$wp_customize->add_setting( 'emi_default_tenure', array(
+		'default'           => '3',
+		'sanitize_callback' => 'absint',
+	) );
+	$wp_customize->add_control( 'emi_default_tenure', array(
+		'label'       => __( 'Default Loan Tenure (Years)', 'rikshawale-theme' ),
+		'description' => __( 'Default loan tenure slider value in years (1 to 7 years)', 'rikshawale-theme' ),
+		'section'     => 'rikshawale_emi_calculator_section',
+		'type'        => 'number',
+	) );
+
+	// Principal Color (Chart)
+	$wp_customize->add_setting( 'emi_principal_color', array(
+		'default'           => '#0ea5e9',
+		'sanitize_callback' => 'sanitize_hex_color',
+	) );
+	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'emi_principal_color', array(
+		'label'    => __( 'Principal Amount Donut Color', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_emi_calculator_section',
+		'settings' => 'emi_principal_color',
+	) ) );
+
+	// Interest Color (Chart)
+	$wp_customize->add_setting( 'emi_interest_color', array(
+		'default'           => '#fce4e4',
+		'sanitize_callback' => 'sanitize_hex_color',
+	) );
+	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'emi_interest_color', array(
+		'label'    => __( 'Total Interest Donut Color', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_emi_calculator_section',
+		'settings' => 'emi_interest_color',
+	) ) );
+
+	/* =====================================================
 	   HOMEPAGE PANEL & THEME OPTIONS
 	   ===================================================== */
 	$wp_customize->add_panel( 'rikshawale_homepage_panel', array(

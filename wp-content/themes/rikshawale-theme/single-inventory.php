@@ -23,6 +23,20 @@ while ( have_posts() ) : the_post();
 
     $car_video_url = get_post_meta( $post_id, '_car_video_url', true );
 
+    // Extract raw price integer for EMI calculator
+    $raw_price_str = get_post_meta( $post_id, '_car_price', true ) ?: get_post_meta( $post_id, '_riksha_price', true );
+    $numeric_price = preg_replace( '/[^0-9]/', '', $raw_price_str );
+    $numeric_price = ( ! empty( $numeric_price ) && floatval( $numeric_price ) > 0 ) ? floatval( $numeric_price ) : 500000;
+
+    $interest_rate       = floatval( get_theme_mod( 'emi_interest_rate', '9.5' ) );
+    $default_dp_pct      = floatval( get_theme_mod( 'emi_min_downpayment_pct', '20' ) );
+    $default_tenure_yrs  = intval( get_theme_mod( 'emi_default_tenure', '3' ) );
+    $principal_chart_col = get_theme_mod( 'emi_principal_color', '#0ea5e9' );
+    $interest_chart_col  = get_theme_mod( 'emi_interest_color', '#fce4e4' );
+
+    $init_dp   = round( $numeric_price * ( $default_dp_pct / 100 ) );
+    $init_loan = $numeric_price - $init_dp;
+
     // Collect 5 gallery images
     $slides = array();
     if ( has_post_thumbnail() ) {
@@ -120,7 +134,7 @@ while ( have_posts() ) : the_post();
                     <div class="d-flex align-items-center justify-content-between bg-light p-2 px-3 rounded-3 mb-4 border">
                         <div>
                             <span class="extra-small text-muted d-block">Starting EMI</span>
-                            <strong class="small" style="color: var(--primary-color, #db2d2e);">₹12,182 /m</strong>
+                            <strong class="small" style="color: var(--primary-color, #db2d2e);" id="topStartingEMI">₹0 /m</strong>
                         </div>
                         <a href="#emi-calculator" class="btn btn-sm rounded-pill px-3 extra-small fw-bold" style="color: var(--primary-color, #db2d2e); border-color: var(--primary-color, #db2d2e);">Calculate your EMI</a>
                     </div>
@@ -213,66 +227,135 @@ while ( have_posts() ) : the_post();
 
                 <!-- 5. EMI Calculator Card -->
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" id="emi-calculator">
-                    <h5 class="fw-bold text-dark mb-4">EMI calculator</h5>
+                    <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-calculator me-2 text-primary"></i> EMI calculator</h5>
                     <div class="row g-4 align-items-center">
                         <div class="col-md-7">
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
-                                    <span>Loan Amount (Max 80%)</span>
-                                    <strong class="text-dark">₹6,24,000</strong>
+                                    <span>Loan Amount</span>
+                                    <strong class="text-dark" id="loanAmountLabel">₹<?php echo number_format( $init_loan ); ?></strong>
                                 </div>
-                                <input type="range" class="form-range" min="100000" max="800000" step="10000" value="624000" id="loanAmountRange" oninput="calculateEMI()">
+                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_loan; ?>" id="loanAmountRange" oninput="onLoanAmountChange()">
                             </div>
 
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
-                                    <span>Down Payment (Min 20%)</span>
-                                    <strong class="text-dark">₹1,41,000</strong>
+                                    <span>Down Payment</span>
+                                    <strong class="text-dark" id="downPaymentLabel">₹<?php echo number_format( $init_dp ); ?></strong>
                                 </div>
-                                <input type="range" class="form-range" min="50000" max="400000" step="5000" value="141000" id="downPaymentRange" oninput="calculateEMI()">
+                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_dp; ?>" id="downPaymentRange" oninput="onDownPaymentChange()">
                             </div>
 
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
                                     <span>Loan Tenure</span>
-                                    <strong class="text-dark" id="tenureVal">5 years</strong>
+                                    <strong class="text-dark" id="tenureVal"><?php echo $default_tenure_yrs; ?> years</strong>
                                 </div>
-                                <input type="range" class="form-range" min="1" max="7" step="1" value="5" id="tenureRange" oninput="calculateEMI()">
+                                <input type="range" class="form-range" min="1" max="7" step="1" value="<?php echo $default_tenure_yrs; ?>" id="tenureRange" oninput="calculateEMI()">
                             </div>
 
-                            <div class="p-3 border rounded-3 text-start" style="background-color: rgba(219, 45, 46, 0.05); border-color: rgba(219, 45, 46, 0.2) !important;">
+                            <div class="p-3 border rounded-3 text-start" style="background-color: rgba(14, 165, 233, 0.06); border-color: rgba(14, 165, 233, 0.2) !important;">
                                 <span class="d-block text-muted small">Monthly EMI</span>
-                                <span class="fs-3 fw-bold" style="color: var(--primary-color, #db2d2e);" id="calculatedEMI">₹12,182</span>
+                                <span class="fs-3 fw-bold text-primary" id="calculatedEMI">₹0</span>
                             </div>
                         </div>
 
                         <div class="col-md-5 text-center">
-                            <!-- Donut Chart SVG -->
+                            <!-- Donut Chart SVG (Dynamic Fill) -->
                             <div class="position-relative d-inline-block mb-3" style="width: 140px; height: 140px;">
-                                <svg viewBox="0 0 36 36" class="w-100 h-100">
-                                    <path class="circle-bg" stroke="#fce4e4" stroke-width="3.8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path class="circle" stroke="var(--primary-color, #db2d2e)" stroke-dasharray="75, 100" stroke-width="3.8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
+                                    <path class="circle-bg" stroke="<?php echo esc_attr($interest_chart_col); ?>" stroke-width="3.8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path id="emiDonutProgress" class="circle" stroke="<?php echo esc_attr($principal_chart_col); ?>" stroke-dasharray="75, 100" stroke-width="3.8" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" style="transition: stroke-dasharray 0.3s ease;" />
                                 </svg>
                             </div>
                             <div class="text-start small">
                                 <h6 class="fw-bold mb-2">Payment Breakdown</h6>
                                 <div class="d-flex justify-content-between text-muted mb-1">
-                                    <span><i class="fa-solid fa-square me-1" style="color: var(--primary-color, #db2d2e);"></i>Principal Amount</span>
-                                    <strong class="text-dark">₹5,50,000</strong>
+                                    <span><i class="fa-solid fa-square me-1" style="color: <?php echo esc_attr($principal_chart_col); ?>;"></i>Principal Amount</span>
+                                    <strong class="text-dark" id="breakdownPrincipal">₹0</strong>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted mb-1">
-                                    <span><i class="fa-solid fa-square me-1" style="color:#fce4e4;"></i>Total Interest</span>
-                                    <strong class="text-dark">₹1,80,921</strong>
+                                    <span><i class="fa-solid fa-square me-1" style="color: <?php echo esc_attr($interest_chart_col); ?>;"></i>Total Interest</span>
+                                    <strong class="text-dark" id="breakdownInterest">₹0</strong>
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex justify-content-between fw-bold text-dark">
                                     <span>Total Payment</span>
-                                    <span>₹7,30,921</span>
+                                    <span id="breakdownTotal">₹0</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+<script>
+var emiVehiclePrice = <?php echo $numeric_price; ?>;
+var emiInterestRate = <?php echo $interest_rate; ?>;
+
+function onLoanAmountChange() {
+    var loanVal = parseInt(document.getElementById('loanAmountRange').value) || 0;
+    var dpVal = emiVehiclePrice - loanVal;
+    if (dpVal < 0) dpVal = 0;
+    document.getElementById('downPaymentRange').value = dpVal;
+    calculateEMI();
+}
+
+function onDownPaymentChange() {
+    var dpVal = parseInt(document.getElementById('downPaymentRange').value) || 0;
+    var loanVal = emiVehiclePrice - dpVal;
+    if (loanVal < 0) loanVal = 0;
+    document.getElementById('loanAmountRange').value = loanVal;
+    calculateEMI();
+}
+
+function calculateEMI() {
+    var loanVal   = parseInt(document.getElementById('loanAmountRange').value) || 0;
+    var dpVal     = parseInt(document.getElementById('downPaymentRange').value) || 0;
+    var tenureYrs = parseInt(document.getElementById('tenureRange').value) || 1;
+
+    document.getElementById('loanAmountLabel').innerText = '₹' + loanVal.toLocaleString('en-IN');
+    document.getElementById('downPaymentLabel').innerText = '₹' + dpVal.toLocaleString('en-IN');
+    document.getElementById('tenureVal').innerText = tenureYrs + (tenureYrs > 1 ? ' years' : ' year');
+
+    var months = tenureYrs * 12;
+    var monthlyRate = (emiInterestRate / 12) / 100;
+    
+    var emi = 0;
+    if (loanVal > 0 && monthlyRate > 0) {
+        var pow = Math.pow(1 + monthlyRate, months);
+        emi = loanVal * monthlyRate * pow / (pow - 1);
+    }
+    emi = Math.round(emi);
+
+    var totalPayment = Math.round(emi * months);
+    var totalInterest = totalPayment - loanVal;
+    if (totalInterest < 0) totalInterest = 0;
+
+    var emiFormatted = '₹' + emi.toLocaleString('en-IN');
+    document.getElementById('calculatedEMI').innerText = emiFormatted;
+    
+    var topEMIEl = document.getElementById('topStartingEMI');
+    if (topEMIEl) {
+        topEMIEl.innerText = emiFormatted + ' /m';
+    }
+
+    document.getElementById('breakdownPrincipal').innerText = '₹' + loanVal.toLocaleString('en-IN');
+    document.getElementById('breakdownInterest').innerText = '₹' + totalInterest.toLocaleString('en-IN');
+    document.getElementById('breakdownTotal').innerText = '₹' + totalPayment.toLocaleString('en-IN');
+
+    var principalPct = totalPayment > 0 ? (loanVal / totalPayment) * 100 : 0;
+    principalPct = Math.min(Math.max(principalPct, 0), 100);
+    
+    var donutPath = document.getElementById('emiDonutProgress');
+    if (donutPath) {
+        donutPath.setAttribute('stroke-dasharray', principalPct.toFixed(1) + ', 100');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    calculateEMI();
+});
+</script>
 
                 <!-- 6. Benefits Card -->
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
