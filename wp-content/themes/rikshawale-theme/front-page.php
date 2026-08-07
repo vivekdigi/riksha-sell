@@ -130,16 +130,47 @@ endif;
 </div>
 
 <!-- 5a. Welcome & About Us Section -->
-<section class="welcome-section py-5 my-5 text-center">
+<section class="welcome-section py-5 my-4">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10 reveal">
-                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.85rem; letter-spacing: 2px;"><?php echo esc_html( get_theme_mod( 'welcome_subtitle', 'Welcome to our website' ) ); ?></span>
-                <h2 class="display-5 fw-bold mt-2 mb-3" style="text-transform: uppercase; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'welcome_title', 'RIKSHAWALE' ) ); ?></h2>
-                <div class="gradient-divider"></div>
-                <p class="lead text-muted mb-5" style="font-size: 1rem; line-height: 1.8;">
-                    <?php echo nl2br( esc_html( get_theme_mod( 'welcome_description', 'Rikshawale is India\'s trusted marketplace for certified pre-owned three-wheelers. Every auto-rickshaw is thoroughly inspected, transparently priced, and comes with easy financing options and a 30-day warranty for complete peace of mind.' ) ) ); ?>
-                </p>
+        <div class="row g-4 align-items-center mb-5">
+            <!-- Left Column: Dynamic Image Carousel -->
+            <div class="col-lg-6 reveal">
+                <div class="position-relative rounded-4 overflow-hidden shadow-lg border">
+                    <?php 
+                    $slide_1 = get_theme_mod( 'welcome_image_1' ) ?: ( get_theme_mod( 'welcome_image' ) ?: content_url( '/uploads/2026/08/ChatGPT-Image-Aug-5-2026-06_58_49-PM.png' ) );
+                    $slide_2 = get_theme_mod( 'welcome_image_2' ) ?: content_url( '/uploads/2026/08/ChatGPT-Image-Aug-5-2026-07_29_34-PM.png' );
+                    $slide_3 = get_theme_mod( 'welcome_image_3' ) ?: content_url( '/uploads/2026/08/ChatGPT-Image-Aug-5-2026-04_17_52-PM.png' );
+                    $slides  = array_filter( array( $slide_1, $slide_2, $slide_3 ) );
+                    ?>
+                    <div id="aboutUsCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+                        <?php if ( count( $slides ) > 1 ) : ?>
+                        <div class="carousel-indicators mb-2">
+                            <?php foreach ( array_values( $slides ) as $idx => $s_url ) : ?>
+                            <button type="button" data-bs-target="#aboutUsCarousel" data-bs-slide-to="<?php echo $idx; ?>" class="<?php echo $idx === 0 ? 'active' : ''; ?>" aria-current="<?php echo $idx === 0 ? 'true' : 'false'; ?>" aria-label="Slide <?php echo $idx + 1; ?>"></button>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+                        <div class="carousel-inner rounded-4">
+                            <?php foreach ( array_values( $slides ) as $idx => $s_url ) : ?>
+                            <div class="carousel-item <?php echo $idx === 0 ? 'active' : ''; ?>">
+                                <img src="<?php echo esc_url( $s_url ); ?>" alt="About Rikshawale Banner <?php echo $idx + 1; ?>" class="w-100 h-auto rounded-4 d-block shadow-sm" style="object-fit: cover; max-height: 480px;">
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: About Us Text -->
+            <div class="col-lg-6 reveal">
+                <div class="ps-lg-4 text-start">
+                    <span class="text-uppercase fw-bold text-muted d-block mb-2" style="font-size: 0.85rem; letter-spacing: 2px;"><?php echo esc_html( get_theme_mod( 'welcome_subtitle', "BUILDING INDIA'S LARGEST TRUSTED MARKETPLACE" ) ); ?></span>
+                    <h2 class="display-6 fw-bold mb-3 text-dark" style="text-transform: uppercase; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'welcome_title', 'ABOUT US' ) ); ?></h2>
+                    <div class="gradient-divider ms-0 mb-4" style="margin-left: 0 !important; background: linear-gradient(90deg, #0ea5e9, #ff6b35);"></div>
+                    <p class="lead text-muted mb-4" style="font-size: 0.98rem; line-height: 1.8;">
+                        <?php echo nl2br( esc_html( get_theme_mod( 'welcome_description', "Rikshawale.com is a technology-driven marketplace for certified pre-owned three-wheelers, connecting buyers and sellers through a trusted, transparent, and hassle-free platform. Every vehicle undergoes a standardized inspection and quality check, with access to refurbishment, financing assistance, warranty support, and seamless ownership transfer. Our mission is to organize and modernize India's highly fragmented used commercial vehicle market, making every transaction simple, secure, and reliable." ) ) ); ?>
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -308,18 +339,19 @@ if ( $srv_query->have_posts() ) :
                 $s_index++;
             ?>
             <div class="col-md-4">
-                <div class="card h-100 border-secondary-subtle p-3 rounded-3 shadow-sm hover-lift">
+                <div class="card h-100 p-3 challenge-card-gradient">
                     <div class="card-body p-1">
-                        <h6 class="fw-bold text-dark mb-2">
-                            <span class="me-2 fs-5">
+                        <h6 class="fw-bold mb-2 d-flex align-items-center">
+                            <span class="challenge-icon-box fs-5">
                                 <?php if ( strpos($s_icon, 'fa-') !== false ) : ?>
                                     <i class="<?php echo esc_attr($s_icon); ?>"></i>
                                 <?php else : ?>
                                     <?php echo esc_html($s_icon); ?>
                                 <?php endif; ?>
-                            </span><?php the_title(); ?>
+                            </span>
+                            <span><?php the_title(); ?></span>
                         </h6>
-                        <p class="text-secondary small mb-0 lh-base">
+                        <p class="small mb-0 lh-base">
                             <?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>
                         </p>
                     </div>
@@ -332,11 +364,11 @@ if ( $srv_query->have_posts() ) :
         </div>
 
         <!-- Key Investor Insight Highlight Box -->
-        <div class="p-3 rounded-3 text-start">
-            <h6 class="fw-bold text-dark mb-1">
-                <?php echo esc_html( get_theme_mod('services_insight_title', 'Key Investor Insight') ); ?>
+        <div class="p-4 text-start insight-card-gradient">
+            <h6 class="fw-bold mb-2 fs-6 text-uppercase" style="letter-spacing: 1px;">
+                💡 <?php echo esc_html( get_theme_mod('services_insight_title', 'Key Investor Insight') ); ?>
             </h6>
-            <p class="text-secondary small mb-0">
+            <p class="small mb-0 lh-base" style="font-size: 0.92rem;">
                 <?php echo esc_html( get_theme_mod('services_insight_text', "India's pre-owned three-wheeler market remains highly fragmented, creating a significant opportunity for a trusted, technology-enabled platform that standardizes sourcing, inspection, financing, and ownership transfer.") ); ?>
             </p>
         </div>
@@ -344,33 +376,6 @@ if ( $srv_query->have_posts() ) :
 </section>
 <?php endif; ?>
 
-<!-- === 2. Dual Promo Images === -->
-<?php
-$promo_img1 = get_theme_mod( 'promo_banner1_image', '' );
-$promo_img2 = get_theme_mod( 'promo_banner2_image', '' );
-if ( $promo_img1 || $promo_img2 ) :
-?>
-<section class="promo-image-section py-3 my-1">
-    <div class="container">
-        <div class="row g-3">
-            <?php if ( $promo_img1 ) : ?>
-            <div class="col-md-6 reveal reveal-delay-1">
-                <div class="promo-image-card">
-                    <img src="<?php echo esc_url( $promo_img1 ); ?>" alt="Promo Banner 1">
-                </div>
-            </div>
-            <?php endif; ?>
-            <?php if ( $promo_img2 ) : ?>
-            <div class="col-md-6 reveal reveal-delay-2">
-                <div class="promo-image-card">
-                    <img src="<?php echo esc_url( $promo_img2 ); ?>" alt="Promo Banner 2">
-                </div>
-            </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
 
 <!-- === 3. 4-Video Autoplay Grid === -->
 <?php

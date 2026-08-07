@@ -1427,7 +1427,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Subtitle
 	$wp_customize->add_setting( 'welcome_subtitle', array(
-		'default'           => 'Welcome to our website',
+		'default'           => 'BUILDING INDIA\'S LARGEST TRUSTED MARKETPLACE',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1440,7 +1440,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Title
 	$wp_customize->add_setting( 'welcome_title', array(
-		'default'           => 'RIKSHAWALE',
+		'default'           => 'ABOUT US',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1453,7 +1453,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Description
 	$wp_customize->add_setting( 'welcome_description', array(
-		'default'           => 'Rikshawale is India\'s trusted marketplace for certified pre-owned three-wheelers. Every auto-rickshaw is thoroughly inspected, transparently priced, and comes with easy financing options and a 30-day warranty for complete peace of mind.',
+		'default'           => 'Rikshawale.com is a technology-driven marketplace for certified pre-owned three-wheelers, connecting buyers and sellers through a trusted, transparent, and hassle-free platform. Every vehicle undergoes a standardized inspection and quality check, with access to refurbishment, financing assistance, warranty support, and seamless ownership transfer. Our mission is to organize and modernize India\'s highly fragmented used commercial vehicle market, making every transaction simple, secure, and reliable.',
 		'sanitize_callback' => 'sanitize_textarea_field',
 		'transport'         => 'refresh',
 	) );
@@ -1463,6 +1463,42 @@ function rikshawale_customize_register( $wp_customize ) {
 		'section'  => 'rikshawale_welcome_section',
 		'settings' => 'welcome_description',
 	) );
+
+	// Slider Image 1
+	$wp_customize->add_setting( 'welcome_image_1', array(
+		'default'           => '',
+		'sanitize_callback' => 'esc_url_raw',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'welcome_image_1', array(
+		'label'    => __( 'About Slider Image 1', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_welcome_section',
+		'settings' => 'welcome_image_1',
+	) ) );
+
+	// Slider Image 2
+	$wp_customize->add_setting( 'welcome_image_2', array(
+		'default'           => '',
+		'sanitize_callback' => 'esc_url_raw',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'welcome_image_2', array(
+		'label'    => __( 'About Slider Image 2', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_welcome_section',
+		'settings' => 'welcome_image_2',
+	) ) );
+
+	// Slider Image 3
+	$wp_customize->add_setting( 'welcome_image_3', array(
+		'default'           => '',
+		'sanitize_callback' => 'esc_url_raw',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'welcome_image_3', array(
+		'label'    => __( 'About Slider Image 3', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_welcome_section',
+		'settings' => 'welcome_image_3',
+	) ) );
 
 	// Feature 1 Title
 	$wp_customize->add_setting( 'welcome_feature1_title', array(

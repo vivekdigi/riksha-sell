@@ -19,8 +19,8 @@ get_header();
             <div class="row g-5 align-items-center">
                 <!-- Left Column: Car Image -->
                 <div class="col-lg-6">
-                    <div class="position-relative overflow-hidden rounded-3 shadow-lg">
-                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="About Car Dealer" class="w-100 h-100 object-fit-cover d-block" style="min-height: 480px; max-height: 560px;">
+                    <div class="position-relative overflow-hidden rounded-4 shadow-lg border">
+                        <img src="<?php echo esc_url( content_url( '/uploads/2026/08/541976bc-3da8-460a-9799-771d11960dd3.png' ) ); ?>" alt="About Rikshawale" class="w-100 h-auto object-fit-cover d-block" style="max-height: 480px;">
                     </div>
                 </div>
 
@@ -28,16 +28,16 @@ get_header();
                 <div class="col-lg-6">
                     <div class="ps-lg-4">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="fw-semibold text-uppercase small" style="color: var(--primary-color, #db2d2e); letter-spacing: 1px; font-size: 0.82rem;">About Electric Vehicle</span>
+                            <span class="fw-semibold text-uppercase small" style="color: var(--primary-color, #db2d2e); letter-spacing: 1.5px; font-size: 0.82rem;">BUILDING INDIA'S LARGEST TRUSTED MARKETPLACE</span>
                             <div style="width: 35px; height: 2px; background-color: var(--primary-color, #db2d2e);"></div>
                         </div>
 
                         <h2 class="fw-bold text-dark mb-3" style="font-size: 2.3rem; line-height: 1.2; letter-spacing: -0.5px; font-family: var(--font-heading);">
-                            Best Solution Provides Electric Vehicle
+                            ABOUT US
                         </h2>
 
-                        <p class="text-muted mb-4" style="font-size: 0.92rem; line-height: 1.7;">
-                            Car Dealer is the best premium HTML5 Template. We provide everything you need to build an amazing dealership website developed especially for car sellers, dealers or auto motor retailers.
+                        <p class="text-muted mb-4" style="font-size: 0.94rem; line-height: 1.8;">
+                            Rikshawale.com is a technology-driven marketplace for certified pre-owned three-wheelers, connecting buyers and sellers through a trusted, transparent, and hassle-free platform. Every vehicle undergoes a standardized inspection and quality check, with access to refurbishment, financing assistance, warranty support, and seamless ownership transfer. Our mission is to organize and modernize India's highly fragmented used commercial vehicle market, making every transaction simple, secure, and reliable.
                         </p>
 
                         <!-- Feature Item 1 -->
