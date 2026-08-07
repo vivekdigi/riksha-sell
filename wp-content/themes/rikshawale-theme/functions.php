@@ -741,6 +741,7 @@ function rikshawale_render_inventory_metabox( $post ) {
 
     $price           = get_post_meta( $post->ID, '_car_price', true );
     $currency_symbol = get_post_meta( $post->ID, '_car_currency_symbol', true ) ?: '₹';
+    $custom_interest = get_post_meta( $post->ID, '_car_interest_rate', true );
     $mfg_year        = get_post_meta( $post->ID, '_car_mfg_year', true ) ?: get_post_meta( $post->ID, '_car_year', true );
     $reg_year        = get_post_meta( $post->ID, '_car_reg_year', true );
     $owner_type      = get_post_meta( $post->ID, '_car_owner_type', true );
@@ -775,6 +776,13 @@ function rikshawale_render_inventory_metabox( $post ) {
         <tr>
             <th><label for="car_price"><?php _e( 'Selling Price', 'rikshawale-theme' ); ?></label></th>
             <td><input type="text" id="car_price" name="car_price" value="<?php echo esc_attr( $price ); ?>" class="regular-text" placeholder="e.g. 24,000 or ₹10.75 Lakh"></td>
+        </tr>
+        <tr>
+            <th><label for="car_interest_rate"><?php _e( 'EMI Interest Rate (% p.a.)', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_interest_rate" name="car_interest_rate" value="<?php echo esc_attr( $custom_interest ); ?>" class="regular-text" placeholder="e.g. 11.75 or 9.5 (Default: Theme Option setting)">
+                <p class="description"><?php _e( 'Custom annual loan interest rate for this vehicle. If left empty, global Theme Option setting is used.', 'rikshawale-theme' ); ?></p>
+            </td>
         </tr>
         <tr>
             <th><label for="car_video_url"><?php _e( '🎬 Banner Video URL (Auto-Play)', 'rikshawale-theme' ); ?></label></th>
@@ -938,6 +946,7 @@ function rikshawale_save_inventory_meta( $post_id ) {
     $fields = array(
         'car_price',
         'car_currency_symbol',
+        'car_interest_rate',
         'car_badge',
         'car_video_url',
         'car_mfg_year',

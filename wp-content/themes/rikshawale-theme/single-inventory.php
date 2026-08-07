@@ -28,8 +28,14 @@ while ( have_posts() ) : the_post();
     $numeric_price = preg_replace( '/[^0-9]/', '', $raw_price_str );
     $numeric_price = ( ! empty( $numeric_price ) && floatval( $numeric_price ) > 0 ) ? floatval( $numeric_price ) : 500000;
 
-    $interest_rate       = floatval( get_theme_mod( 'emi_interest_rate', '11.75' ) );
-    if ( $interest_rate <= 0 || $interest_rate > 30 ) {
+    $car_custom_rate = get_post_meta( $post_id, '_car_interest_rate', true );
+    if ( strlen( trim( $car_custom_rate ) ) > 0 ) {
+        $interest_rate = floatval( preg_replace( '/[^0-9.]/', '', $car_custom_rate ) );
+    } else {
+        $theme_rate    = get_theme_mod( 'emi_interest_rate', '11.75' );
+        $interest_rate = floatval( preg_replace( '/[^0-9.]/', '', $theme_rate ) );
+    }
+    if ( $interest_rate <= 0 ) {
         $interest_rate = 11.75;
     }
     $default_dp_pct      = floatval( get_theme_mod( 'emi_min_downpayment_pct', '20' ) );
