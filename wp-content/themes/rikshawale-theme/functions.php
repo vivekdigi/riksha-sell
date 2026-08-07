@@ -3017,6 +3017,7 @@ function rikshawale_hide_subscriber_booking_actions() {
 		if ( $pagenow === 'profile.php' ) {
 			echo '<style>
 				body.profile-php h2,
+				body.profile-php h3,
 				body.profile-php .user-rich-editing-wrap,
 				body.profile-php .user-syntax-highlighting-wrap,
 				body.profile-php .user-admin-color-wrap,
@@ -3030,6 +3031,9 @@ function rikshawale_hide_subscriber_booking_actions() {
 				body.profile-php .user-sessions-wrap,
 				body.profile-php .application-passwords,
 				body.profile-php #elementor-ai-user-profile,
+				body.profile-php .elementor-ai-user-profile,
+				body.profile-php tr:has(input[name*="elementor"]),
+				body.profile-php tr:has(label[for*="elementor"]),
 				body.profile-php .user-admin-bar-front-wrap {
 					display: none !important;
 				}
@@ -3054,7 +3058,16 @@ function rikshawale_hide_subscriber_booking_actions() {
 					border-radius: 6px;
 					padding: 6px 12px;
 				}
-			</style>';
+			</style>
+			<script>
+				document.addEventListener("DOMContentLoaded", function() {
+					document.querySelectorAll("h2, h3, tr, table").forEach(function(el) {
+						if (el.innerText && el.innerText.indexOf("Elementor") !== -1) {
+							el.style.display = "none";
+						}
+					});
+				});
+			</script>';
 		}
 	}
 }
