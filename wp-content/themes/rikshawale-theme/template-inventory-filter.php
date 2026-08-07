@@ -8,6 +8,7 @@ get_header();
 
 // Fetch unique meta values from published inventory posts for filter choices
 $all_brands        = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
+$all_models        = array( 'King Deluxe', 'Maxima Cargo', 'RE', 'Treo', 'Alfa', 'Ape', 'E-Alfa Mini', 'Safari', 'Super Carry' );
 $all_fuels         = array( 'Electric', 'CNG', 'Diesel', 'Petrol', 'LPG', 'Hybrid' );
 $all_transmissions = array( 'Automatic', 'Manual' );
 $all_owners        = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' );
@@ -16,6 +17,7 @@ $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Y
 
 $selected_colors = isset( $_GET['color'] ) ? array_map( 'sanitize_text_field', (array) $_GET['color'] ) : array();
 $selected_brands = isset( $_GET['brand'] ) ? array_map( 'sanitize_text_field', (array) $_GET['brand'] ) : array();
+$selected_models = isset( $_GET['model'] ) ? array_map( 'sanitize_text_field', (array) $_GET['model'] ) : array();
 $selected_fuels  = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_GET['fuel'] ) : array();
 ?>
 
@@ -134,6 +136,21 @@ $selected_fuels  = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (a
                                         <input class="form-check-input filter-checkbox" type="checkbox" name="brand[]" value="<?php echo esc_attr($brand); ?>" id="brand_<?php echo sanitize_title($brand); ?>" <?php checked( in_array( $brand, $selected_brands, true ) ); ?> onchange="triggerFilterAjax(1)">
                                         <label class="form-check-label small text-dark" for="brand_<?php echo sanitize_title($brand); ?>">
                                             <?php echo esc_html($brand); ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- 2.5 VEHICLE MODEL FILTER -->
+                        <div class="filter-group mb-4 pb-3 border-bottom">
+                            <h6 class="fw-bold text-dark small mb-3">Vehicle Model</h6>
+                            <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
+                                <?php foreach ( $all_models as $model ) : ?>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="model[]" value="<?php echo esc_attr($model); ?>" id="model_<?php echo sanitize_title($model); ?>" <?php checked( in_array( $model, $selected_models, true ) ); ?> onchange="triggerFilterAjax(1)">
+                                        <label class="form-check-label small text-dark" for="model_<?php echo sanitize_title($model); ?>">
+                                            <?php echo esc_html($model); ?>
                                         </label>
                                     </div>
                                 <?php endforeach; ?>

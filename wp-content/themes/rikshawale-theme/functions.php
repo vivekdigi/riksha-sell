@@ -3495,6 +3495,7 @@ function rikshawale_ajax_filter_inventory() {
 	$sort_by       = sanitize_text_field( $_POST['sort_by'] ?? 'date_desc' );
 	$paged         = isset( $_POST['paged'] ) ? max( 1, intval( $_POST['paged'] ) ) : 1;
 	$brands        = isset( $_POST['brand'] ) ? array_map( 'sanitize_text_field', (array) $_POST['brand'] ) : array();
+	$models        = isset( $_POST['model'] ) ? array_map( 'sanitize_text_field', (array) $_POST['model'] ) : array();
 	$fuels         = isset( $_POST['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_POST['fuel'] ) : array();
 	$years         = isset( $_POST['year'] ) ? array_map( 'sanitize_text_field', (array) $_POST['year'] ) : array();
 	$transmissions = isset( $_POST['transmission'] ) ? array_map( 'sanitize_text_field', (array) $_POST['transmission'] ) : array();
@@ -3629,6 +3630,22 @@ function rikshawale_ajax_filter_inventory() {
 					}
 				}
 				if ( ! $color_match ) {
+					continue;
+				}
+			}
+
+			// Filter by Vehicle Model (case-insensitive)
+			if ( ! empty( $models ) ) {
+				$p_model     = trim( (string) get_post_meta( $pid, '_car_model_name', true ) );
+				$p_title     = get_the_title( $pid );
+				$model_match = false;
+				foreach ( $models as $m ) {
+					if ( ( ! empty( $p_model ) && strpos( strtolower( $p_model ), strtolower( $m ) ) !== false ) || strpos( strtolower( $p_title ), strtolower( $m ) ) !== false ) {
+						$model_match = true;
+						break;
+					}
+				}
+				if ( ! $model_match ) {
 					continue;
 				}
 			}

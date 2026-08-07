@@ -136,10 +136,10 @@
                 <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
                     <h5 class="mb-3">MODELS</h5>
                     <ul class="list-unstyled">
-                        <li><a href="#">King Deluxe</a></li>
-                        <li><a href="#">Maxima Cargo</a></li>
-                        <li><a href="#">RE</a></li>
-                        <li><a href="#">Treo</a></li>
+                        <li><a href="<?php echo esc_url( home_url( '/inventory/?model[]=King+Deluxe' ) ); ?>">King Deluxe</a></li>
+                        <li><a href="<?php echo esc_url( home_url( '/inventory/?model[]=Maxima+Cargo' ) ); ?>">Maxima Cargo</a></li>
+                        <li><a href="<?php echo esc_url( home_url( '/inventory/?model[]=RE' ) ); ?>">RE</a></li>
+                        <li><a href="<?php echo esc_url( home_url( '/inventory/?model[]=Treo' ) ); ?>">Treo</a></li>
                     </ul>
                 </div>
             <?php endif; ?>
