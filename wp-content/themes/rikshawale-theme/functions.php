@@ -7,6 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+// Require One-Click Demo Importer
+require_once get_template_directory() . '/inc/demo-importer.php';
+
 function rikshawale_theme_setup() {
 	// Add support for Featured Images (Post Thumbnails)
 	add_theme_support( 'post-thumbnails' );
