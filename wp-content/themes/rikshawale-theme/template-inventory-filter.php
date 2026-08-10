@@ -15,10 +15,23 @@ $all_owners        = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' 
 $all_years         = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018' );
 $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
 
-$selected_colors = isset( $_GET['color'] ) ? array_map( 'sanitize_text_field', (array) $_GET['color'] ) : array();
-$selected_brands = isset( $_GET['brand'] ) ? array_map( 'sanitize_text_field', (array) $_GET['brand'] ) : array();
-$selected_models = isset( $_GET['model'] ) ? array_map( 'sanitize_text_field', (array) $_GET['model'] ) : array();
-$selected_fuels  = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_GET['fuel'] ) : array();
+$selected_colors    = isset( $_GET['color'] ) ? array_map( 'sanitize_text_field', (array) $_GET['color'] ) : array();
+$selected_brands    = isset( $_GET['brand'] ) ? array_map( 'sanitize_text_field', (array) $_GET['brand'] ) : array();
+$selected_models    = isset( $_GET['model'] ) ? array_map( 'sanitize_text_field', (array) $_GET['model'] ) : array();
+$selected_fuels     = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (array) $_GET['fuel'] ) : array();
+$selected_locations = isset( $_GET['location'] ) ? array_map( 'sanitize_text_field', (array) $_GET['location'] ) : array();
+
+if ( is_tax( 'riksha_location' ) ) {
+    $queried_loc = get_queried_object();
+    if ( $queried_loc && isset( $queried_loc->slug ) && ! in_array( $queried_loc->slug, $selected_locations, true ) ) {
+        $selected_locations[] = $queried_loc->slug;
+    }
+}
+
+$all_locations_terms = get_terms( array(
+    'taxonomy'   => 'riksha_location',
+    'hide_empty' => false,
+) );
 ?>
 
 <style>
@@ -125,6 +138,30 @@ $selected_fuels  = isset( $_GET['fuel'] ) ? array_map( 'sanitize_text_field', (a
                             <!-- Hidden Min/Max inputs submitted via AJAX -->
                             <input type="hidden" name="price_min" id="priceMinInput" value="0">
                             <input type="hidden" name="price_max" id="priceMaxInput" value="25000000">
+                        </div>
+
+                        <!-- 1.5 LOCATION / PLACE FILTER -->
+                        <div class="filter-group mb-4 pb-3 border-bottom">
+                            <h6 class="fw-bold text-dark small mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i> Location / Place</h6>
+                            <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
+                                <?php 
+                                if ( ! empty( $all_locations_terms ) && ! is_wp_error( $all_locations_terms ) ) :
+                                    foreach ( $all_locations_terms as $loc_term ) : 
+                                ?>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" name="location[]" value="<?php echo esc_attr($loc_term->slug); ?>" id="loc_<?php echo esc_attr($loc_term->slug); ?>" <?php checked( in_array( $loc_term->slug, $selected_locations, true ) ); ?> onchange="triggerFilterAjax(1)">
+                                        <label class="form-check-label small text-dark d-flex justify-content-between align-items-center w-100 pe-2" for="loc_<?php echo esc_attr($loc_term->slug); ?>">
+                                            <span>📍 <?php echo esc_html($loc_term->name); ?></span>
+                                            <span class="badge bg-light text-muted border rounded-pill font-mono extra-small"><?php echo intval($loc_term->count); ?></span>
+                                        </label>
+                                    </div>
+                                <?php 
+                                    endforeach;
+                                else:
+                                ?>
+                                    <p class="small text-muted mb-0">No locations added yet.</p>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <!-- 2. BRAND / MAKE FILTER -->

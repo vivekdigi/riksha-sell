@@ -618,6 +618,59 @@ add_action( 'init', 'rikshawale_register_inventory_cpt' );
  * Register Custom Taxonomies for Riksha Inventory
  */
 function rikshawale_register_inventory_taxonomies() {
+	// Riksha Locations / Places Taxonomy
+	register_taxonomy( 'riksha_location', array( 'inventory', 'riksha' ), array(
+		'hierarchical'      => true,
+		'labels'            => array(
+			'name'              => _x( 'Locations / Places', 'taxonomy general name', 'rikshawale-theme' ),
+			'singular_name'     => _x( 'Location', 'taxonomy singular name', 'rikshawale-theme' ),
+			'search_items'      => __( 'Search Locations', 'rikshawale-theme' ),
+			'all_items'         => __( 'All Locations', 'rikshawale-theme' ),
+			'parent_item'       => __( 'Parent Location', 'rikshawale-theme' ),
+			'parent_item_colon' => __( 'Parent Location:', 'rikshawale-theme' ),
+			'edit_item'         => __( 'Edit Location', 'rikshawale-theme' ),
+			'update_item'       => __( 'Update Location', 'rikshawale-theme' ),
+			'add_new_item'      => __( 'Add New Location', 'rikshawale-theme' ),
+			'new_item_name'     => __( 'New Location Name', 'rikshawale-theme' ),
+			'menu_name'         => __( 'Locations / Places', 'rikshawale-theme' ),
+		),
+		'show_ui'           => true,
+		'show_admin_column' => true,
+		'query_var'         => true,
+		'rewrite'           => array( 'slug' => 'location' ),
+		'show_in_rest'      => true,
+	) );
+}
+add_action( 'init', 'rikshawale_register_inventory_taxonomies' );
+
+/**
+ * Seed Default Locations / Places terms into riksha_location taxonomy
+ */
+function rikshawale_seed_default_locations() {
+	if ( taxonomy_exists( 'riksha_location' ) ) {
+		$default_places = array(
+			'Delhi NCR' => 'delhi-ncr',
+			'Mumbai'    => 'mumbai',
+			'Patna'     => 'patna',
+			'Jaipur'    => 'jaipur',
+			'Lucknow'   => 'lucknow',
+			'Kolkata'   => 'kolkata',
+			'Bengaluru' => 'bengaluru',
+			'Ahmedabad' => 'ahmedabad',
+			'Pune'      => 'pune',
+			'Indore'    => 'indore',
+		);
+		foreach ( $default_places as $name => $slug ) {
+			if ( ! term_exists( $slug, 'riksha_location' ) ) {
+				wp_insert_term( $name, 'riksha_location', array( 'slug' => $slug ) );
+			}
+		}
+	}
+}
+add_action( 'init', 'rikshawale_seed_default_locations', 20 );
+
+function rikshawale_register_inventory_taxonomies_old() {
+
 	// Riksha Models
 	register_taxonomy( 'car_model', array( 'inventory' ), array(
 		'hierarchical'      => true,
@@ -3504,15 +3557,26 @@ function rikshawale_ajax_filter_inventory() {
 	$transmissions = isset( $_POST['transmission'] ) ? array_map( 'sanitize_text_field', (array) $_POST['transmission'] ) : array();
 	$owners        = isset( $_POST['owner'] ) ? array_map( 'sanitize_text_field', (array) $_POST['owner'] ) : array();
 	$colors        = isset( $_POST['color'] ) ? array_map( 'sanitize_text_field', (array) $_POST['color'] ) : array();
+	$locations     = isset( $_POST['location'] ) ? array_map( 'sanitize_text_field', (array) $_POST['location'] ) : array();
 	$price_ranges  = isset( $_POST['price_range'] ) ? array_map( 'sanitize_text_field', (array) $_POST['price_range'] ) : array();
 	$price_min     = isset( $_POST['price_min'] ) && $_POST['price_min'] !== '' ? floatval( $_POST['price_min'] ) : 0;
 	$price_max     = isset( $_POST['price_max'] ) && $_POST['price_max'] !== '' ? floatval( $_POST['price_max'] ) : 0;
 
 	$args = array(
-		'post_type'      => 'inventory',
+		'post_type'      => array( 'inventory', 'riksha' ),
 		'posts_per_page' => -1, // Fetch candidates for clean numeric price filtering
 		'post_status'    => 'publish',
 	);
+
+	if ( ! empty( $locations ) ) {
+		$args['tax_query'] = array(
+			array(
+				'taxonomy' => 'riksha_location',
+				'field'    => 'slug',
+				'terms'    => $locations,
+			),
+		);
+	}
 
 	if ( ! empty( $keyword ) ) {
 		$args['s'] = $keyword;
