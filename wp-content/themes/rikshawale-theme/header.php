@@ -119,12 +119,16 @@
             transform: translate(2px, -2px);
             display: inline-block;
         }
-        /* Parent menu items relative positioning */
-        .navbar-nav li,
+        /* Parent menu items relative positioning (except Mega Menu) */
+        .navbar-nav li:not(.mega-places-menu-item),
         .navbar-nav .menu-item-has-children,
         .navbar-nav .page_item_has_children,
-        .navbar-nav .dropdown {
+        .navbar-nav .dropdown:not(.mega-places-menu-item) {
             position: relative !important;
+        }
+
+        .navbar-nav li.mega-places-menu-item {
+            position: static !important;
         }
 
         /* 1. HIDE ALL SUBMENUS & CHILDREN BY DEFAULT */
@@ -149,6 +153,17 @@
             transition: opacity 0.2s ease, transform 0.2s ease !important;
         }
 
+        /* Full Width Mega Dropdown Panel Fix */
+        .navbar-nav .mega-dropdown-panel {
+            width: 100% !important;
+            min-width: 100% !important;
+            left: 0 !important;
+            right: 0 !important;
+            padding: 24px !important;
+            border-radius: 0 0 16px 16px !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+        }
+
         /* Submenu items formatting */
         .navbar-nav ul.sub-menu li,
         .navbar-nav ul.children li {
@@ -168,6 +183,10 @@
             text-decoration: none !important;
             white-space: nowrap !important;
             transition: all 0.2s ease !important;
+        }
+
+        .navbar-nav .mega-dropdown-panel a {
+            white-space: normal !important;
         }
 
         .navbar-nav ul.sub-menu li a:hover,

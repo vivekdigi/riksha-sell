@@ -3881,7 +3881,7 @@ function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 			// Split into 3 columns
 			$cols = array_chunk( $locations, ceil( count( $locations ) / 3 ) );
 			foreach ( $cols as $col_terms ) {
-				$location_links_html .= '<div class="col-md-4 col-sm-6 col-12 mb-2">';
+				$location_links_html .= '<div class="col-lg-4 col-md-6 col-12 mb-2">';
 				$location_links_html .= '<ul class="list-unstyled mb-0 px-1">';
 				foreach ( $col_terms as $term ) {
 					$url = add_query_arg( 'location[]', $term->slug, home_url( '/inventory/' ) );
@@ -3905,9 +3905,9 @@ function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 		$mega_menu_item .= '</a>';
 		$mega_menu_item .= '<div class="dropdown-menu w-100 shadow-lg border-0 rounded-4 p-4 mt-1 mega-dropdown-panel" aria-labelledby="placesNavMegaDropdown" style="left: 0; right: 0; background: #ffffff; border-top: 3px solid var(--primary-color, #db2d2e) !important;">';
 		$mega_menu_item .= '<div class="container" style="max-width: 1140px;">';
-		$mega_menu_item .= '<div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">';
+		$mega_menu_item .= '<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pb-3 mb-3 border-bottom">';
 		$mega_menu_item .= '<div><h6 class="fw-bold text-dark mb-0 fs-6"><i class="fa-solid fa-city text-danger me-2"></i> Buy / Filter Riksha by City & Place</h6><p class="text-muted extra-small mb-0 mt-1">Select your city to view available commercial rikshas & vehicles</p></div>';
-		$mega_menu_item .= '<a href="' . esc_url( home_url( '/inventory/' ) ) . '" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold extra-small">View All Places &rarr;</a>';
+		$mega_menu_item .= '<a href="' . esc_url( home_url( '/inventory/' ) ) . '" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold extra-small text-nowrap">View All Places &rarr;</a>';
 		$mega_menu_item .= '</div>';
 		$mega_menu_item .= '<div class="row g-3">' . $location_links_html . '</div>';
 		$mega_menu_item .= '</div>';
