@@ -818,6 +818,27 @@ function rikshawale_disable_gutenberg_for_inventory( $use_block_editor, $post_ty
 add_filter( 'use_block_editor_for_post_type', 'rikshawale_disable_gutenberg_for_inventory', 10, 2 );
 
 /**
+ * Helper to normalize Owner Type strings across submission and inventory CPTs
+ */
+function rikshawale_normalize_owner_type( $val ) {
+    $v = strtolower( trim( (string) $val ) );
+    if ( empty( $v ) ) return '';
+    if ( strpos( $v, '1' ) !== false || strpos( $v, 'first' ) !== false ) {
+        return '1st Owner';
+    }
+    if ( strpos( $v, '2' ) !== false || strpos( $v, 'second' ) !== false ) {
+        return '2nd Owner';
+    }
+    if ( strpos( $v, '3' ) !== false || strpos( $v, 'third' ) !== false ) {
+        return '3rd Owner';
+    }
+    if ( strpos( $v, '4' ) !== false || strpos( $v, 'fourth' ) !== false ) {
+        return '4th+ Owner';
+    }
+    return $val;
+}
+
+/**
  * Render Riksha Inventory Details Metabox Content
  */
 function rikshawale_render_inventory_metabox( $post ) {
@@ -830,7 +851,8 @@ function rikshawale_render_inventory_metabox( $post ) {
     $color           = get_post_meta( $post->ID, '_car_color', true );
     $mfg_year        = get_post_meta( $post->ID, '_car_mfg_year', true ) ?: get_post_meta( $post->ID, '_car_year', true );
     $reg_year        = get_post_meta( $post->ID, '_car_reg_year', true );
-    $owner_type      = get_post_meta( $post->ID, '_car_owner_type', true );
+    $raw_owner       = get_post_meta( $post->ID, '_car_owner_type', true ) ?: get_post_meta( $post->ID, '_riksha_owner_type', true );
+    $owner_type      = rikshawale_normalize_owner_type( $raw_owner );
     $brand_name      = get_post_meta( $post->ID, '_car_brand_name', true );
     $model_name      = get_post_meta( $post->ID, '_car_model_name', true );
     $variant         = get_post_meta( $post->ID, '_car_variant', true );
@@ -3030,10 +3052,16 @@ function rikshawale_render_car_submission_metabox( $post ) {
     #rikshawale-approve-btn:hover { background: #15803d; }
     #rikshawale-approve-msg { margin-left: 14px; font-weight: 600; }
 
-    .admin-lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px); z-index: 999999; justify-content: center; align-items: center; }
-    .admin-lightbox-overlay img { max-width: 90vw; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); object-fit: contain; }
-    .admin-lightbox-close { position: absolute; top: 25px; right: 35px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .admin-lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(6px); z-index: 999999; justify-content: center; align-items: center; }
+    .admin-lightbox-img-wrapper { display: flex; justify-content: center; align-items: center; max-width: 85vw; max-height: 82vh; }
+    .admin-lightbox-overlay img { max-width: 85vw; max-height: 80vh; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.7); object-fit: contain; }
+    .admin-lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 1000000; }
     .admin-lightbox-close:hover { background: #db2d2e; }
+    .admin-lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.15); color: #fff; border: none; font-size: 24px; padding: 16px 20px; cursor: pointer; border-radius: 50px; transition: background 0.2s, transform 0.2s; z-index: 1000000; outline: none; }
+    .admin-lightbox-nav:hover { background: #db2d2e; transform: translateY(-50%) scale(1.1); }
+    .admin-lightbox-prev { left: 30px; }
+    .admin-lightbox-next { right: 30px; }
+    .admin-lightbox-counter { position: absolute; top: 25px; left: 35px; color: #94a3b8; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); }
     </style>
 
     <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🧑 Seller Information</h3>
@@ -3074,38 +3102,72 @@ function rikshawale_render_car_submission_metabox( $post ) {
     </div>
     <?php endif; ?>
 
-    <?php if ( array_filter($img_urls) ) : ?>
-    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images <small style="font-size:12px; color:#64748b; font-weight:normal;">(Click any image to enlarge)</small></h3>
+    <?php
+    $valid_imgs = array_values( array_filter($img_urls) );
+    if ( ! empty($valid_imgs) ) : ?>
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images <small style="font-size:12px; color:#64748b; font-weight:normal;">(Click any image to open slider)</small></h3>
     <div class="car-sub-imgs">
-        <?php foreach ( $img_urls as $url ) : if ( $url ) : ?>
-            <a href="javascript:void(0)" onclick="openAdminLightbox('<?php echo esc_url($url); ?>')">
-                <img src="<?php echo esc_url($url); ?>" alt="Riksha Image" title="Click to view full size">
+        <?php foreach ( $valid_imgs as $idx => $url ) : ?>
+            <a href="javascript:void(0)" onclick="openAdminLightbox(<?php echo $idx; ?>)">
+                <img src="<?php echo esc_url($url); ?>" alt="Riksha Image" title="Click to open slider view">
             </a>
-        <?php endif; endforeach; ?>
+        <?php endforeach; ?>
     </div>
     <?php endif; ?>
 
-    <!-- Lightbox Modal Container -->
+    <!-- Lightbox Slider Modal Container -->
     <div id="admin-lightbox-modal" class="admin-lightbox-overlay" onclick="closeAdminLightbox(event)">
         <span class="admin-lightbox-close" onclick="closeAdminLightbox(event)">&times;</span>
-        <img id="admin-lightbox-img" src="" alt="Full View">
+        <div class="admin-lightbox-counter" id="admin-lightbox-counter">Image 1 of 5</div>
+        
+        <button type="button" class="admin-lightbox-nav admin-lightbox-prev" onclick="navAdminLightbox(-1, event)">&#10094;</button>
+        <div class="admin-lightbox-img-wrapper" onclick="event.stopPropagation()">
+            <img id="admin-lightbox-img" src="" alt="Full View">
+        </div>
+        <button type="button" class="admin-lightbox-nav admin-lightbox-next" onclick="navAdminLightbox(1, event)">&#10095;</button>
     </div>
 
     <script>
-    function openAdminLightbox(src) {
+    var adminGalleryUrls = <?php echo json_encode( array_values( array_filter($img_urls) ) ); ?>;
+    var adminCurrentIdx = 0;
+
+    function openAdminLightbox(idx) {
+        if (!adminGalleryUrls || adminGalleryUrls.length === 0) return;
+        adminCurrentIdx = idx;
+        updateAdminLightbox();
         var modal = document.getElementById('admin-lightbox-modal');
-        var img = document.getElementById('admin-lightbox-img');
-        if (modal && img) {
-            img.src = src;
-            modal.style.display = 'flex';
-        }
+        if (modal) modal.style.display = 'flex';
     }
+
+    function updateAdminLightbox() {
+        if (adminCurrentIdx < 0) adminCurrentIdx = adminGalleryUrls.length - 1;
+        if (adminCurrentIdx >= adminGalleryUrls.length) adminCurrentIdx = 0;
+
+        var img = document.getElementById('admin-lightbox-img');
+        var counter = document.getElementById('admin-lightbox-counter');
+        if (img) img.src = adminGalleryUrls[adminCurrentIdx];
+        if (counter) counter.textContent = 'Image ' + (adminCurrentIdx + 1) + ' of ' + adminGalleryUrls.length;
+    }
+
+    function navAdminLightbox(step, e) {
+        if (e) e.stopPropagation();
+        adminCurrentIdx += step;
+        updateAdminLightbox();
+    }
+
     function closeAdminLightbox(e) {
         var modal = document.getElementById('admin-lightbox-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
+        if (modal) modal.style.display = 'none';
     }
+
+    document.addEventListener('keydown', function(e) {
+        var modal = document.getElementById('admin-lightbox-modal');
+        if (modal && modal.style.display === 'flex') {
+            if (e.key === 'ArrowRight') navAdminLightbox(1);
+            if (e.key === 'ArrowLeft') navAdminLightbox(-1);
+            if (e.key === 'Escape') closeAdminLightbox();
+        }
+    });
     </script>
 
     <hr>
@@ -3199,6 +3261,10 @@ function rikshawale_approve_car_submission_handler() {
     foreach ( $meta_keys as $key ) {
         $val = $m( $key );
         if ( $val ) {
+            if ( $key === '_car_owner_type' ) {
+                $val = rikshawale_normalize_owner_type( $val );
+                update_post_meta( $inventory_id, '_riksha_owner_type', $val );
+            }
             update_post_meta( $inventory_id, $key, $val );
             // Also set _car_price from expected price
             if ( $key === '_car_expected_price' ) {

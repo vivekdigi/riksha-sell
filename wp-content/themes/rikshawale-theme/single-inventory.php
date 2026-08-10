@@ -19,6 +19,7 @@ while ( have_posts() ) : the_post();
     $transmission = get_post_meta( $post_id, '_car_transmission', true ) ?: 'Automatic';
     $rto          = get_post_meta( $post_id, '_car_exterior', true ) ?: 'UP';
     $insurance    = 'Comprehensive';
+    $color        = get_post_meta( $post_id, '_car_color', true ) ?: 'White';
     $short_desc = get_post_meta( $post_id, '_car_short_desc', true );
     if ( empty( $short_desc ) && has_excerpt( $post_id ) ) {
         $short_desc = get_the_excerpt( $post_id );
