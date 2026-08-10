@@ -32,7 +32,10 @@ while ( have_posts() ) : the_post();
         }
     }
 
-    $car_video_url = get_post_meta( $post_id, '_car_video_url', true );
+    $car_video_url  = get_post_meta( $post_id, '_car_video_url', true );
+    $car_badge      = get_post_meta( $post_id, '_car_badge', true );
+    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $car_badge ) ) );
+    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
 
     // Extract raw price integer for EMI calculator
     $raw_price_str = get_post_meta( $post_id, '_car_price', true ) ?: get_post_meta( $post_id, '_riksha_price', true );
@@ -97,7 +100,15 @@ while ( have_posts() ) : the_post();
                 <!-- 1. Main Featured Image / Video Container -->
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
                     <div class="position-relative bg-black text-center" style="height: 440px;" id="mainDetailMediaFrame">
-                        <?php if ( $car_video_url ) : ?>
+                        <?php if ( $is_coming_soon ) : ?>
+                            <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-4 text-white position-relative">
+                                <div class="coming-soon-glossy-icon mb-3" style="width: 80px; height: 80px;">
+                                    <i class="fa-solid fa-clock-rotate-left fs-1" style="color: #60a5fa; text-shadow: 0 0 16px rgba(96, 165, 250, 0.7);"></i>
+                                </div>
+                                <h4 class="fw-bold text-uppercase tracking-wider text-white mb-2" style="font-family: var(--font-heading, sans-serif); letter-spacing: 1.5px;">Coming Soon</h4>
+                                <p class="text-white-50 small mb-0">This vehicle will be arriving live in inventory soon.</p>
+                            </div>
+                        <?php elseif ( $car_video_url ) : ?>
                             <?php if ( strpos( $car_video_url, 'youtube.com' ) !== false || strpos( $car_video_url, 'youtu.be' ) !== false ) : 
                                 preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $car_video_url, $yt_match );
                                 $yt_id = $yt_match[1] ?? '';
@@ -177,10 +188,17 @@ while ( have_posts() ) : the_post();
                             </a>
                         </div>
                         <div class="col-6">
-                            <button type="button" onclick="triggerVehicleBooking(<?php echo $post_id; ?>, '<?php echo esc_js(get_the_title()); ?>', '<?php echo esc_js($price_raw); ?>', '<?php echo esc_url($slides[0]); ?>')" class="btn btn-dark w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center">
-                                <span>Book Now</span>
-                                <span class="extra-small opacity-75 fw-normal">Submit Inquiry</span>
-                            </button>
+                            <?php if ( $is_coming_soon ) : ?>
+                                <button type="button" disabled class="btn btn-secondary w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center" style="opacity: 0.65; cursor: not-allowed; background: #475569; border: none;">
+                                    <span>Coming Soon</span>
+                                    <span class="extra-small opacity-75 fw-normal">Booking Unavailable</span>
+                                </button>
+                            <?php else : ?>
+                                <button type="button" onclick="triggerVehicleBooking(<?php echo $post_id; ?>, '<?php echo esc_js(get_the_title()); ?>', '<?php echo esc_js($price_raw); ?>', '<?php echo esc_url($slides[0]); ?>')" class="btn btn-dark w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center">
+                                    <span>Book Now</span>
+                                    <span class="extra-small opacity-75 fw-normal">Submit Inquiry</span>
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -478,10 +496,10 @@ window.addEventListener('load', calculateEMI);
                     ?>
                     <div class="car-slider-item">
                         <div class="car-card-exact">
-                            <?php if ( $r_badge ) : ?>
-                                <span class="car-card-badge <?php echo $r_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($r_badge); ?></span>
-                            <?php endif; ?>
                             <a href="<?php the_permalink(); ?>" class="car-card-img-link">
+                                <?php if ( $r_badge ) : ?>
+                                    <span class="car-card-badge <?php echo $r_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($r_badge); ?></span>
+                                <?php endif; ?>
                                 <?php if ( $r_coming_soon ) : ?>
                                     <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
                                         <div class="coming-soon-glossy-icon mb-2">

@@ -285,15 +285,16 @@ foreach ( $section_order as $sec_key ) {
                                     $p_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
                                     $p_state = get_post_meta( get_the_ID(), '_car_exterior', true ) ?: 'DL';
                                     $p_badge = get_post_meta( get_the_ID(), '_car_badge', true ) ?: ( has_excerpt() ? get_the_excerpt() : '' );
+                                    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
+                                    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
                                     $thumb   = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
                             ?>
                             <div class="car-slider-item">
                                 <div class="car-card-exact">
-                                    <?php $is_coming_soon = ( strtolower( trim( $p_badge ) ) === 'coming soon' ); ?>
-                                    <?php if ( $p_badge ) : ?>
-                                        <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
-                                    <?php endif; ?>
                                     <a href="<?php the_permalink(); ?>" class="car-card-img-link">
+                                        <?php if ( $p_badge ) : ?>
+                                            <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
+                                        <?php endif; ?>
                                         <?php if ( $is_coming_soon ) : ?>
                                             <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
                                                 <div class="coming-soon-glossy-icon mb-2">
@@ -520,13 +521,16 @@ foreach ( $section_order as $sec_key ) {
                                     $p_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
                                     $p_state = get_post_meta( get_the_ID(), '_car_exterior', true ) ?: 'DL';
                                     $p_badge = get_post_meta( get_the_ID(), '_car_badge', true ) ?: 'LIMITED OFFER';
+                                    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
+                                    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
                                     $thumb   = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
                             ?>
                             <div class="car-slider-item">
                                 <div class="car-card-exact">
-                                    <?php $is_coming_soon = ( strtolower( trim( $p_badge ) ) === 'coming soon' ); ?>
-                                    <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
                                     <a href="<?php the_permalink(); ?>" class="car-card-img-link">
+                                        <?php if ( $p_badge ) : ?>
+                                            <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
+                                        <?php endif; ?>
                                         <?php if ( $is_coming_soon ) : ?>
                                             <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
                                                 <div class="coming-soon-glossy-icon mb-2">

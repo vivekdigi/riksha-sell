@@ -1330,8 +1330,9 @@ body:hover #cursor-glow {
 }
 .car-card-badge {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    bottom: 10px;
+    top: auto !important;
+    right: 10px;
     left: auto !important;
     background: #db2d2e;
     color: #ffffff;
@@ -1342,7 +1343,7 @@ body:hover #cursor-glow {
     border-radius: 50px !important;
     letter-spacing: 0.5px;
     z-index: 5;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     transition: all 0.3s ease;
 }
 .car-card-badge.badge-coming-soon {

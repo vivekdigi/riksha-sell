@@ -358,14 +358,15 @@ $all_locations_terms = get_terms( array(
                             $est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
                     ?>
                     <?php
-                    $is_coming_soon = ( strtolower( trim( $p_badge ) ) === 'coming soon' );
+                    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
+                    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
                     ?>
                     <div class="col-lg-4 col-md-6 inventory-card-item">
                         <div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
-                            <?php if ( $p_badge ) : ?>
-                                <span class="car-card-badge position-absolute top-0 end-0 m-2.5 m-md-3 badge <?php echo $is_coming_soon ? 'badge-coming-soon' : 'bg-danger'; ?> z-3 shadow-sm rounded-pill px-3 py-1.5 extra-small uppercase" style="<?php echo $is_coming_soon ? 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important; border: 1px solid rgba(255,255,255,0.25);' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
-                            <?php endif; ?>
                             <a href="<?php the_permalink(); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
+                                <?php if ( $p_badge ) : ?>
+                                    <span class="car-card-badge position-absolute bottom-0 end-0 m-2.5 m-md-3 badge <?php echo $is_coming_soon ? 'badge-coming-soon' : 'bg-danger'; ?> z-3 shadow-sm rounded-pill px-3 py-1.5 extra-small uppercase" style="<?php echo $is_coming_soon ? 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important; border: 1px solid rgba(255,255,255,0.25);' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
+                                <?php endif; ?>
                                 <?php if ( $is_coming_soon ) : ?>
                                     <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
                                         <div class="coming-soon-glossy-icon mb-2">
@@ -403,9 +404,15 @@ $all_locations_terms = get_terms( array(
                                     </div>
                                     <div class="d-grid gap-2 d-flex mt-3">
                                         <a href="<?php the_permalink(); ?>" class="btn btn-outline-dark btn-sm rounded-3 flex-grow-1 fw-bold">View Details</a>
-                                        <button type="button" class="btn btn-danger btn-sm rounded-3 fw-bold px-3" onclick="triggerVehicleBooking(<?php echo $p_id; ?>, '<?php echo esc_js($title); ?>', '<?php echo esc_js($p_price); ?>', '<?php echo esc_url($thumb); ?>')" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border:none;">
-                                            Book
-                                        </button>
+                                        <?php if ( $is_coming_soon ) : ?>
+                                            <button type="button" class="btn btn-secondary btn-sm rounded-3 fw-bold px-3" disabled style="opacity: 0.65; cursor: not-allowed; background: #64748b; border: none;">
+                                                Book
+                                            </button>
+                                        <?php else : ?>
+                                            <button type="button" class="btn btn-danger btn-sm rounded-3 fw-bold px-3" onclick="triggerVehicleBooking(<?php echo $p_id; ?>, '<?php echo esc_js($title); ?>', '<?php echo esc_js($p_price); ?>', '<?php echo esc_url($thumb); ?>')" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border:none;">
+                                                Book
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
