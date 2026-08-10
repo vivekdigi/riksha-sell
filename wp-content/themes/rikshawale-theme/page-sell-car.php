@@ -10,7 +10,7 @@
 get_header();
 
 // Fetch taxonomy terms for dropdowns
-$brands        = get_terms( array( 'taxonomy' => 'car_brand',        'hide_empty' => false ) );
+$brands        = get_terms( array( 'taxonomy' => 'riksha_brand',       'hide_empty' => false ) );
 $fuel_types    = get_terms( array( 'taxonomy' => 'riksha_fuel_type', 'hide_empty' => false ) );
 $trans_types   = get_terms( array( 'taxonomy' => 'riksha_trans_type','hide_empty' => false ) );
 $owner_types   = get_terms( array( 'taxonomy' => 'riksha_owner_type','hide_empty' => false ) );

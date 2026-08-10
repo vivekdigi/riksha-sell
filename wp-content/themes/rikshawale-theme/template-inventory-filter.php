@@ -7,10 +7,10 @@
 get_header();
 
 // Fetch dynamic taxonomy terms from database
-$brand_terms = get_terms( array( 'taxonomy' => 'car_brand', 'hide_empty' => false ) );
+$brand_terms = get_terms( array( 'taxonomy' => 'riksha_brand', 'hide_empty' => false ) );
 $all_brands  = ( ! empty( $brand_terms ) && ! is_wp_error( $brand_terms ) ) ? wp_list_pluck( $brand_terms, 'name' ) : array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
 
-$model_terms = get_terms( array( 'taxonomy' => 'car_model', 'hide_empty' => false ) );
+$model_terms = get_terms( array( 'taxonomy' => 'riksha_model', 'hide_empty' => false ) );
 $all_models  = ( ! empty( $model_terms ) && ! is_wp_error( $model_terms ) ) ? wp_list_pluck( $model_terms, 'name' ) : array( 'King Deluxe', 'Maxima Cargo', 'RE', 'Treo', 'Alfa', 'Ape', 'E-Alfa Mini', 'Safari', 'Super Carry' );
 
 $fuel_terms  = get_terms( array( 'taxonomy' => 'riksha_fuel_type', 'hide_empty' => false ) );

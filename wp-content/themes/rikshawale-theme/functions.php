@@ -642,7 +642,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Riksha Models
-	register_taxonomy( 'car_model', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_model', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Riksha Models', 'taxonomy general name', 'rikshawale-theme' ),
@@ -660,7 +660,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Riksha Brands
-	register_taxonomy( 'car_brand', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_brand', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Riksha Brands', 'taxonomy general name', 'rikshawale-theme' ),
@@ -762,20 +762,20 @@ function rikshawale_seed_all_taxonomy_terms() {
 		}
 	}
 	// 2. Brands
-	if ( taxonomy_exists( 'car_brand' ) ) {
+	if ( taxonomy_exists( 'riksha_brand' ) ) {
 		$default_brands = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
 		foreach ( $default_brands as $brand_name ) {
-			if ( ! term_exists( $brand_name, 'car_brand' ) ) {
-				wp_insert_term( $brand_name, 'car_brand' );
+			if ( ! term_exists( $brand_name, 'riksha_brand' ) ) {
+				wp_insert_term( $brand_name, 'riksha_brand' );
 			}
 		}
 	}
 	// 3. Models
-	if ( taxonomy_exists( 'car_model' ) ) {
+	if ( taxonomy_exists( 'riksha_model' ) ) {
 		$default_models = array( 'King Deluxe', 'Maxima Cargo', 'RE', 'Treo', 'Alfa', 'Ape', 'E-Alfa Mini', 'Safari', 'Super Carry' );
 		foreach ( $default_models as $model_name ) {
-			if ( ! term_exists( $model_name, 'car_model' ) ) {
-				wp_insert_term( $model_name, 'car_model' );
+			if ( ! term_exists( $model_name, 'riksha_model' ) ) {
+				wp_insert_term( $model_name, 'riksha_model' );
 			}
 		}
 	}
