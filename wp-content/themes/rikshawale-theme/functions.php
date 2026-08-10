@@ -88,8 +88,8 @@ function rikshawale_register_riksha_cpt() {
 		'hierarchical'        => false,
 		'menu_position'      => 5,
 		'menu_icon'          => 'dashicons-car',
-		'supports'           => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
-		'show_in_rest'       => true, // Enables Gutenberg editor support
+		'supports'           => array( 'title', 'thumbnail', 'excerpt', 'custom-fields' ),
+		'show_in_rest'       => false, // Disables Gutenberg block editor
 	);
 
 	register_post_type( 'riksha', $args );
@@ -606,8 +606,8 @@ function rikshawale_register_inventory_cpt() {
 		'hierarchical'        => false,
 		'menu_position'      => 6,
 		'menu_icon'          => 'dashicons-admin-network',
-		'supports'           => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
-		'show_in_rest'       => true,
+		'supports'           => array( 'title', 'thumbnail', 'excerpt', 'custom-fields' ),
+		'show_in_rest'       => false,
 	);
 
 	register_post_type( 'inventory', $args );
@@ -807,6 +807,17 @@ function rikshawale_add_inventory_metabox() {
 add_action( 'add_meta_boxes', 'rikshawale_add_inventory_metabox' );
 
 /**
+ * Disable Gutenberg Block Editor for Inventory & Riksha Post Types
+ */
+function rikshawale_disable_gutenberg_for_inventory( $use_block_editor, $post_type ) {
+    if ( in_array( $post_type, array( 'inventory', 'riksha' ), true ) ) {
+        return false;
+    }
+    return $use_block_editor;
+}
+add_filter( 'use_block_editor_for_post_type', 'rikshawale_disable_gutenberg_for_inventory', 10, 2 );
+
+/**
  * Render Riksha Inventory Details Metabox Content
  */
 function rikshawale_render_inventory_metabox( $post ) {
@@ -899,7 +910,7 @@ function rikshawale_render_inventory_metabox( $post ) {
                 <select id="car_owner_type" name="car_owner_type">
                     <option value=""><?php _e( 'Choose owner type', 'rikshawale-theme' ); ?></option>
                     <?php foreach ( $owners as $k => $v ) : ?>
-                        <option value="<?php echo esc_attr($k); ?>" <?php selected( $owner_type, $k ); ?>><?php echo esc_html($v); ?></option>
+                        <option value="<?php echo esc_attr($k); ?>" <?php selected( strtolower(trim((string)$owner_type)), strtolower(trim((string)$k)) ); ?>><?php echo esc_html($v); ?></option>
                     <?php endforeach; ?>
                 </select>
             </td>
@@ -3012,11 +3023,17 @@ function rikshawale_render_car_submission_metabox( $post ) {
     .car-sub-field { background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 6px; padding: 10px 14px; }
     .car-sub-field label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 3px; }
     .car-sub-field strong { font-size: 14px; color: #1a1a1a; }
-    .car-sub-imgs { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
-    .car-sub-imgs img { width: 120px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
+    .car-sub-imgs { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+    .car-sub-imgs img { width: 130px; height: 90px; object-fit: cover; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .car-sub-imgs img:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.2); border-color: #db2d2e; }
     #rikshawale-approve-btn { background: #16a34a; color: #fff; border: none; padding: 12px 28px; font-size: 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
     #rikshawale-approve-btn:hover { background: #15803d; }
     #rikshawale-approve-msg { margin-left: 14px; font-weight: 600; }
+
+    .admin-lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px); z-index: 999999; justify-content: center; align-items: center; }
+    .admin-lightbox-overlay img { max-width: 90vw; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); object-fit: contain; }
+    .admin-lightbox-close { position: absolute; top: 25px; right: 35px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .admin-lightbox-close:hover { background: #db2d2e; }
     </style>
 
     <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🧑 Seller Information</h3>
@@ -3031,16 +3048,16 @@ function rikshawale_render_car_submission_metabox( $post ) {
 
     <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🚗 Vehicle Details</h3>
     <div class="car-sub-grid">
-        <div class="car-sub-field"><label>Brand</label><strong><?php echo $m('_car_brand_name'); ?></strong></div>
-        <div class="car-sub-field"><label>Model</label><strong><?php echo $m('_car_model_name'); ?></strong></div>
-        <div class="car-sub-field"><label>Variant</label><strong><?php echo $m('_car_variant'); ?></strong></div>
-        <div class="car-sub-field"><label>Mfg Year</label><strong><?php echo $m('_car_mfg_year'); ?></strong></div>
-        <div class="car-sub-field"><label>Reg Year</label><strong><?php echo $m('_car_reg_year'); ?></strong></div>
-        <div class="car-sub-field"><label>Owner Type</label><strong><?php echo $m('_car_owner_type'); ?></strong></div>
-        <div class="car-sub-field"><label>Driven (KM)</label><strong><?php echo $m('_car_driven_km'); ?></strong></div>
-        <div class="car-sub-field"><label>Fuel Type</label><strong><?php echo $m('_car_fuel'); ?></strong></div>
-        <div class="car-sub-field"><label>Transmission</label><strong><?php echo $m('_car_transmission'); ?></strong></div>
-        <div class="car-sub-field" style="grid-column: span 3;"><label>Expected Price</label><strong><?php echo $m('_car_expected_price'); ?></strong></div>
+        <div class="car-sub-field"><label>Brand</label><strong><?php echo $m('_car_brand_name') ?: $m('_riksha_brand_name'); ?></strong></div>
+        <div class="car-sub-field"><label>Model</label><strong><?php echo $m('_car_model_name') ?: $m('_riksha_model_name'); ?></strong></div>
+        <div class="car-sub-field"><label>Variant</label><strong><?php echo $m('_car_variant') ?: $m('_riksha_variant'); ?></strong></div>
+        <div class="car-sub-field"><label>Mfg Year</label><strong><?php echo $m('_car_mfg_year') ?: $m('_riksha_mfg_year'); ?></strong></div>
+        <div class="car-sub-field"><label>Reg Year</label><strong><?php echo $m('_car_reg_year') ?: $m('_riksha_reg_year'); ?></strong></div>
+        <div class="car-sub-field"><label>Owner Type</label><strong><?php echo $m('_car_owner_type') ?: $m('_riksha_owner_type'); ?></strong></div>
+        <div class="car-sub-field"><label>Driven (KM)</label><strong><?php echo $m('_car_driven_km') ?: $m('_riksha_driven_km'); ?></strong></div>
+        <div class="car-sub-field"><label>Fuel Type</label><strong><?php echo $m('_car_fuel') ?: $m('_riksha_fuel'); ?></strong></div>
+        <div class="car-sub-field"><label>Transmission</label><strong><?php echo $m('_car_transmission') ?: $m('_riksha_transmission'); ?></strong></div>
+        <div class="car-sub-field" style="grid-column: span 3;"><label>Expected Price</label><strong><?php echo $m('_car_expected_price') ?: $m('_riksha_expected_price'); ?></strong></div>
     </div>
 
     <?php
@@ -3058,15 +3075,38 @@ function rikshawale_render_car_submission_metabox( $post ) {
     <?php endif; ?>
 
     <?php if ( array_filter($img_urls) ) : ?>
-    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images</h3>
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images <small style="font-size:12px; color:#64748b; font-weight:normal;">(Click any image to enlarge)</small></h3>
     <div class="car-sub-imgs">
         <?php foreach ( $img_urls as $url ) : if ( $url ) : ?>
-            <a href="<?php echo esc_url($url); ?>" target="_blank">
-                <img src="<?php echo esc_url($url); ?>" alt="Car Image">
+            <a href="javascript:void(0)" onclick="openAdminLightbox('<?php echo esc_url($url); ?>')">
+                <img src="<?php echo esc_url($url); ?>" alt="Riksha Image" title="Click to view full size">
             </a>
         <?php endif; endforeach; ?>
     </div>
     <?php endif; ?>
+
+    <!-- Lightbox Modal Container -->
+    <div id="admin-lightbox-modal" class="admin-lightbox-overlay" onclick="closeAdminLightbox(event)">
+        <span class="admin-lightbox-close" onclick="closeAdminLightbox(event)">&times;</span>
+        <img id="admin-lightbox-img" src="" alt="Full View">
+    </div>
+
+    <script>
+    function openAdminLightbox(src) {
+        var modal = document.getElementById('admin-lightbox-modal');
+        var img = document.getElementById('admin-lightbox-img');
+        if (modal && img) {
+            img.src = src;
+            modal.style.display = 'flex';
+        }
+    }
+    function closeAdminLightbox(e) {
+        var modal = document.getElementById('admin-lightbox-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    </script>
 
     <hr>
     <p>

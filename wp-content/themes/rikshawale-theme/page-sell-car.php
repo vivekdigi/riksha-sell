@@ -154,8 +154,8 @@ $states = array(
                         <input type="text" class="sell-input form-control" id="riksha_model_name" name="riksha_model_name" placeholder="Enter model name" required>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="riksha_variant">Variant <span class="text-danger">*</span></label>
-                        <input type="text" class="sell-input form-control" id="riksha_variant" name="riksha_variant" placeholder="Enter variant">
+                        <label class="sell-label" for="riksha_variant">Variant <span class="text-muted" style="font-weight:400;">(Optional)</span></label>
+                        <input type="text" class="sell-input form-control" id="riksha_variant" name="riksha_variant" placeholder="e.g. Compact / Deluxe / Passenger">
                     </div>
                 </div>
 
