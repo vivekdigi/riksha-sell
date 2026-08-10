@@ -33,9 +33,15 @@ while ( have_posts() ) : the_post();
     }
 
     $car_video_url  = get_post_meta( $post_id, '_car_video_url', true );
-    $car_badge      = get_post_meta( $post_id, '_car_badge', true );
-    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $car_badge ) ) );
-    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+    $raw_badge      = get_post_meta( $post_id, '_car_badge', true );
+    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_badge ) ) );
+    if ( empty( $raw_badge ) || $badge_clean === 'none' || $badge_clean === 'no_badge' || $badge_clean === 'hide' || $badge_clean === 'no badge' ) {
+        $car_badge      = '';
+        $is_coming_soon = false;
+    } else {
+        $car_badge      = $raw_badge;
+        $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+    }
 
     // Extract raw price integer for EMI calculator
     $raw_price_str = get_post_meta( $post_id, '_car_price', true ) ?: get_post_meta( $post_id, '_riksha_price', true );
@@ -491,8 +497,15 @@ window.addEventListener('load', calculateEMI);
                             $r_price = rikshawale_get_formatted_price( get_the_ID() );
                             $r_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: 'Petrol';
                             $r_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
-                            $r_badge = get_post_meta( get_the_ID(), '_car_badge', true ) ?: 'LIMITED OFFER';
-                            $r_coming_soon = ( strtolower( trim( $r_badge ) ) === 'coming soon' );
+                            $raw_r_badge   = get_post_meta( get_the_ID(), '_car_badge', true );
+                            $r_badge_clean = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_r_badge ) ) );
+                            if ( empty( $raw_r_badge ) || $r_badge_clean === 'none' || $r_badge_clean === 'no_badge' || $r_badge_clean === 'hide' || $r_badge_clean === 'no badge' ) {
+                                $r_badge       = '';
+                                $r_coming_soon = false;
+                            } else {
+                                $r_badge       = $raw_r_badge;
+                                $r_coming_soon = ( $r_badge_clean === 'coming soon' || strpos( $r_badge_clean, 'coming soon' ) !== false );
+                            }
                     ?>
                     <div class="car-slider-item">
                         <div class="car-card-exact">

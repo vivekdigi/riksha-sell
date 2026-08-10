@@ -284,9 +284,15 @@ foreach ( $section_order as $sec_key ) {
                                     $p_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: get_post_meta( get_the_ID(), '_riksha_fuel', true );
                                     $p_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
                                     $p_state = get_post_meta( get_the_ID(), '_car_exterior', true ) ?: 'DL';
-                                    $p_badge = get_post_meta( get_the_ID(), '_car_badge', true ) ?: ( has_excerpt() ? get_the_excerpt() : '' );
-                                    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
-                                    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+                                    $raw_badge   = get_post_meta( get_the_ID(), '_car_badge', true );
+                                    $badge_clean = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_badge ) ) );
+                                    if ( empty( $raw_badge ) || $badge_clean === 'none' || $badge_clean === 'no_badge' || $badge_clean === 'hide' || $badge_clean === 'no badge' ) {
+                                        $p_badge        = '';
+                                        $is_coming_soon = false;
+                                    } else {
+                                        $p_badge        = $raw_badge;
+                                        $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+                                    }
                                     $thumb   = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
                             ?>
                             <div class="car-slider-item">
@@ -520,9 +526,15 @@ foreach ( $section_order as $sec_key ) {
                                     $p_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: get_post_meta( get_the_ID(), '_riksha_fuel', true );
                                     $p_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
                                     $p_state = get_post_meta( get_the_ID(), '_car_exterior', true ) ?: 'DL';
-                                    $p_badge = get_post_meta( get_the_ID(), '_car_badge', true ) ?: 'LIMITED OFFER';
-                                    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
-                                    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+                                    $raw_badge   = get_post_meta( get_the_ID(), '_car_badge', true );
+                                    $badge_clean = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_badge ) ) );
+                                    if ( empty( $raw_badge ) || $badge_clean === 'none' || $badge_clean === 'no_badge' || $badge_clean === 'hide' || $badge_clean === 'no badge' ) {
+                                        $p_badge        = '';
+                                        $is_coming_soon = false;
+                                    } else {
+                                        $p_badge        = $raw_badge;
+                                        $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+                                    }
                                     $thumb   = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
                             ?>
                             <div class="car-slider-item">

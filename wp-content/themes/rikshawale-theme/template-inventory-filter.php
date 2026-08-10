@@ -346,7 +346,15 @@ $all_locations_terms = get_terms( array(
                             $p_fuel  = get_post_meta( $p_id, '_car_fuel', true ) ?: 'Electric';
                             $p_trans = get_post_meta( $p_id, '_car_transmission', true ) ?: 'Automatic';
                             $p_km    = get_post_meta( $p_id, '_car_driven_km', true ) ?: '15,000 km';
-                            $p_badge = get_post_meta( $p_id, '_car_badge', true ) ?: 'LIMITED OFFER';
+                            $raw_badge   = get_post_meta( $p_id, '_car_badge', true );
+                            $badge_clean = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_badge ) ) );
+                            if ( empty( $raw_badge ) || $badge_clean === 'none' || $badge_clean === 'no_badge' || $badge_clean === 'hide' || $badge_clean === 'no badge' ) {
+                                $p_badge        = '';
+                                $is_coming_soon = false;
+                            } else {
+                                $p_badge        = $raw_badge;
+                                $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+                            }
                             $thumb   = get_the_post_thumbnail_url( $p_id, 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
                             $title   = get_the_title();
 
@@ -357,15 +365,11 @@ $all_locations_terms = get_terms( array(
                             $pow_m    = pow(1 + $rate_m, 60);
                             $est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
                     ?>
-                    <?php
-                    $badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
-                    $is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
-                    ?>
                     <div class="col-lg-4 col-md-6 inventory-card-item">
                         <div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
                             <a href="<?php the_permalink(); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
                                 <?php if ( $p_badge ) : ?>
-                                    <span class="car-card-badge position-absolute bottom-0 end-0 m-2.5 m-md-3 badge <?php echo $is_coming_soon ? 'badge-coming-soon' : 'bg-danger'; ?> z-3 shadow-sm rounded-pill px-3 py-1.5 extra-small uppercase" style="<?php echo $is_coming_soon ? 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important; border: 1px solid rgba(255,255,255,0.25);' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
+                                    <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
                                 <?php endif; ?>
                                 <?php if ( $is_coming_soon ) : ?>
                                     <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">

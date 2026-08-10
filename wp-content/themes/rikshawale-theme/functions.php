@@ -916,7 +916,41 @@ function rikshawale_render_inventory_metabox( $post ) {
         </tr>
         <tr>
             <th><label for="car_badge"><?php _e( 'Ribbon Badge Tag', 'rikshawale-theme' ); ?></label></th>
-            <td><input type="text" id="car_badge" name="car_badge" value="<?php echo esc_attr( $badge ); ?>" class="regular-text" placeholder="e.g. LIMITED OFFER, COMING SOON, FEATURED"></td>
+            <td>
+                <?php
+                $badge_options = array(
+                    'none'          => '🚫 No Badge (Hide)',
+                    'LIMITED OFFER' => '🔥 LIMITED OFFER',
+                    'COMING SOON'   => '⏳ COMING SOON',
+                    'FEATURED'      => '⭐ FEATURED',
+                    'POPULAR'       => '🔥 POPULAR',
+                    'CERTIFIED'     => '🛡️ CERTIFIED',
+                    'BEST VALUE'    => '💰 BEST VALUE',
+                    'NEW ARRIVAL'   => '🆕 NEW ARRIVAL',
+                    'BUDGET PICK'   => '🏷️ BUDGET PICK',
+                    'HEAVY DUTY'    => '💪 HEAVY DUTY',
+                    'TOP RATED'     => '🌟 TOP RATED',
+                );
+                $current_badge = trim( (string) $badge );
+                $badge_key     = strtoupper( $current_badge );
+                if ( empty( $current_badge ) || $badge_key === 'NONE' || $badge_key === 'NO_BADGE' || $badge_key === 'HIDE' || $badge_key === 'NO BADGE' ) {
+                    $badge_key = 'none';
+                }
+                ?>
+                <select id="car_badge" name="car_badge" class="regular-text" style="font-weight: 600;">
+                    <?php foreach ( $badge_options as $val => $label ) : ?>
+                        <option value="<?php echo esc_attr( $val ); ?>" <?php selected( $badge_key, $val ); ?>>
+                            <?php echo esc_html( $label ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                    <?php if ( ! empty( $current_badge ) && ! array_key_exists( $badge_key, $badge_options ) ) : ?>
+                        <option value="<?php echo esc_attr( $current_badge ); ?>" selected>
+                            <?php echo esc_html( $current_badge ); ?>
+                        </option>
+                    <?php endif; ?>
+                </select>
+                <p class="description"><?php _e( 'Select a ribbon badge for vehicle card. Choose "No Badge (Hide)" to hide badge.', 'rikshawale-theme' ); ?></p>
+            </td>
         </tr>
         <tr>
             <th><label for="car_mfg_year"><?php _e( 'Manufacturing Year *', 'rikshawale-theme' ); ?></label></th>
@@ -4300,7 +4334,15 @@ function rikshawale_ajax_filter_inventory() {
 			$p_fuel  = get_post_meta( $p_id, '_car_fuel', true ) ?: 'Electric';
 			$p_trans = get_post_meta( $p_id, '_car_transmission', true ) ?: 'Automatic';
 			$p_km    = get_post_meta( $p_id, '_car_driven_km', true ) ?: '15,000 km';
-			$p_badge = get_post_meta( $p_id, '_car_badge', true ) ?: 'LIMITED OFFER';
+			$raw_badge   = get_post_meta( $p_id, '_car_badge', true );
+			$badge_clean = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_badge ) ) );
+			if ( empty( $raw_badge ) || $badge_clean === 'none' || $badge_clean === 'no_badge' || $badge_clean === 'hide' || $badge_clean === 'no badge' ) {
+				$p_badge        = '';
+				$is_coming_soon = false;
+			} else {
+				$p_badge        = $raw_badge;
+				$is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
+			}
 			$thumb   = get_the_post_thumbnail_url( $p_id, 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
 			$title   = get_the_title( $p_id );
 
@@ -4309,14 +4351,12 @@ function rikshawale_ajax_filter_inventory() {
 			$rate_m   = (11.75 / 12) / 100;
 			$pow_m    = pow(1 + $rate_m, 60);
 			$est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
-			$badge_clean    = preg_replace( '/\s+/', ' ', strtolower( trim( $p_badge ) ) );
-			$is_coming_soon = ( $badge_clean === 'coming soon' || strpos( $badge_clean, 'coming soon' ) !== false );
 			?>
 			<div class="col-lg-4 col-md-6 inventory-card-item">
 				<div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
 					<a href="<?php echo get_permalink($p_id); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
 						<?php if ( $p_badge ) : ?>
-							<span class="car-card-badge position-absolute bottom-0 end-0 m-2.5 m-md-3 badge <?php echo $is_coming_soon ? 'badge-coming-soon' : 'bg-danger'; ?> z-3 shadow-sm rounded-pill px-3 py-1.5 extra-small uppercase" style="<?php echo $is_coming_soon ? 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important; border: 1px solid rgba(255,255,255,0.25);' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
+							<span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
 						<?php endif; ?>
 						<?php if ( $is_coming_soon ) : ?>
 							<div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
