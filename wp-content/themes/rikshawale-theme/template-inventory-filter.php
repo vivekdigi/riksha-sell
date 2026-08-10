@@ -97,7 +97,7 @@ $all_locations_terms = get_terms( array(
                     <span class="text-white">Inventory & Filter</span>
                 </div>
                 <h2 class="fw-black text-white display-6 mb-2">Explore Commercial Rikshas & Vehicles</h2>
-                <p class="text-white-50 mb-3 small">Filter certified pre-owned electric rikshas, autorikshas, commercial vehicles, and cars by brand, price, fuel, and specs.</p>
+                <p class="text-white-50 mb-3 small">Filter certified pre-owned electric rikshas, autorikshas, and commercial 3-wheelers by brand, price, fuel, and specs.</p>
                 
                 <!-- Quick Search Input -->
                 <div class="bg-white rounded-4 p-2 shadow-sm d-flex align-items-center gap-2 max-w-500">

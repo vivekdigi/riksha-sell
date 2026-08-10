@@ -619,7 +619,7 @@ add_action( 'init', 'rikshawale_register_inventory_cpt' );
  */
 function rikshawale_register_inventory_taxonomies() {
 	// Riksha Locations / Places Taxonomy
-	register_taxonomy( 'riksha_location', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'riksha_location', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'              => _x( 'Locations / Places', 'taxonomy general name', 'rikshawale-theme' ),
@@ -642,7 +642,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Riksha Models
-	register_taxonomy( 'car_model', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'car_model', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Riksha Models', 'taxonomy general name', 'rikshawale-theme' ),
@@ -660,7 +660,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Riksha Brands
-	register_taxonomy( 'car_brand', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'car_brand', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Riksha Brands', 'taxonomy general name', 'rikshawale-theme' ),
@@ -678,7 +678,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Manufacturing Year Taxonomy
-	register_taxonomy( 'riksha_mfg_year', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'riksha_mfg_year', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Manufacturing Years', 'taxonomy general name', 'rikshawale-theme' ),
@@ -691,7 +691,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Registration Year Taxonomy
-	register_taxonomy( 'riksha_reg_year', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'riksha_reg_year', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Registration Years', 'taxonomy general name', 'rikshawale-theme' ),
@@ -704,7 +704,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Owner Type Taxonomy
-	register_taxonomy( 'riksha_owner_type', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'riksha_owner_type', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Owner Types', 'taxonomy general name', 'rikshawale-theme' ),
@@ -717,7 +717,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Fuel Type Taxonomy
-	register_taxonomy( 'riksha_fuel_type', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'riksha_fuel_type', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Fuel Types', 'taxonomy general name', 'rikshawale-theme' ),
@@ -730,7 +730,7 @@ function rikshawale_register_inventory_taxonomies() {
 	) );
 
 	// Transmission Type Taxonomy
-	register_taxonomy( 'riksha_trans_type', array( 'inventory', 'riksha' ), array(
+	register_taxonomy( 'riksha_trans_type', array( 'inventory' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Transmission Types', 'taxonomy general name', 'rikshawale-theme' ),
@@ -1126,7 +1126,7 @@ function rikshawale_register_riksha_taxonomy() {
 		'show_in_rest'      => true,
 	);
 
-	register_taxonomy( 'riksha_type', array( 'riksha' ), $args );
+	register_taxonomy( 'riksha_type', array( 'inventory' ), $args );
 }
 add_action( 'init', 'rikshawale_register_riksha_taxonomy' );
 
@@ -1158,7 +1158,7 @@ function rikshawale_register_riksha_brand_taxonomy() {
 		'show_in_rest'      => true,
 	);
 
-	register_taxonomy( 'riksha_brand', array( 'riksha' ), $args );
+	register_taxonomy( 'riksha_brand', array( 'inventory' ), $args );
 }
 add_action( 'init', 'rikshawale_register_riksha_brand_taxonomy' );
 

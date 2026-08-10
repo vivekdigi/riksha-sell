@@ -1,9 +1,9 @@
 <?php
 /**
- * Template Name: Sell a Car
+ * Template Name: Sell a Riksha
  * Template Post Type: page
  *
- * Premium "Sell Your Car" form page template for Rikshawale theme.
+ * Premium "Sell Your Riksha" form page template for Rikshawale theme.
  * Submissions are stored as car_submission CPT (pending) for admin review.
  */
 

@@ -106,10 +106,10 @@
                 }
                 ?>
                 <div class="footer-tagline-box my-2 px-2 py-1">
-                    <?php echo esc_html( get_theme_mod( 'footer_tagline', 'PREMIUM PRE-OWNED AUTOMOTIVE EXPERIENCE' ) ); ?>
+                    <?php echo esc_html( get_theme_mod( 'footer_tagline', 'INDIA\'S TRUSTED PRE-OWNED THREE-WHEELER MARKETPLACE' ) ); ?>
                 </div>
                 <p class="mb-0">
-                    <?php echo esc_html( get_theme_mod( 'footer_description', 'Luxury, trust, and performance — handpicked pre-owned cars for buyers who expect more.' ) ); ?>
+                    <?php echo esc_html( get_theme_mod( 'footer_description', 'Quality, trust, and transparency — handpicked pre-owned commercial rikshas & e-vehicles.' ) ); ?>
                 </p>
             </div>
 
@@ -123,7 +123,7 @@
                     <ul class="list-unstyled">
                         <li><a href="<?php echo esc_url( home_url('/') ); ?>">Home</a></li>
                         <li><a href="<?php echo esc_url( home_url('/about-us/') ); ?>">About us</a></li>
-                        <li><a href="<?php echo esc_url( home_url('/sell-a-car/') ); ?>">Sell a Car</a></li>
+                        <li><a href="<?php echo esc_url( home_url('/inventory/') ); ?>">Riksha Inventory</a></li>
                         <li><a href="<?php echo esc_url( home_url('/contact-us/') ); ?>">Contact us</a></li>
                     </ul>
                 </div>
