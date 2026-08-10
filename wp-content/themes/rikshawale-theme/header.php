@@ -119,13 +119,79 @@
             transform: translate(2px, -2px);
             display: inline-block;
         }
+        /* Open Submenus & Dropdowns on Hover for Desktop */
         @media (min-width: 992px) {
+            .navbar-nav .dropdown:hover > .dropdown-menu,
+            .navbar-nav .menu-item-has-children:hover > .sub-menu,
+            .navbar-nav .menu-item-has-children:hover > .dropdown-menu,
+            .navbar-nav li:hover > ul.sub-menu,
+            .navbar-nav li:hover > .dropdown-menu,
             .mega-places-menu-item:hover .mega-dropdown-panel {
-                display: block;
-                animation: fadeIn 0.2s ease-in-out;
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                animation: fadeInDown 0.2s ease-in-out;
+            }
+
+            .navbar-nav ul.sub-menu,
+            .navbar-nav .dropdown-menu {
+                border-radius: 12px;
+                border: 1px solid #f1f5f9;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .navbar-nav ul.sub-menu li a,
+            .navbar-nav .dropdown-menu a {
+                transition: all 0.2s ease;
+            }
+
+            .navbar-nav ul.sub-menu li a:hover,
+            .navbar-nav .dropdown-menu a:hover {
+                background-color: #f8fafc;
+                color: var(--primary-color, #db2d2e) !important;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth >= 992) {
+            document.querySelectorAll('.navbar-nav .dropdown, .navbar-nav .menu-item-has-children, .navbar-nav li').forEach(function(everydropdown) {
+                everydropdown.addEventListener('mouseenter', function() {
+                    let el_link = this.querySelector('a[data-bs-toggle="dropdown"], a.dropdown-toggle');
+                    let el_menu = this.querySelector('.dropdown-menu, .sub-menu');
+                    if (el_menu) {
+                        el_menu.classList.add('show');
+                    }
+                    if (el_link) {
+                        el_link.setAttribute('aria-expanded', 'true');
+                    }
+                });
+                everydropdown.addEventListener('mouseleave', function() {
+                    let el_link = this.querySelector('a[data-bs-toggle="dropdown"], a.dropdown-toggle');
+                    let el_menu = this.querySelector('.dropdown-menu, .sub-menu');
+                    if (el_menu) {
+                        el_menu.classList.remove('show');
+                    }
+                    if (el_link) {
+                        el_link.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+        }
+    });
+    </script>
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
