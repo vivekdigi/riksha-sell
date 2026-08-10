@@ -289,11 +289,22 @@ foreach ( $section_order as $sec_key ) {
                             ?>
                             <div class="car-slider-item">
                                 <div class="car-card-exact">
+                                    <?php $is_coming_soon = ( strtolower( trim( $p_badge ) ) === 'coming soon' ); ?>
                                     <?php if ( $p_badge ) : ?>
-                                        <span class="car-card-badge"><?php echo esc_html($p_badge); ?></span>
+                                        <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
                                     <?php endif; ?>
                                     <a href="<?php the_permalink(); ?>" class="car-card-img-link">
-                                        <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                        <?php if ( $is_coming_soon ) : ?>
+                                            <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
+                                                <div class="coming-soon-glossy-icon mb-2">
+                                                    <i class="fa-solid fa-clock-rotate-left fs-4" style="color: #60a5fa; text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);"></i>
+                                                </div>
+                                                <span class="fw-bold text-uppercase tracking-wider small mb-1" style="color: #f8fafc; font-family: var(--font-heading, sans-serif); letter-spacing: 1px; font-size: 0.78rem;">Coming Soon</span>
+                                                <span class="extra-small text-white-50">Arriving Soon</span>
+                                            </div>
+                                        <?php else : ?>
+                                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                        <?php endif; ?>
                                     </a>
                                     <div class="car-card-content">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -513,9 +524,20 @@ foreach ( $section_order as $sec_key ) {
                             ?>
                             <div class="car-slider-item">
                                 <div class="car-card-exact">
-                                    <span class="car-card-badge"><?php echo esc_html($p_badge); ?></span>
+                                    <?php $is_coming_soon = ( strtolower( trim( $p_badge ) ) === 'coming soon' ); ?>
+                                    <span class="car-card-badge <?php echo $is_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
                                     <a href="<?php the_permalink(); ?>" class="car-card-img-link">
-                                        <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                        <?php if ( $is_coming_soon ) : ?>
+                                            <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
+                                                <div class="coming-soon-glossy-icon mb-2">
+                                                    <i class="fa-solid fa-clock-rotate-left fs-4" style="color: #60a5fa; text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);"></i>
+                                                </div>
+                                                <span class="fw-bold text-uppercase tracking-wider small mb-1" style="color: #f8fafc; font-family: var(--font-heading, sans-serif); letter-spacing: 1px; font-size: 0.78rem;">Coming Soon</span>
+                                                <span class="extra-small text-white-50">Arriving Soon</span>
+                                            </div>
+                                        <?php else : ?>
+                                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                        <?php endif; ?>
                                     </a>
                                     <div class="car-card-content">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -628,7 +650,7 @@ foreach ( $section_order as $sec_key ) {
                                         </div>
                                         <div class="col-md-7 p-3">
                                             <h5 class="fw-bold text-dark mb-1"><?php the_title(); ?></h5>
-                                            <span class="badge mb-2 px-3 py-2 text-wrap" style="background-color: rgba(219, 45, 46, 0.1); color: var(--primary-color, #db2d2e); font-size: 0.82rem; border: 1px solid rgba(219, 45, 46, 0.2);"><?php echo esc_html($t_role); ?></span>
+                                            <span class="badge team-role-glossy mb-2 px-3 py-2 text-wrap"><?php echo esc_html($t_role); ?></span>
                                             <p class="text-secondary small mb-0 lh-base">
                                                 <?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>
                                             </p>
@@ -645,6 +667,8 @@ foreach ( $section_order as $sec_key ) {
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
+                    <!-- Team Slider Pagination Dots (Bubbles) -->
+                    <div class="team-slider-dots" id="teamSliderDots"></div>
                 </div>
             </section>
             <?php
@@ -1003,6 +1027,45 @@ function scrollTeamSlider(direction) {
     var scrollAmount = track.clientWidth * 0.8;
     track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    var teamTrack = document.getElementById('teamSliderTrack');
+    var dotsContainer = document.getElementById('teamSliderDots');
+    if (teamTrack && dotsContainer) {
+        var items = teamTrack.querySelectorAll('.team-slider-item');
+        if (items.length > 0) {
+            dotsContainer.innerHTML = '';
+            for (var i = 0; i < items.length; i++) {
+                (function(index) {
+                    var dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'team-slider-dot' + (index === 0 ? ' active' : '');
+                    dot.setAttribute('aria-label', 'Go to slide ' + (index + 1));
+                    dot.addEventListener('click', function() {
+                        var scrollPos = items[index].offsetLeft - teamTrack.offsetLeft;
+                        teamTrack.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                    });
+                    dotsContainer.appendChild(dot);
+                })(i);
+            }
+
+            teamTrack.addEventListener('scroll', function() {
+                var scrollLeft = teamTrack.scrollLeft;
+                var trackWidth = teamTrack.clientWidth;
+                var activeIdx = 0;
+                items.forEach(function(item, idx) {
+                    if (item.offsetLeft - teamTrack.offsetLeft <= scrollLeft + (trackWidth / 3)) {
+                        activeIdx = idx;
+                    }
+                });
+                var dots = dotsContainer.querySelectorAll('.team-slider-dot');
+                dots.forEach(function(d, idx) {
+                    d.classList.toggle('active', idx === activeIdx);
+                });
+            });
+        }
+    }
+});
 </script>
 
 <?php get_footer(); ?>

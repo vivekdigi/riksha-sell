@@ -4309,14 +4309,25 @@ function rikshawale_ajax_filter_inventory() {
 			$rate_m   = (11.75 / 12) / 100;
 			$pow_m    = pow(1 + $rate_m, 60);
 			$est_emi  = round( $loan_amt * $rate_m * $pow_m / ($pow_m - 1) );
+			$is_coming_soon = ( strtolower( trim( $p_badge ) ) === 'coming soon' );
 			?>
 			<div class="col-lg-4 col-md-6 inventory-card-item">
 				<div class="car-card-exact card border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative">
 					<?php if ( $p_badge ) : ?>
-						<span class="car-card-badge position-absolute top-0 start-0 m-3 badge bg-danger z-2 shadow-sm rounded-pill px-3 py-2 extra-small uppercase"><?php echo esc_html($p_badge); ?></span>
+						<span class="car-card-badge position-absolute top-0 end-0 m-2.5 m-md-3 badge <?php echo $is_coming_soon ? 'badge-coming-soon' : 'bg-danger'; ?> z-3 shadow-sm rounded-pill px-3 py-1.5 extra-small uppercase" style="<?php echo $is_coming_soon ? 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important; border: 1px solid rgba(255,255,255,0.25);' : ''; ?>"><?php echo esc_html($p_badge); ?></span>
 					<?php endif; ?>
 					<a href="<?php echo get_permalink($p_id); ?>" class="car-card-img-link d-block position-relative bg-light text-center" style="height: 200px; overflow: hidden;">
-						<img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($title); ?>" class="w-100 h-100 object-fit-cover transition-all">
+						<?php if ( $is_coming_soon ) : ?>
+							<div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
+								<div class="coming-soon-glossy-icon mb-2">
+									<i class="fa-solid fa-clock-rotate-left fs-4" style="color: #60a5fa; text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);"></i>
+								</div>
+								<span class="fw-bold text-uppercase tracking-wider small mb-1" style="color: #f8fafc; font-family: var(--font-heading, sans-serif); letter-spacing: 1px; font-size: 0.78rem;">Coming Soon</span>
+								<span class="extra-small text-white-50">Arriving in Live Inventory</span>
+							</div>
+						<?php else : ?>
+							<img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($title); ?>" class="w-100 h-100 object-fit-cover transition-all">
+						<?php endif; ?>
 					</a>
 					<div class="card-body p-4 d-flex flex-column justify-content-between">
 						<div>

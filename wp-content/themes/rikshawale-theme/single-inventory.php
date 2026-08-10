@@ -473,13 +473,26 @@ window.addEventListener('load', calculateEMI);
                             $r_price = rikshawale_get_formatted_price( get_the_ID() );
                             $r_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: 'Petrol';
                             $r_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
-                            $r_thumb = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80';
+                            $r_badge = get_post_meta( get_the_ID(), '_car_badge', true ) ?: 'LIMITED OFFER';
+                            $r_coming_soon = ( strtolower( trim( $r_badge ) ) === 'coming soon' );
                     ?>
                     <div class="car-slider-item">
                         <div class="car-card-exact">
-                            <span class="car-card-badge" style="background-color: var(--primary-color, #db2d2e);">LIMITED OFFER</span>
+                            <?php if ( $r_badge ) : ?>
+                                <span class="car-card-badge <?php echo $r_coming_soon ? 'badge-coming-soon' : ''; ?>"><?php echo esc_html($r_badge); ?></span>
+                            <?php endif; ?>
                             <a href="<?php the_permalink(); ?>" class="car-card-img-link">
-                                <img src="<?php echo esc_url($r_thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                <?php if ( $r_coming_soon ) : ?>
+                                    <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-3 text-white position-relative">
+                                        <div class="coming-soon-glossy-icon mb-2">
+                                            <i class="fa-solid fa-clock-rotate-left fs-4" style="color: #60a5fa; text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);"></i>
+                                        </div>
+                                        <span class="fw-bold text-uppercase tracking-wider small mb-1" style="color: #f8fafc; font-family: var(--font-heading, sans-serif); letter-spacing: 1px; font-size: 0.78rem;">Coming Soon</span>
+                                        <span class="extra-small text-white-50">Arriving Soon</span>
+                                    </div>
+                                <?php else : ?>
+                                    <img src="<?php echo esc_url($r_thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                <?php endif; ?>
                             </a>
                             <div class="car-card-content">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
