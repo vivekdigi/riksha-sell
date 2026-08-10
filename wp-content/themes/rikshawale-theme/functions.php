@@ -3867,10 +3867,41 @@ add_action( 'wp_ajax_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inven
 add_action( 'wp_ajax_nopriv_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inventory' );
 
 /**
- * Append Places Mega Menu item to Primary Nav Menu
+ * Append Places Mega Menu item to Primary Nav Menu (Dynamically showing logged-in user place)
  */
 function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 	if ( ( isset( $args->theme_location ) && $args->theme_location === 'primary' ) || empty( $args->theme_location ) ) {
+		$current_place_label = 'Places';
+
+		// 1. Check logged-in user meta
+		if ( is_user_logged_in() ) {
+			$user_id    = get_current_user_id();
+			$user_place = get_user_meta( $user_id, 'user_place', true );
+			if ( empty( $user_place ) ) {
+				$user_place = get_user_meta( $user_id, 'city', true );
+			}
+			if ( empty( $user_place ) ) {
+				$user_place = get_user_meta( $user_id, 'billing_city', true );
+			}
+			if ( ! empty( $user_place ) ) {
+				$current_place_label = esc_html( $user_place );
+			}
+		}
+
+		// 2. Check cookie if user meta is empty or not logged in
+		if ( $current_place_label === 'Places' && ! empty( $_COOKIE['user_selected_place'] ) ) {
+			$current_place_label = esc_html( sanitize_text_field( $_COOKIE['user_selected_place'] ) );
+		}
+
+		// 3. Check query param if currently filtering by location
+		if ( ! empty( $_GET['location'] ) ) {
+			$loc_slug = is_array( $_GET['location'] ) ? $_GET['location'][0] : $_GET['location'];
+			$term     = get_term_by( 'slug', sanitize_text_field( $loc_slug ), 'riksha_location' );
+			if ( $term && ! is_wp_error( $term ) ) {
+				$current_place_label = esc_html( $term->name );
+			}
+		}
+
 		$locations = get_terms( array(
 			'taxonomy'   => 'riksha_location',
 			'hide_empty' => false,
@@ -3878,16 +3909,18 @@ function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 
 		$location_links_html = '';
 		if ( ! empty( $locations ) && ! is_wp_error( $locations ) ) {
-			// Split into 3 columns
 			$cols = array_chunk( $locations, ceil( count( $locations ) / 3 ) );
 			foreach ( $cols as $col_terms ) {
 				$location_links_html .= '<div class="col-lg-4 col-md-6 col-12 mb-2">';
 				$location_links_html .= '<ul class="list-unstyled mb-0 px-1">';
 				foreach ( $col_terms as $term ) {
-					$url = add_query_arg( 'location[]', $term->slug, home_url( '/inventory/' ) );
+					$url          = add_query_arg( 'location[]', $term->slug, home_url( '/inventory/' ) );
+					$is_active    = ( strtolower( $current_place_label ) === strtolower( $term->name ) );
+					$active_class = $is_active ? 'bg-danger-subtle text-danger fw-bold' : 'text-dark fw-semibold';
+
 					$location_links_html .= '<li class="mb-2">';
-					$location_links_html .= '<a href="' . esc_url( $url ) . '" class="mega-city-link text-decoration-none text-dark fw-semibold d-flex align-items-center justify-content-between py-1 px-2 rounded-2" style="font-size: 0.9rem;">';
-					$location_links_html .= '<span>Riksha in ' . esc_html( $term->name ) . '</span>';
+					$location_links_html .= '<a href="' . esc_url( $url ) . '" onclick="saveUserSelectedPlace(\'' . esc_js( $term->name ) . '\')" class="mega-city-link text-decoration-none ' . $active_class . ' d-flex align-items-center justify-content-between py-1 px-2 rounded-2" style="font-size: 0.9rem;">';
+					$location_links_html .= '<span>Riksha in ' . esc_html( $term->name ) . ( $is_active ? ' <small class="badge bg-danger ms-1" style="font-size:0.65rem;">Active</small>' : '' ) . '</span>';
 					$location_links_html .= '<span class="arrow-icon text-secondary small ms-2">↗</span>';
 					$location_links_html .= '</a>';
 					$location_links_html .= '</li>';
@@ -3901,7 +3934,7 @@ function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 
 		$mega_menu_item  = '<li class="nav-item dropdown position-static mega-places-menu-item ms-lg-2">';
 		$mega_menu_item .= '<a class="nav-link dropdown-toggle fw-bold text-dark d-inline-flex align-items-center gap-1 py-2" href="#" id="placesNavMegaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">';
-		$mega_menu_item .= '<i class="fa-solid fa-location-dot text-danger"></i> Places';
+		$mega_menu_item .= '<i class="fa-solid fa-location-dot text-danger"></i> <span id="currentPlacesLabel">' . $current_place_label . '</span>';
 		$mega_menu_item .= '</a>';
 		$mega_menu_item .= '<div class="dropdown-menu w-100 shadow-lg border-0 rounded-4 p-4 mt-1 mega-dropdown-panel" aria-labelledby="placesNavMegaDropdown" style="left: 0; right: 0; background: #ffffff; border-top: 3px solid var(--primary-color, #db2d2e) !important;">';
 		$mega_menu_item .= '<div class="container" style="max-width: 1140px;">';
@@ -3919,3 +3952,54 @@ function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 	return $items;
 }
 add_filter( 'wp_nav_menu_items', 'rikshawale_add_places_mega_menu_to_nav', 10, 2 );
+
+/**
+ * AJAX Handler: Save Selected User Place
+ */
+function rikshawale_save_user_place_ajax() {
+	$place = isset( $_POST['place'] ) ? sanitize_text_field( $_POST['place'] ) : '';
+	if ( ! empty( $place ) ) {
+		if ( is_user_logged_in() ) {
+			$user_id = get_current_user_id();
+			update_user_meta( $user_id, 'user_place', $place );
+			update_user_meta( $user_id, 'city', $place );
+		}
+		wp_send_json_success( array( 'place' => $place ) );
+	}
+	wp_send_json_error( array( 'message' => 'Invalid place' ) );
+}
+add_action( 'wp_ajax_rikshawale_save_user_place', 'rikshawale_save_user_place_ajax' );
+add_action( 'wp_ajax_nopriv_rikshawale_save_user_place', 'rikshawale_save_user_place_ajax' );
+
+/**
+ * WP Profile Settings Field for Location / Place
+ */
+function rikshawale_show_extra_profile_fields( $user ) {
+	$user_place = get_user_meta( $user->ID, 'user_place', true );
+	?>
+	<h3><?php _e( 'Location / Place Details', 'rikshawale-theme' ); ?></h3>
+	<table class="form-table">
+		<tr>
+			<th><label for="user_place"><?php _e( 'Current Location / City', 'rikshawale-theme' ); ?></label></th>
+			<td>
+				<input type="text" name="user_place" id="user_place" value="<?php echo esc_attr( $user_place ); ?>" class="regular-text" placeholder="e.g. Delhi NCR, Mumbai, Patna" /><br />
+				<span class="description"><?php _e( 'Your preferred location / city for commercial riksha inventory.', 'rikshawale-theme' ); ?></span>
+			</td>
+		</tr>
+	</table>
+	<?php
+}
+add_action( 'show_user_profile', 'rikshawale_show_extra_profile_fields' );
+add_action( 'edit_user_profile', 'rikshawale_show_extra_profile_fields' );
+
+function rikshawale_save_extra_profile_fields( $user_id ) {
+	if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		return false;
+	}
+	if ( isset( $_POST['user_place'] ) ) {
+		update_user_meta( $user_id, 'user_place', sanitize_text_field( $_POST['user_place'] ) );
+		update_user_meta( $user_id, 'city', sanitize_text_field( $_POST['user_place'] ) );
+	}
+}
+add_action( 'personal_options_update', 'rikshawale_save_extra_profile_fields' );
+add_action( 'edit_user_profile_update', 'rikshawale_save_extra_profile_fields' );

@@ -250,9 +250,20 @@
                         el_link.setAttribute('aria-expanded', 'false');
                     }
                 });
-            });
+    function saveUserSelectedPlace(placeName) {
+        document.cookie = "user_selected_place=" + encodeURIComponent(placeName) + "; path=/; max-age=" + (365*24*60*60);
+        var lbl = document.getElementById('currentPlacesLabel');
+        if (lbl) {
+            lbl.textContent = placeName;
         }
-    });
+        var formData = new FormData();
+        formData.append('action', 'rikshawale_save_user_place');
+        formData.append('place', placeName);
+        fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
+            method: 'POST',
+            body: formData
+        });
+    }
     </script>
 </head>
 <body <?php body_class(); ?>>
