@@ -513,6 +513,433 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- ============================================================
+     FLOATING WHATSAPP CHAT WIDGET
+     ============================================================ -->
+<?php
+$wa_enable = get_theme_mod( 'whatsapp_enable', true );
+$wa_number = preg_replace('/[^0-9]/', '', get_theme_mod( 'whatsapp_number', '919876543210' ) );
+$wa_text   = urlencode( get_theme_mod( 'whatsapp_message', 'Hi Rikshawale, I am interested in buying/selling a commercial rickshaw.' ) );
+if ( $wa_enable && ! empty( $wa_number ) ) : ?>
+<a href="https://wa.me/<?php echo esc_attr($wa_number); ?>?text=<?php echo $wa_text; ?>" target="_blank" rel="noopener noreferrer" id="rikshawale-whatsapp-float" title="Chat on WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+</a>
+<style>
+#rikshawale-whatsapp-float {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 62px;
+    height: 62px;
+    background: radial-gradient(circle at 35% 25%, #4bf285 0%, #25d366 50%, #0d9447 100%);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+    z-index: 99999;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    text-decoration: none !important;
+    animation: waGlossyPulse 2.5s infinite;
+}
+#rikshawale-whatsapp-float::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 10%;
+    width: 80%;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 100%);
+    border-radius: 50% 50% 40% 40%;
+    pointer-events: none;
+}
+#rikshawale-whatsapp-float:hover {
+    transform: scale(1.15) translateY(-3px);
+    box-shadow: 0 14px 35px rgba(37, 211, 102, 0.65), inset 0 3px 4px rgba(255, 255, 255, 0.8), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+}
+#rikshawale-whatsapp-float i {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+    transition: transform 0.3s ease;
+}
+#rikshawale-whatsapp-float:hover i {
+    transform: scale(1.08);
+}
+@keyframes waGlossyPulse {
+    0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6), 0 10px 25px rgba(37, 211, 102, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.3); }
+    70% { box-shadow: 0 0 0 16px rgba(37, 211, 102, 0), 0 10px 25px rgba(37, 211, 102, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.3); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0), 0 10px 25px rgba(37, 211, 102, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.3); }
+}
+</style>
+<?php endif; ?>
+
+<!-- ============================================================
+     FLOATING AI SALES ASSISTANT CHATBOT WIDGET
+     ============================================================ -->
+<div id="rikshawale-ai-chat-launcher" onclick="toggleRikshawaleAIChat()">
+    <div class="ai-launcher-badge">AI Assistant</div>
+    <i class="fa-solid fa-robot"></i>
+</div>
+
+<div id="rikshawale-ai-chat-window">
+    <!-- Header -->
+    <div class="ai-chat-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="ai-avatar-box"><i class="fa-solid fa-robot"></i></div>
+            <div>
+                <h6 class="mb-0 fw-bold text-white fs-6">Rikshawale AI Assistant</h6>
+                <small class="text-emerald-400" style="color: #4ade80; font-size: 11px;"><i class="fa-solid fa-circle me-1" style="font-size: 8px;"></i> Live Inventory Search</small>
+            </div>
+        </div>
+        <button type="button" class="ai-close-btn" onclick="toggleRikshawaleAIChat()">&times;</button>
+    </div>
+
+    <!-- Quick Pills -->
+    <div class="ai-quick-pills">
+        <button type="button" onclick="sendAIChatQuick('E-Rickshaw under 1.5 Lakh')">⚡ E-Rickshaw &lt; ₹1.5L</button>
+        <button type="button" onclick="sendAIChatQuick('Bajaj CNG Auto')">🛺 Bajaj CNG Auto</button>
+        <button type="button" onclick="sendAIChatQuick('Lowest Price Rickshaw')">💰 Lowest Price</button>
+        <button type="button" onclick="sendAIChatQuick('Mahindra Treo Auto')">⚡ Mahindra Treo</button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="ai-chat-body" id="aiChatBody">
+        <div class="ai-msg-bubble ai">
+            <strong>Namaste! 🙏 Main Aapka Rikshawale AI Assistant Hoon.</strong><br>
+            Aap kis budget, fuel type (Electric/CNG/Diesel) ya location ki commercial Rickshaw dhoond rahe hain? Niche likhein ya search karein!
+        </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="ai-typing-indicator" id="aiTypingIndicator">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <span class="ms-2 text-muted small">Searching Inventory...</span>
+    </div>
+
+    <!-- Input Box -->
+    <div class="ai-chat-footer">
+        <input type="text" id="aiChatInput" placeholder="Type your query (e.g. Electric auto under 2 Lakh)..." onkeydown="if(event.key==='Enter') sendAIChatMsg()">
+        <button type="button" id="aiChatSendBtn" onclick="sendAIChatMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<style>
+/* Chat Launcher Floating Button (Hidden for now) */
+#rikshawale-ai-chat-launcher {
+    display: none !important;
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #db2d2e 0%, #b91c1c 100%);
+    color: #ffffff;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(219, 45, 46, 0.45);
+    z-index: 99999;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+#rikshawale-ai-chat-launcher:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 30px rgba(219, 45, 46, 0.6);
+}
+.ai-launcher-badge {
+    position: absolute;
+    top: -8px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 10px;
+    border: 1px solid #db2d2e;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Chat Window Container */
+#rikshawale-ai-chat-window {
+    display: none;
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    height: 530px;
+    max-height: calc(100vh - 120px);
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    z-index: 99999;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+.ai-chat-header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.ai-avatar-box {
+    width: 36px;
+    height: 36px;
+    background: rgba(219,45,46,0.15);
+    border: 1px solid #db2d2e;
+    color: #db2d2e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+.ai-close-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.ai-close-btn:hover { color: #ffffff; }
+
+/* Quick Pills */
+.ai-quick-pills {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #1e293b;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+.ai-quick-pills::-webkit-scrollbar { display: none; }
+.ai-quick-pills button {
+    background: rgba(255,255,255,0.06);
+    color: #cbd5e1;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.ai-quick-pills button:hover {
+    background: #db2d2e;
+    color: #ffffff;
+    border-color: #db2d2e;
+}
+
+/* Chat Messages Stream */
+.ai-chat-body {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ai-msg-bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+.ai-msg-bubble.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #db2d2e 0%, #b91c1c 100%);
+    color: #ffffff;
+    border-bottom-right-radius: 2px;
+}
+.ai-msg-bubble.ai {
+    align-self: flex-start;
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-bottom-left-radius: 2px;
+}
+
+/* Vehicle Card inside Chat */
+.ai-vehicle-card {
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px;
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    transition: border-color 0.2s;
+}
+.ai-vehicle-card:hover { border-color: #db2d2e; }
+.ai-vehicle-card img {
+    width: 65px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #0f172a;
+}
+.ai-vehicle-info { flex: 1; min-width: 0; }
+.ai-vehicle-title { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-vehicle-badge { display: inline-block; background: rgba(219,45,46,0.2); color: #f87171; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+.ai-vehicle-specs { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+.ai-vehicle-link { display: inline-block; font-size: 11px; color: #38bdf8; font-weight: 600; text-decoration: none; margin-top: 3px; }
+.ai-vehicle-link:hover { text-decoration: underline; color: #60a5fa; }
+
+/* Typing Indicator */
+.ai-typing-indicator {
+    display: none;
+    align-items: center;
+    padding: 6px 14px;
+}
+.ai-typing-indicator .dot {
+    width: 6px;
+    height: 6px;
+    background: #db2d2e;
+    border-radius: 50%;
+    margin-right: 4px;
+    animation: aiBounce 1.4s infinite ease-in-out both;
+}
+.ai-typing-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+.ai-typing-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes aiBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* Chat Footer Input */
+.ai-chat-footer {
+    padding: 10px 12px;
+    background: #1e293b;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    gap: 8px;
+}
+.ai-chat-footer input {
+    flex: 1;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    outline: none;
+}
+.ai-chat-footer input:focus { border-color: #db2d2e; }
+.ai-chat-footer button {
+    background: #db2d2e;
+    color: #ffffff;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.ai-chat-footer button:hover { background: #b91c1c; }
+</style>
+
+<script>
+function toggleRikshawaleAIChat() {
+    var win = document.getElementById('rikshawale-ai-chat-window');
+    if (win.style.display === 'flex') {
+        win.style.display = 'none';
+    } else {
+        win.style.display = 'flex';
+        document.getElementById('aiChatInput').focus();
+    }
+}
+
+function sendAIChatQuick(txt) {
+    document.getElementById('aiChatInput').value = txt;
+    sendAIChatMsg();
+}
+
+function sendAIChatMsg() {
+    var input = document.getElementById('aiChatInput');
+    var msg = input.value.trim();
+    if (!msg) return;
+
+    var body = document.getElementById('aiChatBody');
+    var typing = document.getElementById('aiTypingIndicator');
+
+    // Append User Message
+    var userBubble = document.createElement('div');
+    userBubble.className = 'ai-msg-bubble user';
+    userBubble.textContent = msg;
+    body.appendChild(userBubble);
+
+    input.value = '';
+    body.scrollTop = body.scrollHeight;
+
+    // Show Typing Indicator
+    typing.style.display = 'flex';
+
+    // AJAX Call
+    var fd = new FormData();
+    fd.append('action', 'rikshawale_ai_chat');
+    fd.append('message', msg);
+
+    fetch(rikshawale_ajax.url, { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(res => {
+        typing.style.display = 'none';
+
+        var aiBubble = document.createElement('div');
+        aiBubble.className = 'ai-msg-bubble ai';
+
+        if (res.success && res.data.reply) {
+            aiBubble.innerHTML = res.data.reply;
+
+            // Render matching vehicles if returned
+            if (res.data.vehicles && res.data.vehicles.length > 0) {
+                res.data.vehicles.forEach(v => {
+                    var cardHtml = '<div class="ai-vehicle-card">'
+                        + (v.image ? '<img src="' + v.image + '" alt="' + v.title + '">' : '')
+                        + '<div class="ai-vehicle-info">'
+                        + '<div class="ai-vehicle-title">' + v.title + '</div>'
+                        + '<span class="ai-vehicle-badge">' + v.price + '</span>'
+                        + '<div class="ai-vehicle-specs">' + v.year + ' • ' + v.fuel + (v.location ? ' • ' + v.location : '') + '</div>'
+                        + '<a href="' + v.link + '" target="_blank" class="ai-vehicle-link">View Vehicle <i class="fa-solid fa-arrow-right-long ms-1"></i></a>'
+                        + '</div></div>';
+                    aiBubble.innerHTML += cardHtml;
+                });
+            }
+        } else {
+            aiBubble.textContent = "Apologies, could not process request right now. Please try again or check vehicle inventory.";
+        }
+
+        body.appendChild(aiBubble);
+        body.scrollTop = body.scrollHeight;
+    })
+    .catch(err => {
+        typing.style.display = 'none';
+        var aiBubble = document.createElement('div');
+        aiBubble.className = 'ai-msg-bubble ai';
+        aiBubble.textContent = "Network error. Please try again.";
+        body.appendChild(aiBubble);
+        body.scrollTop = body.scrollHeight;
+    });
+}
+</script>
+
 <?php wp_footer(); ?>
 </body>
 </html>

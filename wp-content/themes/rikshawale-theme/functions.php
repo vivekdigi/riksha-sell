@@ -1567,6 +1567,54 @@ function rikshawale_customize_register( $wp_customize ) {
 
 
 	// Add Section: Top Bar Customization
+	// WhatsApp Floating Button Section
+	$wp_customize->add_section( 'rikshawale_whatsapp_section', array(
+		'title'       => __( 'WhatsApp Floating Button', 'rikshawale-theme' ),
+		'priority'    => 28,
+		'description' => __( 'Configure the Admin WhatsApp Mobile Number and Floating Button settings for 1-click customer chats.', 'rikshawale-theme' ),
+	) );
+
+	// Enable WhatsApp Button Checkbox
+	$wp_customize->add_setting( 'whatsapp_enable', array(
+		'default'           => true,
+		'sanitize_callback' => 'rest_sanitize_boolean',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'whatsapp_enable', array(
+		'type'     => 'checkbox',
+		'label'    => __( 'Enable Floating WhatsApp Button', 'rikshawale-theme' ),
+		'section'  => 'rikshawale_whatsapp_section',
+		'settings' => 'whatsapp_enable',
+	) );
+
+	// Admin WhatsApp Mobile Number
+	$wp_customize->add_setting( 'whatsapp_number', array(
+		'default'           => '919876543210',
+		'sanitize_callback' => 'sanitize_text_field',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'whatsapp_number', array(
+		'type'        => 'text',
+		'label'       => __( 'Admin WhatsApp Mobile Number (With Country Code)', 'rikshawale-theme' ),
+		'description' => __( 'Enter number with country code without + or spaces e.g. 919876543210 or 919123456789', 'rikshawale-theme' ),
+		'section'     => 'rikshawale_whatsapp_section',
+		'settings'    => 'whatsapp_number',
+	) );
+
+	// Preset Welcome Message Text
+	$wp_customize->add_setting( 'whatsapp_message', array(
+		'default'           => 'Hi Rikshawale, I am interested in buying/selling a commercial rickshaw.',
+		'sanitize_callback' => 'sanitize_text_field',
+		'transport'         => 'refresh',
+	) );
+	$wp_customize->add_control( 'whatsapp_message', array(
+		'type'        => 'text',
+		'label'       => __( 'Preset Greeting Message Text', 'rikshawale-theme' ),
+		'description' => __( 'Default message populated when visitor opens WhatsApp chat.', 'rikshawale-theme' ),
+		'section'     => 'rikshawale_whatsapp_section',
+		'settings'    => 'whatsapp_message',
+	) );
+
 	$wp_customize->add_section( 'rikshawale_topbar_section', array(
 		'title'       => __( 'Header Top Bar Settings', 'rikshawale-theme' ),
 		'priority'    => 29,
@@ -2925,7 +2973,11 @@ function rikshawale_calculate_ai_valuation_internal($brand, $model, $mfg_year, $
     }
 
     if ( ! empty( $api_key ) && ! empty( $images_data ) ) {
-        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($api_key);
+        $endpoints = array(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . urlencode($api_key),
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($api_key),
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=' . urlencode($api_key)
+        );
 
         $prompt_text = "You are an expert commercial Rickshaw / Auto valuation specialist in India. "
                      . "Analyze the attached Rickshaw image(s) along with these vehicle details: "
@@ -2949,26 +3001,29 @@ function rikshawale_calculate_ai_valuation_internal($brand, $model, $mfg_year, $
             'contents' => array( array( 'parts' => $parts ) )
         ) );
 
-        $response = wp_remote_post( $endpoint, array(
-            'headers' => array( 'Content-Type' => 'application/json' ),
-            'body'    => $request_body,
-            'timeout' => 15,
-        ) );
+        foreach ( $endpoints as $endpoint ) {
+            $response = wp_remote_post( $endpoint, array(
+                'headers' => array( 'Content-Type' => 'application/json' ),
+                'body'    => $request_body,
+                'timeout' => 15,
+            ) );
 
-        if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
-            $res_body = json_decode( wp_remote_retrieve_body( $response ), true );
-            if ( isset( $res_body['candidates'][0]['content']['parts'][0]['text'] ) ) {
-                $raw_text = $res_body['candidates'][0]['content']['parts'][0]['text'];
-                $clean_json = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw_text));
-                $ai_res = json_decode( $clean_json, true );
+            if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
+                $res_body = json_decode( wp_remote_retrieve_body( $response ), true );
+                if ( isset( $res_body['candidates'][0]['content']['parts'][0]['text'] ) ) {
+                    $raw_text = $res_body['candidates'][0]['content']['parts'][0]['text'];
+                    $clean_json = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw_text));
+                    $ai_res = json_decode( $clean_json, true );
 
-                if ( $ai_res && isset($ai_res['condition_score']) ) {
-                    $condition_score = (float) $ai_res['condition_score'];
-                    $ai_summary = sanitize_text_field( $ai_res['summary'] ?? $ai_summary );
-                    if ( isset($ai_res['multiplier']) && is_numeric($ai_res['multiplier']) ) {
-                        $calculated_fair = $calculated_fair * (float) $ai_res['multiplier'];
+                    if ( $ai_res && isset($ai_res['condition_score']) ) {
+                        $condition_score = (float) $ai_res['condition_score'];
+                        $ai_summary = sanitize_text_field( $ai_res['summary'] ?? $ai_summary );
+                        if ( isset($ai_res['multiplier']) && is_numeric($ai_res['multiplier']) ) {
+                            $calculated_fair = $calculated_fair * (float) $ai_res['multiplier'];
+                        }
+                        $ai_used = true;
+                        break; // Exit loop on successful response
                     }
-                    $ai_used = true;
                 }
             }
         }
@@ -4465,3 +4520,167 @@ function rikshawale_save_extra_profile_fields( $user_id ) {
 }
 add_action( 'personal_options_update', 'rikshawale_save_extra_profile_fields' );
 add_action( 'edit_user_profile_update', 'rikshawale_save_extra_profile_fields' );
+
+/* ============================================================
+   AI SALES ASSISTANT CHATBOT AJAX HANDLER
+   ============================================================ */
+function rikshawale_handle_ai_chat() {
+    $user_msg = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
+    if ( empty( $user_msg ) ) {
+        wp_send_json_error( array( 'reply' => 'Please type a message.' ) );
+    }
+
+    // 1. Fetch published inventory items
+    $query = new WP_Query( array(
+        'post_type'      => array( 'inventory', 'riksha' ),
+        'post_status'    => 'publish',
+        'posts_per_page' => 25,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ) );
+
+    $inventory_list = array();
+    $inventory_context_text = "";
+
+    if ( $query->have_posts() ) {
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $pid = get_the_ID();
+            $title = get_the_title();
+            $price = rikshawale_get_formatted_price( $pid );
+            $raw_price = get_post_meta( $pid, '_car_price', true ) ?: ( get_post_meta( $pid, '_car_expected_price', true ) ?: '' );
+            $num_price = preg_replace('/[^0-9]/', '', $raw_price);
+            $num_price = $num_price ? floatval($num_price) : 0;
+            
+            $brand     = get_post_meta( $pid, '_car_brand_name', true ) ?: ( get_post_meta( $pid, '_riksha_brand_name', true ) ?: 'Riksha' );
+            $model     = get_post_meta( $pid, '_car_model_name', true ) ?: 'Standard';
+            $mfg_year  = get_post_meta( $pid, '_car_mfg_year', true ) ?: ( get_post_meta( $pid, '_car_year', true ) ?: '2022' );
+            $fuel      = get_post_meta( $pid, '_car_fuel', true ) ?: 'CNG';
+            $driven_km = get_post_meta( $pid, '_car_driven_km', true ) ?: ( get_post_meta( $pid, '_car_mileage', true ) ?: '' );
+            $owner     = get_post_meta( $pid, '_car_owner_type', true ) ?: '1st Owner';
+            $img_url   = get_the_post_thumbnail_url( $pid, 'medium' ) ?: ( get_post_meta( $pid, '_car_gallery_image_1', true ) ?: '' );
+            $permalink = get_permalink( $pid );
+
+            // Location taxonomy terms
+            $locations = wp_get_post_terms( $pid, 'riksha_location', array( 'fields' => 'names' ) );
+            $loc_str   = ( ! is_wp_error( $locations ) && ! empty( $locations ) ) ? implode( ', ', $locations ) : 'India';
+
+            $item_data = array(
+                'id'        => $pid,
+                'title'     => $title,
+                'brand'     => $brand,
+                'model'     => $model,
+                'year'      => $mfg_year,
+                'fuel'      => $fuel,
+                'driven'    => $driven_km,
+                'owner'     => $owner,
+                'location'  => $loc_str,
+                'price'     => $price,
+                'num_price' => $num_price,
+                'image'     => $img_url,
+                'link'      => $permalink,
+            );
+
+            $inventory_list[] = $item_data;
+            $inventory_context_text .= "- ID: {$pid} | Title: {$title} | Brand: {$brand} | Price: {$price} (numeric ₹{$num_price}) | Fuel: {$fuel} | Year: {$mfg_year} | Location: {$loc_str} | Link: {$permalink}\n";
+        }
+        wp_reset_postdata();
+    }
+
+    // 2. Call Gemini API if Key Available
+    $api_key = get_option( 'rikshawale_gemini_api_key', '' );
+    $ai_reply = '';
+    $matching_ids = array();
+
+    if ( ! empty( $api_key ) ) {
+        $endpoints = array(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . urlencode($api_key),
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($api_key),
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=' . urlencode($api_key),
+        );
+
+        $prompt_text = "You are Rikshawale AI Assistant, a friendly, helpful commercial Rickshaw sales expert in India.\n"
+                     . "Answer in polite, concise Hindi/Hinglish (or English if requested).\n"
+                     . "Here is our current LIVE Published Rickshaw Inventory:\n"
+                     . $inventory_context_text . "\n"
+                     . "User Query: \"{$user_msg}\"\n\n"
+                     . "Task: Recommend the best matching Rickshaws from the live inventory list above.\n"
+                     . "Provide a JSON response ONLY in this structure without markdown formatting:\n"
+                     . '{"reply": "Polite conversation answer in Hinglish highlighting top options", "matched_ids": [123, 456]}';
+
+        $request_body = json_encode( array(
+            'contents' => array( array( 'parts' => array( array( 'text' => $prompt_text ) ) ) )
+        ) );
+
+        foreach ( $endpoints as $endpoint ) {
+            $res = wp_remote_post( $endpoint, array(
+                'headers' => array( 'Content-Type' => 'application/json' ),
+                'body'    => $request_body,
+                'timeout' => 12,
+            ) );
+
+            if ( ! is_wp_error( $res ) && wp_remote_retrieve_response_code( $res ) === 200 ) {
+                $body = json_decode( wp_remote_retrieve_body( $res ), true );
+                if ( isset( $body['candidates'][0]['content']['parts'][0]['text'] ) ) {
+                    $raw_text = $body['candidates'][0]['content']['parts'][0]['text'];
+                    $clean_json = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw_text));
+                    $parsed = json_decode( $clean_json, true );
+                    if ( $parsed && isset( $parsed['reply'] ) ) {
+                        $ai_reply = sanitize_text_field( $parsed['reply'] );
+                        if ( isset( $parsed['matched_ids'] ) && is_array( $parsed['matched_ids'] ) ) {
+                            $matching_ids = array_map( 'intval', $parsed['matched_ids'] );
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Fallback PHP Logic if Gemini reply is empty or API unavailable
+    if ( empty( $ai_reply ) ) {
+        $low_msg = strtolower( $user_msg );
+        $filtered = array();
+
+        foreach ( $inventory_list as $item ) {
+            if ( preg_match( '/\b(e-rickshaw|electric|ev)\b/i', $low_msg ) && strtolower($item['fuel']) === 'electric' ) {
+                $filtered[] = $item['id'];
+            } elseif ( preg_match( '/\b(cng|gas)\b/i', $low_msg ) && strtolower($item['fuel']) === 'cng' ) {
+                $filtered[] = $item['id'];
+            } elseif ( preg_match( '/\b(diesel|petrol)\b/i', $low_msg ) && strtolower($item['fuel']) === strtolower(preg_replace('/.*(diesel|petrol).*/i', '$1', $low_msg)) ) {
+                $filtered[] = $item['id'];
+            } elseif ( strpos( $low_msg, strtolower($item['brand']) ) !== false ) {
+                $filtered[] = $item['id'];
+            }
+        }
+
+        if ( empty( $filtered ) && ! empty( $inventory_list ) ) {
+            $filtered = array_slice( array_column( $inventory_list, 'id' ), 0, 3 );
+        }
+
+        $matching_ids = array_unique( $filtered );
+        $count = count( $matching_ids );
+        if ( $count > 0 ) {
+            $ai_reply = "Aapke liye humare paas {$count} sabse best Commercial Rickshaw options available hain! Niche dekhiye:";
+        } else {
+            $ai_reply = "Namaste! Aap kis budget ya brand ki Rickshaw dhoond rahe hain? Humare paas Electric, CNG aur Diesel options available hain.";
+        }
+    }
+
+    // 4. Gather matched vehicle objects
+    $matched_vehicles = array();
+    if ( ! empty( $matching_ids ) ) {
+        foreach ( $inventory_list as $item ) {
+            if ( in_array( $item['id'], $matching_ids, true ) ) {
+                $matched_vehicles[] = $item;
+            }
+        }
+    }
+
+    wp_send_json_success( array(
+        'reply'    => $ai_reply,
+        'vehicles' => array_slice($matched_vehicles, 0, 4),
+    ) );
+}
+add_action( 'wp_ajax_rikshawale_ai_chat', 'rikshawale_handle_ai_chat' );
+add_action( 'wp_ajax_nopriv_rikshawale_ai_chat', 'rikshawale_handle_ai_chat' );
