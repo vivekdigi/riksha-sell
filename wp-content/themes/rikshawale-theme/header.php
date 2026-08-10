@@ -119,43 +119,86 @@
             transform: translate(2px, -2px);
             display: inline-block;
         }
-        /* Open Submenus & Dropdowns on Hover for Desktop */
+        /* Parent menu items relative positioning */
+        .navbar-nav li,
+        .navbar-nav .menu-item-has-children,
+        .navbar-nav .page_item_has_children,
+        .navbar-nav .dropdown {
+            position: relative !important;
+        }
+
+        /* 1. HIDE ALL SUBMENUS & CHILDREN BY DEFAULT */
+        .navbar-nav ul.sub-menu,
+        .navbar-nav ul.children,
+        .navbar-nav .dropdown-menu {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            position: absolute !important;
+            top: 100% !important;
+            left: 0 !important;
+            z-index: 9999 !important;
+            margin-top: 0 !important;
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+            padding: 8px 0 !important;
+            list-style: none !important;
+            min-width: 200px !important;
+            transition: opacity 0.2s ease, transform 0.2s ease !important;
+        }
+
+        /* Submenu items formatting */
+        .navbar-nav ul.sub-menu li,
+        .navbar-nav ul.children li {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        .navbar-nav ul.sub-menu li a,
+        .navbar-nav ul.children li a,
+        .navbar-nav .dropdown-menu a {
+            display: block !important;
+            padding: 8px 16px !important;
+            color: #334155 !important;
+            font-size: 0.88rem !important;
+            font-weight: 500 !important;
+            text-decoration: none !important;
+            white-space: nowrap !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .navbar-nav ul.sub-menu li a:hover,
+        .navbar-nav ul.children li a:hover,
+        .navbar-nav .dropdown-menu a:hover {
+            background-color: #f8fafc !important;
+            color: var(--primary-color, #db2d2e) !important;
+            padding-left: 20px !important;
+        }
+
+        /* 2. SHOW SUBMENUS ONLY ON HOVER (DESKTOP) */
         @media (min-width: 992px) {
-            .navbar-nav .dropdown:hover > .dropdown-menu,
-            .navbar-nav .menu-item-has-children:hover > .sub-menu,
-            .navbar-nav .menu-item-has-children:hover > .dropdown-menu,
             .navbar-nav li:hover > ul.sub-menu,
+            .navbar-nav li:hover > ul.children,
             .navbar-nav li:hover > .dropdown-menu,
+            .navbar-nav .menu-item-has-children:hover > .sub-menu,
+            .navbar-nav .page_item_has_children:hover > ul.children,
+            .navbar-nav .dropdown:hover > .dropdown-menu,
             .mega-places-menu-item:hover .mega-dropdown-panel {
                 display: block !important;
                 opacity: 1 !important;
                 visibility: visible !important;
-                animation: fadeInDown 0.2s ease-in-out;
-            }
-
-            .navbar-nav ul.sub-menu,
-            .navbar-nav .dropdown-menu {
-                border-radius: 12px;
-                border: 1px solid #f1f5f9;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            }
-
-            .navbar-nav ul.sub-menu li a,
-            .navbar-nav .dropdown-menu a {
-                transition: all 0.2s ease;
-            }
-
-            .navbar-nav ul.sub-menu li a:hover,
-            .navbar-nav .dropdown-menu a:hover {
-                background-color: #f8fafc;
-                color: var(--primary-color, #db2d2e) !important;
+                transform: translateY(0) !important;
+                animation: fadeInSubmenu 0.2s ease-in-out !important;
             }
         }
 
-        @keyframes fadeInDown {
+        @keyframes fadeInSubmenu {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(6px);
             }
             to {
                 opacity: 1;

@@ -640,39 +640,9 @@ function rikshawale_register_inventory_taxonomies() {
 		'rewrite'           => array( 'slug' => 'location' ),
 		'show_in_rest'      => true,
 	) );
-}
-add_action( 'init', 'rikshawale_register_inventory_taxonomies' );
-
-/**
- * Seed Default Locations / Places terms into riksha_location taxonomy
- */
-function rikshawale_seed_default_locations() {
-	if ( taxonomy_exists( 'riksha_location' ) ) {
-		$default_places = array(
-			'Delhi NCR' => 'delhi-ncr',
-			'Mumbai'    => 'mumbai',
-			'Patna'     => 'patna',
-			'Jaipur'    => 'jaipur',
-			'Lucknow'   => 'lucknow',
-			'Kolkata'   => 'kolkata',
-			'Bengaluru' => 'bengaluru',
-			'Ahmedabad' => 'ahmedabad',
-			'Pune'      => 'pune',
-			'Indore'    => 'indore',
-		);
-		foreach ( $default_places as $name => $slug ) {
-			if ( ! term_exists( $slug, 'riksha_location' ) ) {
-				wp_insert_term( $name, 'riksha_location', array( 'slug' => $slug ) );
-			}
-		}
-	}
-}
-add_action( 'init', 'rikshawale_seed_default_locations', 20 );
-
-function rikshawale_register_inventory_taxonomies_old() {
 
 	// Riksha Models
-	register_taxonomy( 'car_model', array( 'inventory' ), array(
+	register_taxonomy( 'car_model', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Riksha Models', 'taxonomy general name', 'rikshawale-theme' ),
@@ -690,7 +660,7 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 
 	// Riksha Brands
-	register_taxonomy( 'car_brand', array( 'inventory' ), array(
+	register_taxonomy( 'car_brand', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Riksha Brands', 'taxonomy general name', 'rikshawale-theme' ),
@@ -708,7 +678,7 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 
 	// Manufacturing Year Taxonomy
-	register_taxonomy( 'riksha_mfg_year', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_mfg_year', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Manufacturing Years', 'taxonomy general name', 'rikshawale-theme' ),
@@ -721,7 +691,7 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 
 	// Registration Year Taxonomy
-	register_taxonomy( 'riksha_reg_year', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_reg_year', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Registration Years', 'taxonomy general name', 'rikshawale-theme' ),
@@ -734,7 +704,7 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 
 	// Owner Type Taxonomy
-	register_taxonomy( 'riksha_owner_type', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_owner_type', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Owner Types', 'taxonomy general name', 'rikshawale-theme' ),
@@ -747,7 +717,7 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 
 	// Fuel Type Taxonomy
-	register_taxonomy( 'riksha_fuel_type', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_fuel_type', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Fuel Types', 'taxonomy general name', 'rikshawale-theme' ),
@@ -760,7 +730,7 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 
 	// Transmission Type Taxonomy
-	register_taxonomy( 'riksha_trans_type', array( 'inventory' ), array(
+	register_taxonomy( 'riksha_trans_type', array( 'inventory', 'riksha' ), array(
 		'hierarchical'      => true,
 		'labels'            => array(
 			'name'          => _x( 'Transmission Types', 'taxonomy general name', 'rikshawale-theme' ),
@@ -773,6 +743,53 @@ function rikshawale_register_inventory_taxonomies_old() {
 	) );
 }
 add_action( 'init', 'rikshawale_register_inventory_taxonomies' );
+
+/**
+ * Seed Default Taxonomy Terms (Brands, Models, Locations, Fuel Types)
+ */
+function rikshawale_seed_all_taxonomy_terms() {
+	// 1. Locations
+	if ( taxonomy_exists( 'riksha_location' ) ) {
+		$default_places = array(
+			'Delhi NCR' => 'delhi-ncr', 'Mumbai' => 'mumbai', 'Patna' => 'patna',
+			'Jaipur' => 'jaipur', 'Lucknow' => 'lucknow', 'Kolkata' => 'kolkata',
+			'Bengaluru' => 'bengaluru', 'Ahmedabad' => 'ahmedabad', 'Pune' => 'pune', 'Indore' => 'indore'
+		);
+		foreach ( $default_places as $name => $slug ) {
+			if ( ! term_exists( $slug, 'riksha_location' ) ) {
+				wp_insert_term( $name, 'riksha_location', array( 'slug' => $slug ) );
+			}
+		}
+	}
+	// 2. Brands
+	if ( taxonomy_exists( 'car_brand' ) ) {
+		$default_brands = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
+		foreach ( $default_brands as $brand_name ) {
+			if ( ! term_exists( $brand_name, 'car_brand' ) ) {
+				wp_insert_term( $brand_name, 'car_brand' );
+			}
+		}
+	}
+	// 3. Models
+	if ( taxonomy_exists( 'car_model' ) ) {
+		$default_models = array( 'King Deluxe', 'Maxima Cargo', 'RE', 'Treo', 'Alfa', 'Ape', 'E-Alfa Mini', 'Safari', 'Super Carry' );
+		foreach ( $default_models as $model_name ) {
+			if ( ! term_exists( $model_name, 'car_model' ) ) {
+				wp_insert_term( $model_name, 'car_model' );
+			}
+		}
+	}
+	// 4. Fuel Types
+	if ( taxonomy_exists( 'riksha_fuel_type' ) ) {
+		$default_fuels = array( 'Electric', 'CNG', 'Diesel', 'Petrol', 'LPG', 'Hybrid' );
+		foreach ( $default_fuels as $fuel_name ) {
+			if ( ! term_exists( $fuel_name, 'riksha_fuel_type' ) ) {
+				wp_insert_term( $fuel_name, 'riksha_fuel_type' );
+			}
+		}
+	}
+}
+add_action( 'init', 'rikshawale_seed_all_taxonomy_terms', 20 );
 
 /**
  * Add Riksha Inventory Details Metabox

@@ -6,10 +6,16 @@
 
 get_header();
 
-// Fetch unique meta values from published inventory posts for filter choices
-$all_brands        = array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
-$all_models        = array( 'King Deluxe', 'Maxima Cargo', 'RE', 'Treo', 'Alfa', 'Ape', 'E-Alfa Mini', 'Safari', 'Super Carry' );
-$all_fuels         = array( 'Electric', 'CNG', 'Diesel', 'Petrol', 'LPG', 'Hybrid' );
+// Fetch dynamic taxonomy terms from database
+$brand_terms = get_terms( array( 'taxonomy' => 'car_brand', 'hide_empty' => false ) );
+$all_brands  = ( ! empty( $brand_terms ) && ! is_wp_error( $brand_terms ) ) ? wp_list_pluck( $brand_terms, 'name' ) : array( 'Mahindra', 'Bajaj', 'Piaggio', 'TVS', 'Mayuri', 'Yatri', 'Tata', 'Toyota', 'Hyundai' );
+
+$model_terms = get_terms( array( 'taxonomy' => 'car_model', 'hide_empty' => false ) );
+$all_models  = ( ! empty( $model_terms ) && ! is_wp_error( $model_terms ) ) ? wp_list_pluck( $model_terms, 'name' ) : array( 'King Deluxe', 'Maxima Cargo', 'RE', 'Treo', 'Alfa', 'Ape', 'E-Alfa Mini', 'Safari', 'Super Carry' );
+
+$fuel_terms  = get_terms( array( 'taxonomy' => 'riksha_fuel_type', 'hide_empty' => false ) );
+$all_fuels   = ( ! empty( $fuel_terms ) && ! is_wp_error( $fuel_terms ) ) ? wp_list_pluck( $fuel_terms, 'name' ) : array( 'Electric', 'CNG', 'Diesel', 'Petrol', 'LPG', 'Hybrid' );
+
 $all_transmissions = array( 'Automatic', 'Manual' );
 $all_owners        = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' );
 $all_years         = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018' );
