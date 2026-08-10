@@ -3848,3 +3848,57 @@ function rikshawale_ajax_filter_inventory() {
 }
 add_action( 'wp_ajax_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inventory' );
 add_action( 'wp_ajax_nopriv_rikshawale_filter_inventory', 'rikshawale_ajax_filter_inventory' );
+
+/**
+ * Append Places Mega Menu item to Primary Nav Menu
+ */
+function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
+	if ( ( isset( $args->theme_location ) && $args->theme_location === 'primary' ) || empty( $args->theme_location ) ) {
+		$locations = get_terms( array(
+			'taxonomy'   => 'riksha_location',
+			'hide_empty' => false,
+		) );
+
+		$location_links_html = '';
+		if ( ! empty( $locations ) && ! is_wp_error( $locations ) ) {
+			// Split into 3 columns
+			$cols = array_chunk( $locations, ceil( count( $locations ) / 3 ) );
+			foreach ( $cols as $col_terms ) {
+				$location_links_html .= '<div class="col-md-4 col-sm-6 col-12 mb-2">';
+				$location_links_html .= '<ul class="list-unstyled mb-0 px-1">';
+				foreach ( $col_terms as $term ) {
+					$url = add_query_arg( 'location[]', $term->slug, home_url( '/inventory/' ) );
+					$location_links_html .= '<li class="mb-2">';
+					$location_links_html .= '<a href="' . esc_url( $url ) . '" class="mega-city-link text-decoration-none text-dark fw-semibold d-flex align-items-center justify-content-between py-1 px-2 rounded-2" style="font-size: 0.9rem;">';
+					$location_links_html .= '<span>Riksha in ' . esc_html( $term->name ) . '</span>';
+					$location_links_html .= '<span class="arrow-icon text-secondary small ms-2">↗</span>';
+					$location_links_html .= '</a>';
+					$location_links_html .= '</li>';
+				}
+				$location_links_html .= '</ul>';
+				$location_links_html .= '</div>';
+			}
+		} else {
+			$location_links_html = '<div class="col-12"><p class="text-muted small mb-0">No places added yet.</p></div>';
+		}
+
+		$mega_menu_item  = '<li class="nav-item dropdown position-static mega-places-menu-item ms-lg-2">';
+		$mega_menu_item .= '<a class="nav-link dropdown-toggle fw-bold text-dark d-inline-flex align-items-center gap-1 py-2" href="#" id="placesNavMegaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">';
+		$mega_menu_item .= '<i class="fa-solid fa-location-dot text-danger"></i> Places';
+		$mega_menu_item .= '</a>';
+		$mega_menu_item .= '<div class="dropdown-menu w-100 shadow-lg border-0 rounded-4 p-4 mt-1 mega-dropdown-panel" aria-labelledby="placesNavMegaDropdown" style="left: 0; right: 0; background: #ffffff; border-top: 3px solid var(--primary-color, #db2d2e) !important;">';
+		$mega_menu_item .= '<div class="container" style="max-width: 1140px;">';
+		$mega_menu_item .= '<div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">';
+		$mega_menu_item .= '<div><h6 class="fw-bold text-dark mb-0 fs-6"><i class="fa-solid fa-city text-danger me-2"></i> Buy / Filter Riksha by City & Place</h6><p class="text-muted extra-small mb-0 mt-1">Select your city to view available commercial rikshas & vehicles</p></div>';
+		$mega_menu_item .= '<a href="' . esc_url( home_url( '/inventory/' ) ) . '" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold extra-small">View All Places &rarr;</a>';
+		$mega_menu_item .= '</div>';
+		$mega_menu_item .= '<div class="row g-3">' . $location_links_html . '</div>';
+		$mega_menu_item .= '</div>';
+		$mega_menu_item .= '</div>';
+		$mega_menu_item .= '</li>';
+
+		$items .= $mega_menu_item;
+	}
+	return $items;
+}
+add_filter( 'wp_nav_menu_items', 'rikshawale_add_places_mega_menu_to_nav', 10, 2 );

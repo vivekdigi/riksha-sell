@@ -105,10 +105,25 @@
             padding: 6px 16px !important;
             font-size: 0.8rem;
         }
-        .btn-add-car:hover {
-            background-color: transparent !important;
-            color: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
+        .mega-city-link {
+            transition: all 0.2s ease;
+            color: #334155 !important;
+        }
+        .mega-city-link:hover {
+            background-color: #f8fafc;
+            color: var(--primary-color, #db2d2e) !important;
+            padding-left: 10px !important;
+        }
+        .mega-city-link:hover .arrow-icon {
+            color: var(--primary-color, #db2d2e) !important;
+            transform: translate(2px, -2px);
+            display: inline-block;
+        }
+        @media (min-width: 992px) {
+            .mega-places-menu-item:hover .mega-dropdown-panel {
+                display: block;
+                animation: fadeIn 0.2s ease-in-out;
+            }
         }
     </style>
 </head>
@@ -140,7 +155,7 @@
 
 
     <!-- Navigation Menu -->
-    <nav class="navbar navbar-expand-lg navbar-light navbar-custom header-custom shadow-sm py-1">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom header-custom shadow-sm py-1 position-relative">
         <div class="container">
             <?php 
             if ( has_custom_logo() ) {
@@ -181,42 +196,6 @@
                 }
                 ?>
                 <div class="d-flex align-items-center gap-2 ms-lg-3 my-2 my-lg-0">
-                    <!-- Location / Places Mega Menu Dropdown -->
-                    <div class="dropdown me-1">
-                        <button class="btn btn-sm btn-outline-danger dropdown-toggle rounded-pill px-3 fw-bold shadow-sm d-inline-flex align-items-center gap-1" type="button" id="headerLocationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-location-dot text-danger"></i>
-                            <span>Select Place</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 p-3 border-0" aria-labelledby="headerLocationDropdown" style="width: 320px; max-height: 420px; overflow-y: auto;">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                                <h6 class="fw-bold mb-0 text-dark small"><i class="fa-solid fa-map-location-dot text-danger me-1"></i> Filter By Place / City</h6>
-                                <a href="<?php echo esc_url( home_url('/inventory/') ); ?>" class="extra-small text-danger text-decoration-none fw-bold">All Inventory</a>
-                            </div>
-                            <div class="row g-2">
-                                <?php
-                                $header_locations = get_terms( array(
-                                    'taxonomy'   => 'riksha_location',
-                                    'hide_empty' => false,
-                                ) );
-                                if ( ! empty( $header_locations ) && ! is_wp_error( $header_locations ) ) :
-                                    foreach ( $header_locations as $h_loc ) :
-                                        $loc_url = add_query_arg( 'location[]', $h_loc->slug, home_url('/inventory/') );
-                                ?>
-                                        <div class="col-6">
-                                            <a href="<?php echo esc_url( $loc_url ); ?>" class="dropdown-item rounded-3 py-2 px-2 small text-dark d-flex align-items-center justify-content-between border border-light" style="background: #f8fafc;">
-                                                <span class="text-truncate me-1" style="font-size: 0.82rem;"><i class="fa-solid fa-city text-primary me-1" style="font-size: 0.75rem;"></i><?php echo esc_html( $h_loc->name ); ?></span>
-                                                <span class="badge bg-light text-dark border extra-small" style="font-size: 0.7rem;"><?php echo intval( $h_loc->count ); ?></span>
-                                            </a>
-                                        </div>
-                                <?php
-                                    endforeach;
-                                else:
-                                ?>
-                                    <div class="col-12"><p class="small text-muted mb-0">No locations available.</p></div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
 
                     <?php if ( is_user_logged_in() ) : 
                         $current_u = wp_get_current_user();
