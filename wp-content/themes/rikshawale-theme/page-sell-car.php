@@ -96,8 +96,8 @@ $states = array(
                 <!-- Row 3: Mfg Year / Reg Year / Owner Type -->
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_mfg_year">Manufacturing Year <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_mfg_year" name="car_mfg_year" required>
+                        <label class="sell-label" for="riksha_mfg_year">Manufacturing Year <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_mfg_year" name="riksha_mfg_year" required>
                             <option value="">Choose year</option>
                             <?php foreach ( $years as $yr ) : ?>
                                 <option value="<?php echo $yr; ?>"><?php echo $yr; ?></option>
@@ -105,8 +105,8 @@ $states = array(
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_reg_year">Registration Year <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_reg_year" name="car_reg_year" required>
+                        <label class="sell-label" for="riksha_reg_year">Registration Year <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_reg_year" name="riksha_reg_year" required>
                             <option value="">Choose year</option>
                             <?php foreach ( $years as $yr ) : ?>
                                 <option value="<?php echo $yr; ?>"><?php echo $yr; ?></option>
@@ -114,8 +114,8 @@ $states = array(
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_owner_type">Owner Type <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_owner_type" name="car_owner_type" required>
+                        <label class="sell-label" for="riksha_owner_type">Owner Type <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_owner_type" name="riksha_owner_type" required>
                             <option value="">Choose owner type</option>
                             <?php if ( ! empty($owner_types) && ! is_wp_error($owner_types) ) :
                                 foreach ( $owner_types as $term ) : ?>
@@ -134,8 +134,8 @@ $states = array(
                 <!-- Row 4: Brand / Model / Variant -->
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_brand_name">Brand <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_brand_name" name="car_brand_name" required>
+                        <label class="sell-label" for="riksha_brand_name">Brand <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_brand_name" name="riksha_brand_name" required>
                             <option value="">Choose brand</option>
                             <?php if ( ! empty($brands) && ! is_wp_error($brands) ) :
                                 foreach ( $brands as $term ) : ?>
@@ -150,20 +150,20 @@ $states = array(
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_model_name">Model Name <span class="text-danger">*</span></label>
-                        <input type="text" class="sell-input form-control" id="car_model_name" name="car_model_name" placeholder="Enter model name" required>
+                        <label class="sell-label" for="riksha_model_name">Model Name <span class="text-danger">*</span></label>
+                        <input type="text" class="sell-input form-control" id="riksha_model_name" name="riksha_model_name" placeholder="Enter model name" required>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_variant">Variant <span class="text-danger">*</span></label>
-                        <input type="text" class="sell-input form-control" id="car_variant" name="car_variant" placeholder="Enter variant">
+                        <label class="sell-label" for="riksha_variant">Variant <span class="text-danger">*</span></label>
+                        <input type="text" class="sell-input form-control" id="riksha_variant" name="riksha_variant" placeholder="Enter variant">
                     </div>
                 </div>
 
                 <!-- Row 5: Driven KM / Fuel / Transmission -->
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_driven_km">Driven (KM) <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_driven_km" name="car_driven_km" required>
+                        <label class="sell-label" for="riksha_driven_km">Driven (KM) <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_driven_km" name="riksha_driven_km" required>
                             <option value="">Choose km range</option>
                             <option value="Less than 10,000 km">Less than 10,000 km</option>
                             <option value="10,000 – 25,000 km">10,000 – 25,000 km</option>
@@ -174,8 +174,8 @@ $states = array(
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_fuel">Fuel Type <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_fuel" name="car_fuel" required>
+                        <label class="sell-label" for="riksha_fuel">Fuel Type <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_fuel" name="riksha_fuel" required>
                             <option value="">Choose fuel type</option>
                             <?php if ( ! empty($fuel_types) && ! is_wp_error($fuel_types) ) :
                                 foreach ( $fuel_types as $term ) : ?>
@@ -191,8 +191,8 @@ $states = array(
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="sell-label" for="car_transmission">Transmission Type <span class="text-danger">*</span></label>
-                        <select class="sell-input form-select" id="car_transmission" name="car_transmission" required>
+                        <label class="sell-label" for="riksha_transmission">Transmission Type <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_transmission" name="riksha_transmission" required>
                             <option value="">Choose transmission</option>
                             <?php if ( ! empty($trans_types) && ! is_wp_error($trans_types) ) :
                                 foreach ( $trans_types as $term ) : ?>
@@ -208,8 +208,8 @@ $states = array(
 
                 <!-- Row 6: Expected Price -->
                 <div class="mb-3">
-                    <label class="sell-label" for="car_expected_price">Expected Price? <span class="text-danger">*</span></label>
-                    <input type="text" class="sell-input form-control" id="car_expected_price" name="car_expected_price" placeholder="Enter expected price in ₹" required>
+                    <label class="sell-label" for="riksha_expected_price">Expected Price? <span class="text-danger">*</span></label>
+                    <input type="text" class="sell-input form-control" id="riksha_expected_price" name="riksha_expected_price" placeholder="Enter expected price in ₹" required>
                 </div>
 
                 <!-- Row 7: 5 Image Uploads -->
@@ -218,8 +218,8 @@ $states = array(
                     <div class="row g-3">
                         <?php for ( $i = 1; $i <= 5; $i++ ) : ?>
                         <div class="col-6 col-md-4 col-lg">
-                            <label for="car_image_<?php echo $i; ?>" class="sell-img-upload-box" id="img-box-<?php echo $i; ?>">
-                                <input type="file" id="car_image_<?php echo $i; ?>" name="car_image_<?php echo $i; ?>"
+                            <label for="riksha_image_<?php echo $i; ?>" class="sell-img-upload-box" id="img-box-<?php echo $i; ?>">
+                                <input type="file" id="riksha_image_<?php echo $i; ?>" name="riksha_image_<?php echo $i; ?>"
                                     accept="image/jpeg,image/png,image/webp" class="sell-img-input"
                                     onchange="previewSellImage(this, <?php echo $i; ?>)">
                                 <div class="sell-img-placeholder" id="img-placeholder-<?php echo $i; ?>">
@@ -333,6 +333,7 @@ function previewSellImage(input, idx) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
 
 document.getElementById('sell-car-form').addEventListener('submit', function(e) {
     e.preventDefault();

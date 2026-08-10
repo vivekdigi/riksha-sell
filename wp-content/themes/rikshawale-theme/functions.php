@@ -2622,16 +2622,16 @@ function rikshawale_handle_sell_car_submission() {
     $seller_reg_no = sanitize_text_field( $_POST['seller_reg_no'] ?? '' );
     $seller_state  = sanitize_text_field( $_POST['seller_state']  ?? '' );
 
-    $mfg_year      = sanitize_text_field( $_POST['car_mfg_year']      ?? '' );
-    $reg_year      = sanitize_text_field( $_POST['car_reg_year']      ?? '' );
-    $owner_type    = sanitize_text_field( $_POST['car_owner_type']    ?? '' );
-    $brand_name    = sanitize_text_field( $_POST['car_brand_name']    ?? '' );
-    $model_name    = sanitize_text_field( $_POST['car_model_name']    ?? '' );
-    $variant       = sanitize_text_field( $_POST['car_variant']       ?? '' );
-    $driven_km     = sanitize_text_field( $_POST['car_driven_km']     ?? '' );
-    $fuel          = sanitize_text_field( $_POST['car_fuel']          ?? '' );
-    $transmission  = sanitize_text_field( $_POST['car_transmission']  ?? '' );
-    $exp_price     = sanitize_text_field( $_POST['car_expected_price']?? '' );
+    $mfg_year      = sanitize_text_field( $_POST['riksha_mfg_year']       ?? $_POST['car_mfg_year']       ?? '' );
+    $reg_year      = sanitize_text_field( $_POST['riksha_reg_year']       ?? $_POST['car_reg_year']       ?? '' );
+    $owner_type    = sanitize_text_field( $_POST['riksha_owner_type']     ?? $_POST['car_owner_type']     ?? '' );
+    $brand_name    = sanitize_text_field( $_POST['riksha_brand_name']    ?? $_POST['car_brand_name']     ?? '' );
+    $model_name    = sanitize_text_field( $_POST['riksha_model_name']    ?? $_POST['car_model_name']     ?? '' );
+    $variant       = sanitize_text_field( $_POST['riksha_variant']       ?? $_POST['car_variant']        ?? '' );
+    $driven_km     = sanitize_text_field( $_POST['riksha_driven_km']     ?? $_POST['car_driven_km']      ?? '' );
+    $fuel          = sanitize_text_field( $_POST['riksha_fuel']          ?? $_POST['car_fuel']           ?? '' );
+    $transmission  = sanitize_text_field( $_POST['riksha_transmission']  ?? $_POST['car_transmission']   ?? '' );
+    $exp_price     = sanitize_text_field( $_POST['riksha_expected_price']?? $_POST['car_expected_price'] ?? '' );
 
     // Required field check
     if ( empty($seller_name) || empty($seller_phone) || empty($brand_name) || empty($model_name) ) {
@@ -2661,6 +2661,7 @@ function rikshawale_handle_sell_car_submission() {
         '_car_mfg_year'        => $mfg_year,
         '_car_reg_year'        => $reg_year,
         '_car_owner_type'      => $owner_type,
+        '_riksha_brand_name'   => $brand_name,
         '_car_brand_name'      => $brand_name,
         '_car_model_name'      => $model_name,
         '_car_variant'         => $variant,
@@ -2682,7 +2683,7 @@ function rikshawale_handle_sell_car_submission() {
 
     $upload_overrides = array( 'test_form' => false );
     for ( $i = 1; $i <= 5; $i++ ) {
-        $file_key = 'car_image_' . $i;
+        $file_key = ! empty( $_FILES['riksha_image_' . $i]['name'] ) ? 'riksha_image_' . $i : 'car_image_' . $i;
         if ( ! empty( $_FILES[ $file_key ]['name'] ) ) {
             $uploaded = wp_handle_upload( $_FILES[ $file_key ], $upload_overrides );
             if ( isset( $uploaded['url'] ) ) {
@@ -2707,12 +2708,25 @@ function rikshawale_handle_sell_car_submission() {
     }
 
     // Send admin notification email
+    // Automatically calculate and save AI Valuation on backend
+    $ai_res = rikshawale_calculate_ai_valuation_internal( $brand_name, $model_name, $mfg_year, $driven_km, $fuel, $owner_type, $_FILES );
+    if ( $ai_res ) {
+        update_post_meta( $post_id, '_car_ai_valuation_min', $ai_res['min_price'] );
+        update_post_meta( $post_id, '_car_ai_valuation_max', $ai_res['max_price'] );
+        update_post_meta( $post_id, '_car_ai_condition_score', $ai_res['condition_score'] );
+        update_post_meta( $post_id, '_car_ai_summary', $ai_res['summary'] );
+        update_post_meta( $post_id, '_car_indicative_price', $ai_res['indicative_price'] );
+    }
+
     $admin_email = get_option( 'admin_email' );
     $subject = 'New Sell Car Request: ' . $post_title;
     $body  = "New sell car submission received!\n\n";
     $body .= "Seller: {$seller_name}\nPhone: {$seller_phone}\nWhatsApp: {$seller_wa}\nCity: {$seller_city}\nState: {$seller_state}\n\n";
     $body .= "Vehicle: {$brand_name} {$model_name} {$variant}\nMfg Year: {$mfg_year}\nReg Year: {$reg_year}\nOwner: {$owner_type}\n";
     $body .= "Driven: {$driven_km}\nFuel: {$fuel}\nTransmission: {$transmission}\nExpected Price: {$exp_price}\n\n";
+    if ( $ai_res ) {
+        $body .= "AI Indicative Valuation: {$ai_res['indicative_price']} (Condition Score: {$ai_res['condition_score']}/10)\n\n";
+    }
     $body .= "Review in admin: " . admin_url( 'post.php?post=' . $post_id . '&action=edit' );
     wp_mail( $admin_email, $subject, $body );
 
@@ -2722,6 +2736,251 @@ function rikshawale_handle_sell_car_submission() {
 }
 add_action( 'wp_ajax_rikshawale_sell_car',        'rikshawale_handle_sell_car_submission' );
 add_action( 'wp_ajax_nopriv_rikshawale_sell_car', 'rikshawale_handle_sell_car_submission' );
+
+/* ============================================================
+   AI VALUATION & GEMINI API INTEGRATION ENGINE
+   ============================================================ */
+
+/**
+ * Register Admin Settings Page for Gemini API Key
+ */
+function rikshawale_ai_settings_menu() {
+    add_options_page(
+        'Rikshawale AI Valuation Settings',
+        'Rikshawale AI Valuation',
+        'manage_options',
+        'rikshawale-ai-settings',
+        'rikshawale_render_ai_settings_page'
+    );
+}
+add_action( 'admin_menu', 'rikshawale_ai_settings_menu' );
+
+function rikshawale_render_ai_settings_page() {
+    if ( isset($_POST['rikshawale_save_ai_settings']) && check_admin_referer('rikshawale_ai_settings_nonce') ) {
+        $api_key = sanitize_text_field($_POST['rikshawale_gemini_api_key']);
+        update_option('rikshawale_gemini_api_key', $api_key);
+        echo '<div class="updated"><p><strong>Google Gemini API Key saved successfully!</strong></p></div>';
+    }
+    $current_key = get_option('rikshawale_gemini_api_key', '');
+    ?>
+    <div class="wrap" style="max-width:850px; background:#fff; padding:25px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-top:20px;">
+        <h1 style="color:#1e293b; font-weight:700; margin-bottom:10px;">🤖 Rikshawale AI Valuation Settings</h1>
+        <p style="color:#64748b; font-size:14px; margin-bottom:20px;">
+            Configure Google Gemini AI Vision API to enable automatic Rickshaw condition score and fair valuation on your website form.
+        </p>
+
+        <form method="post" action="">
+            <?php wp_nonce_field('rikshawale_ai_settings_nonce'); ?>
+            <table class="form-table" style="margin-bottom:20px;">
+                <tr>
+                    <th scope="row" style="width:200px;">
+                        <label for="rikshawale_gemini_api_key" style="font-weight:600;">Google Gemini API Key</label>
+                    </th>
+                    <td>
+                        <input type="text" id="rikshawale_gemini_api_key" name="rikshawale_gemini_api_key" 
+                               value="<?php echo esc_attr($current_key); ?>" 
+                               class="regular-text" placeholder="AIzaSy..." style="width:100%; max-width:500px; padding:8px 12px; font-family:monospace;">
+                        <p class="description" style="margin-top:6px;">
+                            Paste your free Google Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#db2d2e; font-weight:600;">Google AI Studio</a>.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="display:flex; gap:12px; align-items:center;">
+                <input type="submit" name="rikshawale_save_ai_settings" class="button button-primary" value="Save API Key" style="background:#db2d2e; border-color:#db2d2e; font-weight:600; padding:6px 20px;">
+                <?php if ( ! empty($current_key) ) : ?>
+                    <span style="color:#16a34a; font-weight:600; font-size:13px;">✅ API Key Configured</span>
+                <?php else : ?>
+                    <span style="color:#dc2626; font-weight:600; font-size:13px;">⚠️ API Key Missing (Fallback engine will be used)</span>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
+    <?php
+}
+
+/**
+ * Core Internal Function: Calculate AI Rickshaw Valuation & Vision Analysis
+ */
+function rikshawale_calculate_ai_valuation_internal($brand, $model, $mfg_year, $driven_km, $fuel, $owner_type, $files = array()) {
+    $brand       = sanitize_text_field( $brand );
+    $model       = sanitize_text_field( $model );
+    $mfg_year    = (int) ( $mfg_year ?: date('Y') );
+    $driven_km   = sanitize_text_field( $driven_km );
+    $fuel        = sanitize_text_field( $fuel );
+    $owner_type  = sanitize_text_field( $owner_type );
+
+    // 1. Algorithmic Base Price Valuation Engine
+    $brand_base_prices = array(
+        'bajaj'     => 250000,
+        'mahindra'  => 270000,
+        'piaggio'   => 260000,
+        'atul'      => 240000,
+        'tvs'       => 250000,
+        'saarthi'   => 150000,
+        'champion'  => 160000,
+    );
+
+    $lower_brand = strtolower( $brand );
+    $base_price = 230000;
+    foreach ( $brand_base_prices as $b_key => $b_price ) {
+        if ( strpos( $lower_brand, $b_key ) !== false ) {
+            $base_price = $b_price;
+            break;
+        }
+    }
+
+    // Age Depreciation
+    $current_year = (int) date('Y');
+    $age = max(0, $current_year - $mfg_year);
+    $depreciation_rate = min(0.72, $age * 0.085);
+    $depreciated_price = $base_price * ( 1 - $depreciation_rate );
+
+    // Driven KM Modifier
+    $km_modifier = 1.0;
+    if ( strpos( $driven_km, 'Less than 10,000' ) !== false ) {
+        $km_modifier = 1.05;
+    } elseif ( strpos( $driven_km, '10,000' ) !== false ) {
+        $km_modifier = 1.0;
+    } elseif ( strpos( $driven_km, '25,000' ) !== false ) {
+        $km_modifier = 0.92;
+    } elseif ( strpos( $driven_km, '50,000' ) !== false ) {
+        $km_modifier = 0.84;
+    } elseif ( strpos( $driven_km, '75,000' ) !== false ) {
+        $km_modifier = 0.76;
+    } elseif ( strpos( $driven_km, '1,00,000' ) !== false || strpos( $driven_km, 'More than' ) !== false ) {
+        $km_modifier = 0.68;
+    }
+
+    // Owner Modifier
+    $owner_modifier = 1.0;
+    if ( strpos( $owner_type, '1st' ) !== false )      { $owner_modifier = 1.04; }
+    elseif ( strpos( $owner_type, '2nd' ) !== false ) { $owner_modifier = 0.98; }
+    elseif ( strpos( $owner_type, '3rd' ) !== false ) { $owner_modifier = 0.90; }
+    elseif ( strpos( $owner_type, '4th' ) !== false ) { $owner_modifier = 0.82; }
+
+    // Fuel Modifier
+    $fuel_modifier = 1.0;
+    if ( strtolower($fuel) === 'cng' )           { $fuel_modifier = 1.03; }
+    elseif ( strtolower($fuel) === 'electric' )  { $fuel_modifier = 0.96; }
+    elseif ( strtolower($fuel) === 'diesel' )    { $fuel_modifier = 1.00; }
+
+    $calculated_fair = $depreciated_price * $km_modifier * $owner_modifier * $fuel_modifier;
+
+    $condition_score = 8.0;
+    $ai_used = false;
+    $ai_summary = "Evaluated based on vehicle specifications, age, mileage, and brand resale data.";
+
+    // 2. Check Gemini API & Image Vision
+    $api_key = get_option('rikshawale_gemini_api_key', '');
+    
+    $images_data = array();
+    for ( $i = 1; $i <= 5; $i++ ) {
+        $file_item = ! empty( $files['riksha_image_' . $i]['tmp_name'] ) ? $files['riksha_image_' . $i] : ( $files['car_image_' . $i] ?? array() );
+        if ( ! empty( $file_item['tmp_name'] ) ) {
+            $tmp_path = $file_item['tmp_name'];
+            $mime = $file_item['type'] ?: 'image/jpeg';
+            $data = @file_get_contents($tmp_path);
+            if ( $data ) {
+                $images_data[] = array(
+                    'mime' => $mime,
+                    'b64'  => base64_encode($data)
+                );
+            }
+        }
+    }
+
+    if ( ! empty( $api_key ) && ! empty( $images_data ) ) {
+        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($api_key);
+
+        $prompt_text = "You are an expert commercial Rickshaw / Auto valuation specialist in India. "
+                     . "Analyze the attached Rickshaw image(s) along with these vehicle details: "
+                     . "Brand: {$brand}, Model: {$model}, Mfg Year: {$mfg_year}, Driven: {$driven_km}, Fuel: {$fuel}, Owner: {$owner_type}. "
+                     . "Visually inspect the exterior body condition, paint shine, dents/scratches, rust, hood cover, and tires. "
+                     . "Provide a JSON response ONLY in this exact structure without markdown formatting: "
+                     . '{"condition_score": 8.5, "condition_label": "Good Exterior", "multiplier": 1.02, "summary": "Clean body with minimal paint scratches, good tire tread."}';
+
+        $parts = array( array( 'text' => $prompt_text ) );
+
+        foreach ( $images_data as $img ) {
+            $parts[] = array(
+                'inline_data' => array(
+                    'mime_type' => $img['mime'],
+                    'data'      => $img['b64']
+                )
+            );
+        }
+
+        $request_body = json_encode( array(
+            'contents' => array( array( 'parts' => $parts ) )
+        ) );
+
+        $response = wp_remote_post( $endpoint, array(
+            'headers' => array( 'Content-Type' => 'application/json' ),
+            'body'    => $request_body,
+            'timeout' => 15,
+        ) );
+
+        if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
+            $res_body = json_decode( wp_remote_retrieve_body( $response ), true );
+            if ( isset( $res_body['candidates'][0]['content']['parts'][0]['text'] ) ) {
+                $raw_text = $res_body['candidates'][0]['content']['parts'][0]['text'];
+                $clean_json = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim($raw_text));
+                $ai_res = json_decode( $clean_json, true );
+
+                if ( $ai_res && isset($ai_res['condition_score']) ) {
+                    $condition_score = (float) $ai_res['condition_score'];
+                    $ai_summary = sanitize_text_field( $ai_res['summary'] ?? $ai_summary );
+                    if ( isset($ai_res['multiplier']) && is_numeric($ai_res['multiplier']) ) {
+                        $calculated_fair = $calculated_fair * (float) $ai_res['multiplier'];
+                    }
+                    $ai_used = true;
+                }
+            }
+        }
+    }
+
+    $min_price = max( 25000, round( $calculated_fair * 0.94 / 1000 ) * 1000 );
+    $max_price = max( 30000, round( $calculated_fair * 1.06 / 1000 ) * 1000 );
+    $indicative_price = '₹' . number_format( $min_price ) . ' – ₹' . number_format( $max_price );
+
+    return array(
+        'min_price'        => $min_price,
+        'max_price'        => $max_price,
+        'indicative_price' => $indicative_price,
+        'condition_score'  => number_format( $condition_score, 1 ),
+        'summary'          => $ai_summary,
+        'ai_used'          => $ai_used,
+    );
+}
+
+/**
+ * AJAX Action: Calculate AI Rickshaw Valuation
+ */
+function rikshawale_ajax_ai_valuation_handler() {
+    $res = rikshawale_calculate_ai_valuation_internal(
+        $_POST['brand'] ?? '',
+        $_POST['model'] ?? '',
+        $_POST['mfg_year'] ?? date('Y'),
+        $_POST['driven_km'] ?? '',
+        $_POST['fuel'] ?? '',
+        $_POST['owner_type'] ?? '',
+        $_FILES
+    );
+
+    wp_send_json_success( array(
+        'min_price'       => $res['min_price'],
+        'max_price'       => $res['max_price'],
+        'formatted_min'   => '₹' . number_format( $res['min_price'] ),
+        'formatted_max'   => '₹' . number_format( $res['max_price'] ),
+        'condition_score' => $res['condition_score'],
+        'summary'         => $res['summary'],
+        'ai_used'         => $res['ai_used'],
+    ) );
+}
+add_action( 'wp_ajax_rikshawale_ai_valuation',        'rikshawale_ajax_ai_valuation_handler' );
+add_action( 'wp_ajax_nopriv_rikshawale_ai_valuation', 'rikshawale_ajax_ai_valuation_handler' );
 
 /* ============================================================
    SELL A CAR — Admin Review Metabox
@@ -2783,6 +3042,20 @@ function rikshawale_render_car_submission_metabox( $post ) {
         <div class="car-sub-field"><label>Transmission</label><strong><?php echo $m('_car_transmission'); ?></strong></div>
         <div class="car-sub-field" style="grid-column: span 3;"><label>Expected Price</label><strong><?php echo $m('_car_expected_price'); ?></strong></div>
     </div>
+
+    <?php
+    $ai_min   = get_post_meta( $post->ID, '_car_ai_valuation_min', true );
+    $ai_max   = get_post_meta( $post->ID, '_car_ai_valuation_max', true );
+    $ai_score = get_post_meta( $post->ID, '_car_ai_condition_score', true );
+    $ai_sum   = get_post_meta( $post->ID, '_car_ai_summary', true );
+    if ( $ai_min || $ai_score ) : ?>
+    <h3 style="border-bottom:2px solid #2563eb;padding-bottom:6px;color:#2563eb;">🤖 AI Vehicle Valuation Report</h3>
+    <div class="car-sub-grid" style="background:#eff6ff; border:1px solid #bfdbfe; padding:15px; border-radius:8px;">
+        <div class="car-sub-field" style="background:#fff;"><label>AI Recommended Fair Range</label><strong style="color:#2563eb; font-size:16px;"><?php echo $ai_min ? '₹' . number_format((float)$ai_min) . ' – ₹' . number_format((float)$ai_max) : 'N/A'; ?></strong></div>
+        <div class="car-sub-field" style="background:#fff;"><label>AI Condition Score</label><strong style="color:#16a34a; font-size:16px;">⭐ <?php echo $ai_score ? esc_html($ai_score) . '/10' : 'N/A'; ?></strong></div>
+        <div class="car-sub-field" style="background:#fff; grid-column: span 3;"><label>AI Analysis Summary</label><span><?php echo esc_html($ai_sum); ?></span></div>
+    </div>
+    <?php endif; ?>
 
     <?php if ( array_filter($img_urls) ) : ?>
     <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images</h3>
@@ -2880,6 +3153,8 @@ function rikshawale_approve_car_submission_handler() {
         '_car_expected_price',
         '_car_gallery_image_1', '_car_gallery_image_2', '_car_gallery_image_3',
         '_car_gallery_image_4', '_car_gallery_image_5',
+        '_car_ai_valuation_min', '_car_ai_valuation_max',
+        '_car_ai_condition_score', '_car_ai_summary'
     );
     foreach ( $meta_keys as $key ) {
         $val = $m( $key );
@@ -2890,6 +3165,14 @@ function rikshawale_approve_car_submission_handler() {
                 update_post_meta( $inventory_id, '_car_price', $val );
             }
         }
+    }
+
+    // Save formatted Indicative Price in Inventory
+    $ai_min = $m('_car_ai_valuation_min');
+    $ai_max = $m('_car_ai_valuation_max');
+    if ( $ai_min && $ai_max ) {
+        $indicative_str = '₹' . number_format((float)$ai_min) . ' – ₹' . number_format((float)$ai_max);
+        update_post_meta( $inventory_id, '_car_indicative_price', $indicative_str );
     }
 
     // Copy seller info as extra meta
@@ -2916,6 +3199,79 @@ function rikshawale_approve_car_submission_handler() {
     ) );
 }
 add_action( 'wp_ajax_rikshawale_approve_submission', 'rikshawale_approve_car_submission_handler' );
+
+/* ============================================================
+   INVENTORY & RIKSHA POST TYPE — AI Indicative Price Metabox
+   ============================================================ */
+
+function rikshawale_add_inventory_ai_metabox() {
+    $post_types = array( 'inventory', 'riksha' );
+    foreach ( $post_types as $pt ) {
+        add_meta_box(
+            'rikshawale_inventory_ai_details',
+            '🤖 AI Indicative Price & Condition Details',
+            'rikshawale_render_inventory_ai_metabox',
+            $pt,
+            'side',
+            'high'
+        );
+    }
+}
+add_action( 'add_meta_boxes', 'rikshawale_add_inventory_ai_metabox' );
+
+function rikshawale_render_inventory_ai_metabox( $post ) {
+    wp_nonce_field( 'rikshawale_save_inventory_ai_nonce', 'inventory_ai_nonce' );
+    $indicative = get_post_meta( $post->ID, '_car_indicative_price', true );
+    $val_min    = get_post_meta( $post->ID, '_car_ai_valuation_min', true );
+    $val_max    = get_post_meta( $post->ID, '_car_ai_valuation_max', true );
+    $score      = get_post_meta( $post->ID, '_car_ai_condition_score', true );
+    $summary    = get_post_meta( $post->ID, '_car_ai_summary', true );
+    ?>
+    <div style="padding: 6px 0;">
+        <p style="margin-bottom: 8px;">
+            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Indicative / Incentive Price</label>
+            <input type="text" name="_car_indicative_price" value="<?php echo esc_attr($indicative); ?>" placeholder="e.g. ₹1,20,000 – ₹1,40,000" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+        </p>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div style="flex:1;">
+                <label style="font-weight:600; display:block; font-size:11px; color:#64748b;">AI Min Price (₹)</label>
+                <input type="text" name="_car_ai_valuation_min" value="<?php echo esc_attr($val_min); ?>" placeholder="120000" style="width:100%; padding:4px 6px;">
+            </div>
+            <div style="flex:1;">
+                <label style="font-weight:600; display:block; font-size:11px; color:#64748b;">AI Max Price (₹)</label>
+                <input type="text" name="_car_ai_valuation_max" value="<?php echo esc_attr($val_max); ?>" placeholder="140000" style="width:100%; padding:4px 6px;">
+            </div>
+        </div>
+        <p style="margin-bottom: 8px;">
+            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Condition Rating Score (1-10)</label>
+            <input type="text" name="_car_ai_condition_score" value="<?php echo esc_attr($score); ?>" placeholder="8.5" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+        </p>
+        <p style="margin-bottom: 0;">
+            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">AI Condition Summary</label>
+            <textarea name="_car_ai_summary" rows="3" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1; font-size:12px;"><?php echo esc_textarea($summary); ?></textarea>
+        </p>
+    </div>
+    <?php
+}
+
+function rikshawale_save_inventory_ai_metabox( $post_id ) {
+    if ( ! isset( $_POST['inventory_ai_nonce'] ) || ! wp_verify_nonce( $_POST['inventory_ai_nonce'], 'rikshawale_save_inventory_ai_nonce' ) ) {
+        return;
+    }
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+    $fields = array( '_car_indicative_price', '_car_ai_valuation_min', '_car_ai_valuation_max', '_car_ai_condition_score', '_car_ai_summary' );
+    foreach ( $fields as $f ) {
+        if ( isset( $_POST[$f] ) ) {
+            update_post_meta( $post_id, $f, sanitize_text_field( $_POST[$f] ) );
+        }
+    }
+}
+add_action( 'save_post', 'rikshawale_save_inventory_ai_metabox' );
 
 /* ============================================================
    DYNAMIC TYPOGRAPHY & STYLING CSS OUTPUT IN WP_HEAD
