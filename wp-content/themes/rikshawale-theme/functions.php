@@ -4614,7 +4614,7 @@ add_action( 'wp_ajax_nopriv_rikshawale_filter_inventory', 'rikshawale_ajax_filte
  * Append Places Mega Menu item to Primary Nav Menu (Dynamically showing logged-in user place)
  */
 function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
-	if ( ( isset( $args->theme_location ) && $args->theme_location === 'primary' ) || empty( $args->theme_location ) ) {
+	if ( isset( $args->theme_location ) && $args->theme_location === 'primary' ) {
 		$current_place_label = 'Places';
 
 		// 1. Check logged-in user meta
