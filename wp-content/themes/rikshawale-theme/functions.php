@@ -953,6 +953,25 @@ function rikshawale_render_inventory_metabox( $post ) {
             </td>
         </tr>
         <tr>
+            <th><label for="car_video_url"><?php _e( 'Riksha Video URL / File Link', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_video_url" name="car_video_url" value="<?php echo esc_attr( $video_url ); ?>" class="regular-text" placeholder="e.g. https://www.youtube.com/watch?v=... or http://localhost/.../video.mp4">
+                <p class="description"><?php _e( 'YouTube video link or uploaded MP4 video URL. Displayed right after photo gallery slides on vehicle detail page.', 'rikshawale-theme' ); ?></p>
+                <?php if ( ! empty( $video_url ) ) : ?>
+                    <div style="margin-top:8px; max-width:400px;">
+                        <?php if ( strpos( $video_url, 'youtube.com' ) !== false || strpos( $video_url, 'youtu.be' ) !== false ) :
+                            preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $video_url, $yt_match );
+                            $yt_id = $yt_match[1] ?? '';
+                        ?>
+                            <iframe width="100%" height="220" src="https://www.youtube.com/embed/<?php echo esc_attr($yt_id); ?>" frameborder="0" allowfullscreen style="border-radius:6px;"></iframe>
+                        <?php else : ?>
+                            <video src="<?php echo esc_url($video_url); ?>" controls style="width:100%; max-height:220px; background:#000; border-radius:6px;"></video>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
             <th><label for="car_mfg_year"><?php _e( 'Manufacturing Year *', 'rikshawale-theme' ); ?></label></th>
             <td><input type="text" id="car_mfg_year" name="car_mfg_year" value="<?php echo esc_attr( $mfg_year ); ?>" class="regular-text" placeholder="e.g. 2022"></td>
         </tr>
@@ -2748,9 +2767,16 @@ function rikshawale_handle_sell_car_submission() {
     $transmission  = sanitize_text_field( $_POST['riksha_transmission']  ?? $_POST['car_transmission']   ?? '' );
     $exp_price     = sanitize_text_field( $_POST['riksha_expected_price']?? $_POST['car_expected_price'] ?? '' );
 
-    // Required field check
+    $video_url_input = sanitize_text_field( $_POST['riksha_video_url'] ?? '' );
+    $has_video_file  = ! empty( $_FILES['riksha_video_file']['name'] );
+
+    // Required field check (including compulsory Video File or YouTube Link)
     if ( empty($seller_name) || empty($seller_phone) || empty($brand_name) || empty($model_name) ) {
         wp_send_json_error( array( 'message' => 'Please fill all required fields.' ) );
+    }
+
+    if ( ! $has_video_file && empty($video_url_input) ) {
+        wp_send_json_error( array( 'message' => 'Video is mandatory! Please upload a Riksha video file or provide a YouTube video URL.' ) );
     }
 
     // Create the submission post (pending review)
@@ -2820,6 +2846,28 @@ function rikshawale_handle_sell_car_submission() {
                 }
             }
         }
+    }
+
+    // Handle Video File Upload or YouTube Link
+    $video_url_field = isset( $_POST['riksha_video_url'] ) ? esc_url_raw( wp_unslash( $_POST['riksha_video_url'] ) ) : '';
+    $final_video_url = '';
+    if ( ! empty( $_FILES['riksha_video_file']['name'] ) ) {
+        $uploaded_video = wp_handle_upload( $_FILES['riksha_video_file'], $upload_overrides );
+        if ( isset( $uploaded_video['url'] ) ) {
+            $final_video_url = $uploaded_video['url'];
+            wp_insert_attachment( array(
+                'post_mime_type' => $uploaded_video['type'],
+                'post_title'     => sanitize_file_name( $_FILES['riksha_video_file']['name'] ),
+                'post_content'   => '',
+                'post_status'    => 'inherit',
+            ), $uploaded_video['file'], $post_id );
+        }
+    }
+    if ( empty( $final_video_url ) && ! empty( $video_url_field ) ) {
+        $final_video_url = $video_url_field;
+    }
+    if ( ! empty( $final_video_url ) ) {
+        update_post_meta( $post_id, '_car_video_url', $final_video_url );
     }
 
     // Send admin notification email
@@ -3141,16 +3189,24 @@ function rikshawale_render_car_submission_metabox( $post ) {
     #rikshawale-approve-btn:hover { background: #15803d; }
     #rikshawale-approve-msg { margin-left: 14px; font-weight: 600; }
 
-    .admin-lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(6px); z-index: 999999; justify-content: center; align-items: center; }
-    .admin-lightbox-img-wrapper { display: flex; justify-content: center; align-items: center; max-width: 85vw; max-height: 82vh; }
-    .admin-lightbox-overlay img { max-width: 85vw; max-height: 80vh; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.7); object-fit: contain; }
-    .admin-lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 1000000; }
+    .admin-lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(8px); z-index: 999999; flex-direction: column; justify-content: space-between; align-items: center; padding: 20px; box-sizing: border-box; }
+    .admin-lightbox-header { width: 100%; display: flex; justify-content: space-between; align-items: center; z-index: 1000000; }
+    .admin-lightbox-counter { color: #f8fafc; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.12); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+    .admin-lightbox-close { color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
     .admin-lightbox-close:hover { background: #db2d2e; }
-    .admin-lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.15); color: #fff; border: none; font-size: 24px; padding: 16px 20px; cursor: pointer; border-radius: 50px; transition: background 0.2s, transform 0.2s; z-index: 1000000; outline: none; }
+
+    .admin-lightbox-body { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: calc(100vh - 160px); }
+    .admin-lightbox-img-wrapper { display: flex; justify-content: center; align-items: center; max-width: 85vw; max-height: 72vh; }
+    .admin-lightbox-overlay img#admin-lightbox-img { max-width: 85vw; max-height: 70vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); object-fit: contain; transition: transform 0.3s ease; }
+    .admin-lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.2); color: #fff; border: none; font-size: 24px; width: 50px; height: 50px; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s; z-index: 1000000; outline: none; }
     .admin-lightbox-nav:hover { background: #db2d2e; transform: translateY(-50%) scale(1.1); }
-    .admin-lightbox-prev { left: 30px; }
-    .admin-lightbox-next { right: 30px; }
-    .admin-lightbox-counter { position: absolute; top: 25px; left: 35px; color: #94a3b8; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); }
+    .admin-lightbox-prev { left: 20px; }
+    .admin-lightbox-next { right: 20px; }
+
+    /* Bottom Thumbnail Carousel Strip */
+    .admin-lightbox-thumb-strip { display: flex; gap: 10px; overflow-x: auto; max-width: 90vw; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 1000000; }
+    .admin-lightbox-thumb-item { width: 70px; height: 50px; object-fit: cover; border-radius: 6px; opacity: 0.5; border: 2px solid transparent; cursor: pointer; transition: opacity 0.2s, border-color 0.2s, transform 0.2s; }
+    .admin-lightbox-thumb-item:hover, .admin-lightbox-thumb-item.active { opacity: 1; border-color: #db2d2e; transform: scale(1.08); }
     </style>
 
     <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🧑 Seller Information</h3>
@@ -3192,28 +3248,65 @@ function rikshawale_render_car_submission_metabox( $post ) {
     <?php endif; ?>
 
     <?php
+    $video_url_val = get_post_meta( $post->ID, '_car_video_url', true );
+    if ( ! empty( $video_url_val ) ) : ?>
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">🎥 Uploaded Riksha Video / YouTube Link</h3>
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:15px; border-radius:8px; margin-bottom:20px;">
+        <?php if ( strpos( $video_url_val, 'youtube.com' ) !== false || strpos( $video_url_val, 'youtu.be' ) !== false ) :
+            preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $video_url_val, $yt_match );
+            $yt_id = $yt_match[1] ?? '';
+        ?>
+            <div style="max-width:560px; aspect-ratio:16/9; margin-bottom:8px;">
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/<?php echo esc_attr($yt_id); ?>" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>
+            </div>
+            <p style="margin:0; font-size:12px; color:#475569;">
+                <strong>YouTube Link:</strong> <a href="<?php echo esc_url($video_url_val); ?>" target="_blank" style="color:#db2d2e; font-weight:600;"><?php echo esc_html($video_url_val); ?></a>
+            </p>
+        <?php else : ?>
+            <div style="max-width:560px; margin-bottom:8px;">
+                <video src="<?php echo esc_url($video_url_val); ?>" controls style="width:100%; max-height:310px; background:#000; border-radius:8px;"></video>
+            </div>
+            <p style="margin:0; font-size:12px; color:#475569;">
+                <strong>Direct Video URL:</strong> <a href="<?php echo esc_url($video_url_val); ?>" target="_blank" style="color:#db2d2e; font-weight:600;"><?php echo esc_html($video_url_val); ?></a>
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php
     $valid_imgs = array_values( array_filter($img_urls) );
     if ( ! empty($valid_imgs) ) : ?>
-    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images <small style="font-size:12px; color:#64748b; font-weight:normal;">(Click any image to open slider)</small></h3>
+    <h3 style="border-bottom:2px solid #db2d2e;padding-bottom:6px;color:#db2d2e;">📷 Uploaded Images <small style="font-size:12px; color:#64748b; font-weight:normal;">(Click any image to open full-size slider)</small></h3>
     <div class="car-sub-imgs">
         <?php foreach ( $valid_imgs as $idx => $url ) : ?>
             <a href="javascript:void(0)" onclick="openAdminLightbox(<?php echo $idx; ?>)">
-                <img src="<?php echo esc_url($url); ?>" alt="Riksha Image" title="Click to open slider view">
+                <img src="<?php echo esc_url($url); ?>" alt="Riksha Image" title="Click to view full size popup slider">
             </a>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
 
-    <!-- Lightbox Slider Modal Container -->
+    <!-- Full-Size Lightbox Slider Modal Container with Carousel Strip -->
     <div id="admin-lightbox-modal" class="admin-lightbox-overlay" onclick="closeAdminLightbox(event)">
-        <span class="admin-lightbox-close" onclick="closeAdminLightbox(event)">&times;</span>
-        <div class="admin-lightbox-counter" id="admin-lightbox-counter">Image 1 of 5</div>
-        
-        <button type="button" class="admin-lightbox-nav admin-lightbox-prev" onclick="navAdminLightbox(-1, event)">&#10094;</button>
-        <div class="admin-lightbox-img-wrapper" onclick="event.stopPropagation()">
-            <img id="admin-lightbox-img" src="" alt="Full View">
+        <div class="admin-lightbox-header" onclick="event.stopPropagation()">
+            <div class="admin-lightbox-counter" id="admin-lightbox-counter">Image 1 of 5</div>
+            <span class="admin-lightbox-close" onclick="closeAdminLightbox(event)">&times;</span>
         </div>
-        <button type="button" class="admin-lightbox-nav admin-lightbox-next" onclick="navAdminLightbox(1, event)">&#10095;</button>
+        
+        <div class="admin-lightbox-body">
+            <button type="button" class="admin-lightbox-nav admin-lightbox-prev" onclick="navAdminLightbox(-1, event)">&#10094;</button>
+            <div class="admin-lightbox-img-wrapper" onclick="event.stopPropagation()">
+                <img id="admin-lightbox-img" src="" alt="Full View">
+            </div>
+            <button type="button" class="admin-lightbox-nav admin-lightbox-next" onclick="navAdminLightbox(1, event)">&#10095;</button>
+        </div>
+
+        <!-- Carousel Strip -->
+        <div class="admin-lightbox-thumb-strip" onclick="event.stopPropagation()">
+            <?php foreach ( $valid_imgs as $idx => $url ) : ?>
+                <img src="<?php echo esc_url($url); ?>" class="admin-lightbox-thumb-item <?php echo $idx === 0 ? 'active' : ''; ?>" id="admin-thumb-<?php echo $idx; ?>" onclick="openAdminLightbox(<?php echo $idx; ?>)" alt="Thumb <?php echo $idx+1; ?>">
+            <?php endforeach; ?>
+        </div>
     </div>
 
     <script>
@@ -3236,6 +3329,19 @@ function rikshawale_render_car_submission_metabox( $post ) {
         var counter = document.getElementById('admin-lightbox-counter');
         if (img) img.src = adminGalleryUrls[adminCurrentIdx];
         if (counter) counter.textContent = 'Image ' + (adminCurrentIdx + 1) + ' of ' + adminGalleryUrls.length;
+
+        // Highlight active thumbnail in strip
+        for (var i = 0; i < adminGalleryUrls.length; i++) {
+            var th = document.getElementById('admin-thumb-' + i);
+            if (th) {
+                if (i === adminCurrentIdx) {
+                    th.classList.add('active');
+                    th.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    th.classList.remove('active');
+                }
+            }
+        }
     }
 
     function navAdminLightbox(step, e) {
@@ -3341,7 +3447,7 @@ function rikshawale_approve_car_submission_handler() {
         '_car_mfg_year', '_car_reg_year', '_car_owner_type',
         '_car_brand_name', '_car_model_name', '_car_variant',
         '_car_driven_km', '_car_fuel', '_car_transmission',
-        '_car_expected_price',
+        '_car_expected_price', '_car_video_url',
         '_car_gallery_image_1', '_car_gallery_image_2', '_car_gallery_image_3',
         '_car_gallery_image_4', '_car_gallery_image_5',
         '_car_ai_valuation_min', '_car_ai_valuation_max',
