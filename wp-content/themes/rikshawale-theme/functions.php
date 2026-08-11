@@ -3191,9 +3191,9 @@ function rikshawale_render_car_submission_metabox( $post ) {
 
     .admin-lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(8px); z-index: 999999; flex-direction: column; justify-content: space-between; align-items: center; padding: 20px; box-sizing: border-box; }
     .admin-lightbox-header { width: 100%; display: flex; justify-content: space-between; align-items: center; z-index: 1000000; }
-    .admin-lightbox-counter { color: #f8fafc; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.12); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
-    .admin-lightbox-close { color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-    .admin-lightbox-close:hover { background: #db2d2e; }
+    .admin-lightbox-counter { color: #f8fafc; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.12); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+    .admin-lightbox-close { color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s, transform 0.2s; box-sizing: border-box; }
+    .admin-lightbox-close:hover { background: #db2d2e; border-color: #db2d2e; transform: scale(1.1); }
 
     .admin-lightbox-body { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: calc(100vh - 160px); }
     .admin-lightbox-img-wrapper { display: flex; justify-content: center; align-items: center; max-width: 85vw; max-height: 72vh; }
