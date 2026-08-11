@@ -511,10 +511,11 @@ window.addEventListener('load', calculateEMI);
                     ) );
                     if ( $rel_query->have_posts() ) :
                         while ( $rel_query->have_posts() ) : $rel_query->the_post();
-                            $r_price = rikshawale_get_formatted_price( get_the_ID() );
-                            $r_fuel  = get_post_meta( get_the_ID(), '_car_fuel', true ) ?: 'Petrol';
-                            $r_trans = get_post_meta( get_the_ID(), '_car_transmission', true ) ?: 'Automatic';
-                            $raw_r_badge   = get_post_meta( get_the_ID(), '_car_badge', true );
+                            $rel_id  = get_the_ID();
+                            $r_price = rikshawale_get_formatted_price( $rel_id );
+                            $r_fuel  = get_post_meta( $rel_id, '_car_fuel', true ) ?: 'Petrol';
+                            $r_trans = get_post_meta( $rel_id, '_car_transmission', true ) ?: 'Automatic';
+                            $raw_r_badge   = get_post_meta( $rel_id, '_car_badge', true );
                             $r_badge_clean = preg_replace( '/\s+/', ' ', strtolower( trim( (string) $raw_r_badge ) ) );
                             if ( empty( $raw_r_badge ) || $r_badge_clean === 'none' || $r_badge_clean === 'no_badge' || $r_badge_clean === 'hide' || $r_badge_clean === 'no badge' ) {
                                 $r_badge       = '';
@@ -522,6 +523,15 @@ window.addEventListener('load', calculateEMI);
                             } else {
                                 $r_badge       = $raw_r_badge;
                                 $r_coming_soon = ( $r_badge_clean === 'coming soon' || strpos( $r_badge_clean, 'coming soon' ) !== false );
+                            }
+
+                            // Fetch thumbnail image with robust fallbacks
+                            $r_thumb = get_the_post_thumbnail_url( $rel_id, 'medium' );
+                            if ( empty( $r_thumb ) ) {
+                                $r_thumb = get_post_meta( $rel_id, '_car_gallery_image_1', true );
+                            }
+                            if ( empty( $r_thumb ) ) {
+                                $r_thumb = 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80';
                             }
                     ?>
                     <div class="car-slider-item">
