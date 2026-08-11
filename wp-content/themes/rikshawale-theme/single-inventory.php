@@ -114,19 +114,6 @@ while ( have_posts() ) : the_post();
                                 <h4 class="fw-bold text-uppercase tracking-wider text-white mb-2" style="font-family: var(--font-heading, sans-serif); letter-spacing: 1.5px;">Coming Soon</h4>
                                 <p class="text-white-50 small mb-0">This vehicle will be arriving live in inventory soon.</p>
                             </div>
-                        <?php elseif ( $car_video_url ) : ?>
-                            <?php if ( strpos( $car_video_url, 'youtube.com' ) !== false || strpos( $car_video_url, 'youtu.be' ) !== false ) : 
-                                preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $car_video_url, $yt_match );
-                                $yt_id = $yt_match[1] ?? '';
-                            ?>
-                                <iframe id="mainDetailIframe" class="w-100 h-100 border-0" src="https://www.youtube.com/embed/<?php echo esc_attr($yt_id); ?>?autoplay=1&mute=1&loop=1&playlist=<?php echo esc_attr($yt_id); ?>" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                                <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" style="display:none;" alt="<?php the_title_attribute(); ?>">
-                                <video id="mainDetailVideo" class="w-100 h-100 object-fit-cover" style="display:none;" controls></video>
-                            <?php else : ?>
-                                <video id="mainDetailVideo" src="<?php echo esc_url($car_video_url); ?>" class="w-100 h-100 object-fit-cover" autoplay muted loop playsinline controls></video>
-                                <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" style="display:none;" alt="<?php the_title_attribute(); ?>">
-                                <iframe id="mainDetailIframe" class="w-100 h-100 border-0" style="display:none;"></iframe>
-                            <?php endif; ?>
                         <?php else : ?>
                             <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" alt="<?php the_title_attribute(); ?>">
                             <video id="mainDetailVideo" class="w-100 h-100 object-fit-cover" style="display:none;" controls></video>
@@ -141,8 +128,14 @@ while ( have_posts() ) : the_post();
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
                     <div class="thumb-carousel-track" id="thumbCarouselTrack">
+                        <?php foreach ( $slides as $idx => $slide_url ) : ?>
+                            <div class="thumb-carousel-item <?php echo ( $idx === 0 ) ? 'active' : ''; ?>" onclick="changeMainImage('<?php echo esc_url($slide_url); ?>', this)">
+                                <img src="<?php echo esc_url($slide_url); ?>" alt="Thumb <?php echo $idx+1; ?>">
+                            </div>
+                        <?php endforeach; ?>
+
                         <?php if ( $car_video_url ) : ?>
-                            <div class="thumb-carousel-item active" onclick="playBannerVideo('<?php echo esc_url($car_video_url); ?>', this)" style="position:relative; background:#000;">
+                            <div class="thumb-carousel-item" onclick="playBannerVideo('<?php echo esc_url($car_video_url); ?>', this)" style="position:relative; background:#000;">
                                 <img src="<?php echo esc_url($slides[0]); ?>" alt="Video Thumbnail" style="opacity:0.6;">
                                 <span class="position-absolute top-50 start-50 translate-middle text-white text-center">
                                     <i class="fa-solid fa-circle-play fs-4 d-block" style="color:var(--primary-color, #db2d2e);"></i>
@@ -150,12 +143,6 @@ while ( have_posts() ) : the_post();
                                 </span>
                             </div>
                         <?php endif; ?>
-
-                        <?php foreach ( $slides as $idx => $slide_url ) : ?>
-                            <div class="thumb-carousel-item <?php echo (! $car_video_url && $idx === 0) ? 'active' : ''; ?>" onclick="changeMainImage('<?php echo esc_url($slide_url); ?>', this)">
-                                <img src="<?php echo esc_url($slide_url); ?>" alt="Thumb <?php echo $idx+1; ?>">
-                            </div>
-                        <?php endforeach; ?>
                     </div>
                     <button type="button" class="thumb-carousel-arrow thumb-carousel-next" onclick="scrollThumbCarousel(1)" aria-label="Next">
                         <i class="fa-solid fa-chevron-right"></i>
@@ -689,10 +676,15 @@ function playBannerVideo(url, el) {
     if (img) img.style.display = 'none';
 
     if (url.indexOf('youtube.com') !== -1 || url.indexOf('youtu.be') !== -1) {
-        if (vid) vid.style.display = 'none';
-        if (iframe) iframe.style.display = 'block';
+        if (vid) { vid.pause(); vid.style.display = 'none'; }
+        if (iframe) {
+            var ytMatch = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i);
+            var ytId = (ytMatch && ytMatch[1]) ? ytMatch[1] : '';
+            iframe.src = 'https://www.youtube.com/embed/' + ytId + '?autoplay=1&mute=0&loop=1&playlist=' + ytId;
+            iframe.style.display = 'block';
+        }
     } else {
-        if (iframe) iframe.style.display = 'none';
+        if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
         if (vid) {
             vid.src = url;
             vid.style.display = 'block';

@@ -236,6 +236,30 @@ $states = array(
                     </div>
                 </div>
 
+                <!-- Row 8: Riksha Video Options (Upload Video File or YouTube Link) -->
+                <div class="mb-4 p-3 border rounded-3 bg-light">
+                    <label class="sell-label mb-2 d-block text-dark fw-bold">
+                        <i class="fa-solid fa-video text-danger me-1"></i> Upload Riksha Video / YouTube Link <span class="text-muted" style="font-weight:400;">(Optional)</span>
+                    </label>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="sell-label text-muted" for="riksha_video_file">Upload Video File <span class="extra-small">(MP4, WebM, MOV, max 50MB)</span></label>
+                            <input type="file" class="sell-input form-control" id="riksha_video_file" name="riksha_video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska" onchange="previewSellVideo(this)">
+                            <div id="video-file-preview-wrap" class="mt-2" style="display:none;">
+                                <video id="video-file-preview" class="w-100 rounded-2 shadow-sm" style="max-height:160px; background:#000;" controls></video>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="sell-label text-muted" for="riksha_video_url">Or YouTube Video URL</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-danger border-end-0" style="border-radius:8px 0 0 8px;"><i class="fa-brands fa-youtube fs-5"></i></span>
+                                <input type="url" class="sell-input form-control border-start-0" id="riksha_video_url" name="riksha_video_url" placeholder="https://www.youtube.com/watch?v=..." style="border-radius:0 8px 8px 0;">
+                            </div>
+                            <span class="extra-small text-muted d-block mt-1">Paste a link to YouTube video of your vehicle</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Disclaimer -->
                 <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 16px;">
                     By submitting this form, your details will be reviewed by the Rikshawale team for vehicle valuation and follow-up.
@@ -334,6 +358,22 @@ function previewSellImage(input, idx) {
     }
 }
 
+function previewSellVideo(input) {
+    var wrap = document.getElementById('video-file-preview-wrap');
+    var video = document.getElementById('video-file-preview');
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        var url = URL.createObjectURL(file);
+        if (video) {
+            video.src = url;
+            if (wrap) wrap.style.display = 'block';
+        }
+    } else {
+        if (video) video.src = '';
+        if (wrap) wrap.style.display = 'none';
+    }
+}
+
 
 document.getElementById('sell-car-form').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -388,6 +428,11 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
                 if (prev) { prev.src = ''; prev.style.display = 'none'; }
                 if (ph) ph.style.display = 'flex';
             }
+            // Reset video preview
+            var vWrap = document.getElementById('video-file-preview-wrap');
+            var vPreview = document.getElementById('video-file-preview');
+            if (vPreview) { vPreview.src = ''; }
+            if (vWrap) { vWrap.style.display = 'none'; }
             btn.textContent = 'Submitted!';
         } else {
             msg.style.background = '#fef2f2';

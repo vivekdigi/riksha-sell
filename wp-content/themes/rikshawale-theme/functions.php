@@ -4009,7 +4009,7 @@ function rikshawale_ajax_register() {
 add_action( 'wp_ajax_rikshawale_register', 'rikshawale_ajax_register' );
 add_action( 'wp_ajax_nopriv_rikshawale_register', 'rikshawale_ajax_register' );
 
-// 3. AJAX Vehicle Booking Submission (Direct Guest Submission Supported!)
+// 3. AJAX Vehicle Booking Submission (Auto Customer Account Creation Supported!)
 function rikshawale_ajax_submit_booking() {
 	check_ajax_referer( 'rikshawale_booking_nonce', 'nonce' );
 
@@ -4026,6 +4026,51 @@ function rikshawale_ajax_submit_booking() {
 
 	if ( empty( $name ) || empty( $phone ) || empty( $email ) ) {
 		wp_send_json_error( array( 'message' => 'Name, Mobile number, and Email address are required.' ) );
+	}
+
+	$account_created = false;
+	$random_pass     = '';
+
+	// If guest user, create new subscriber account or associate existing account automatically!
+	if ( ! $user_id ) {
+		$existing_user = get_user_by( 'email', $email );
+		if ( $existing_user ) {
+			$user_id = $existing_user->ID;
+			// Auto-login existing customer
+			wp_set_current_user( $user_id );
+			wp_set_auth_cookie( $user_id, true );
+		} else {
+			// Generate username from email or name
+			$base_user = sanitize_user( current( explode( '@', $email ) ) );
+			if ( empty( $base_user ) || strlen( $base_user ) < 3 ) {
+				$base_user = 'cust_' . preg_replace( '/[^a-z0-9]/i', '', strtolower( $name ) );
+			}
+			$username = $base_user;
+			if ( username_exists( $username ) ) {
+				$username = $base_user . rand( 100, 9999 );
+			}
+
+			// Generate random password
+			$random_pass = wp_generate_password( 10, false );
+			$user_id     = wp_create_user( $username, $random_pass, $email );
+
+			if ( ! is_wp_error( $user_id ) ) {
+				wp_update_user( array(
+					'ID'           => $user_id,
+					'display_name' => $name,
+					'first_name'   => $name,
+					'role'         => 'subscriber',
+				) );
+				update_user_meta( $user_id, 'phone_number', $phone );
+
+				// Auto-login newly created customer
+				wp_set_current_user( $user_id );
+				wp_set_auth_cookie( $user_id, true );
+				$account_created = true;
+			} else {
+				$user_id = 0;
+			}
+		}
 	}
 
 	$post_title = $name . ' — ' . $car_title . ' (' . date('d M Y') . ')';
@@ -4056,11 +4101,29 @@ function rikshawale_ajax_submit_booking() {
 	$to      = get_option( 'admin_email' );
 	$subject = '🛺 New Vehicle Booking Inquiry: ' . $car_title . ' by ' . $name;
 	$body    = "Vehicle: {$car_title}\nCustomer Name: {$name}\nMobile No.: {$phone}\nAlternate No.: {$alt_phone}\nEmail: {$email}\nCity: {$city}\nPreferred Date: {$date}\n\nNotes:\n{$message}";
+	if ( $account_created ) {
+		$body .= "\n\n--- Customer Account Created ---\nUsername/Email: {$email}\nPassword: {$random_pass}";
+	}
 	$headers = array( 'Content-Type: text/plain; charset=UTF-8', "Reply-To: {$name} <{$email}>" );
 	wp_mail( $to, $subject, $body, $headers );
 
+	// Email Customer Confirmation & Login Credentials
+	if ( $account_created ) {
+		$cust_subject = '🛺 Your Booking Inquiry & Account Login Details - Rikshawale';
+		$cust_body    = "Namaste {$name},\n\nThank you for booking inquiry on Rikshawale for: {$car_title}.\n\nAn account has been automatically created for you to track your booking inquiry status:\nUsername / Email: {$email}\nPassword: {$random_pass}\n\nYou can log in anytime on Rikshawale to view your bookings.\n\nBest Regards,\nRikshawale Team";
+		wp_mail( $email, $cust_subject, $cust_body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
+	}
+
+	$res_msg = 'Your vehicle booking inquiry has been submitted successfully!';
+	if ( $account_created ) {
+		$res_msg .= ' A new customer account has been created for you & you are now logged in! (Login details sent to ' . esc_html($email) . ')';
+	}
+
 	wp_send_json_success( array(
-		'message' => 'Your vehicle booking inquiry has been submitted successfully! Our team will contact you shortly.',
+		'message'         => $res_msg,
+		'account_created' => $account_created,
+		'logged_in'       => true,
+		'user_name'       => $name,
 	) );
 }
 add_action( 'wp_ajax_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
@@ -4742,3 +4805,108 @@ function rikshawale_handle_ai_chat() {
 }
 add_action( 'wp_ajax_rikshawale_ai_chat', 'rikshawale_handle_ai_chat' );
 add_action( 'wp_ajax_nopriv_rikshawale_ai_chat', 'rikshawale_handle_ai_chat' );
+
+/* ============================================================
+   SELL A RIKSHA AJAX SUBMISSION HANDLER
+   ============================================================ */
+function rikshawale_handle_sell_car_ajax() {
+    check_ajax_referer( 'rikshawale_sell_car_action', 'rikshawale_sell_car_nonce' );
+
+    $seller_name  = isset( $_POST['seller_name'] ) ? sanitize_text_field( wp_unslash( $_POST['seller_name'] ) ) : '';
+    $seller_phone = isset( $_POST['seller_phone'] ) ? sanitize_text_field( wp_unslash( $_POST['seller_phone'] ) ) : '';
+    $seller_wa    = isset( $_POST['seller_wa'] ) ? sanitize_text_field( wp_unslash( $_POST['seller_wa'] ) ) : '';
+    $seller_city  = isset( $_POST['seller_city'] ) ? sanitize_text_field( wp_unslash( $_POST['seller_city'] ) ) : '';
+    $seller_reg   = isset( $_POST['seller_reg_no'] ) ? sanitize_text_field( wp_unslash( $_POST['seller_reg_no'] ) ) : '';
+    $seller_state = isset( $_POST['seller_state'] ) ? sanitize_text_field( wp_unslash( $_POST['seller_state'] ) ) : '';
+
+    $mfg_year     = isset( $_POST['riksha_mfg_year'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_mfg_year'] ) ) : '';
+    $reg_year     = isset( $_POST['riksha_reg_year'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_reg_year'] ) ) : '';
+    $owner_type   = isset( $_POST['riksha_owner_type'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_owner_type'] ) ) : '';
+    $brand_name   = isset( $_POST['riksha_brand_name'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_brand_name'] ) ) : '';
+    $model_name   = isset( $_POST['riksha_model_name'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_model_name'] ) ) : '';
+    $variant      = isset( $_POST['riksha_variant'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_variant'] ) ) : '';
+    $driven_km    = isset( $_POST['riksha_driven_km'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_driven_km'] ) ) : '';
+    $fuel         = isset( $_POST['riksha_fuel'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_fuel'] ) ) : '';
+    $trans        = isset( $_POST['riksha_transmission'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_transmission'] ) ) : '';
+    $price        = isset( $_POST['riksha_expected_price'] ) ? sanitize_text_field( wp_unslash( $_POST['riksha_expected_price'] ) ) : '';
+    $youtube_url  = isset( $_POST['riksha_video_url'] ) ? esc_url_raw( wp_unslash( $_POST['riksha_video_url'] ) ) : '';
+
+    if ( empty( $seller_name ) || empty( $seller_phone ) || empty( $brand_name ) || empty( $model_name ) ) {
+        wp_send_json_error( array( 'message' => 'Please fill in all required fields.' ) );
+    }
+
+    $title = sprintf( '%s %s (%s) - %s', $brand_name, $model_name, $mfg_year, $seller_name );
+
+    $post_data = array(
+        'post_title'   => $title,
+        'post_status'  => 'pending', // Pending admin approval before publishing to inventory
+        'post_type'    => 'inventory',
+        'post_content' => sprintf( "Seller Name: %s\nMobile: %s\nWhatsApp: %s\nCity: %s, %s\nReg No: %s", $seller_name, $seller_phone, $seller_wa, $seller_city, $seller_state, $seller_reg ),
+    );
+
+    $post_id = wp_insert_post( $post_data );
+
+    if ( is_wp_error( $post_id ) ) {
+        wp_send_json_error( array( 'message' => 'Failed to save submission. Please try again.' ) );
+    }
+
+    // Save meta data
+    update_post_meta( $post_id, '_car_brand_name', $brand_name );
+    update_post_meta( $post_id, '_car_model_name', $model_name );
+    update_post_meta( $post_id, '_car_variant', $variant );
+    update_post_meta( $post_id, '_car_mfg_year', $mfg_year );
+    update_post_meta( $post_id, '_car_reg_year', $reg_year );
+    update_post_meta( $post_id, '_car_owner_type', $owner_type );
+    update_post_meta( $post_id, '_car_driven_km', $driven_km );
+    update_post_meta( $post_id, '_car_fuel', $fuel );
+    update_post_meta( $post_id, '_car_transmission', $trans );
+    update_post_meta( $post_id, '_car_price', $price );
+    update_post_meta( $post_id, '_car_seller_name', $seller_name );
+    update_post_meta( $post_id, '_car_seller_phone', $seller_phone );
+    update_post_meta( $post_id, '_car_seller_wa', $seller_wa );
+    update_post_meta( $post_id, '_car_seller_city', $seller_city );
+    update_post_meta( $post_id, '_car_seller_state', $seller_state );
+
+    require_once( ABSPATH . 'wp-admin/includes/image.php' );
+    require_once( ABSPATH . 'wp-admin/includes/file.php' );
+    require_once( ABSPATH . 'wp-admin/includes/media.php' );
+
+    // Handle 5 image uploads
+    $first_img_set = false;
+    for ( $i = 1; $i <= 5; $i++ ) {
+        $file_key = 'riksha_image_' . $i;
+        if ( ! empty( $_FILES[ $file_key ]['name'] ) ) {
+            $attachment_id = media_handle_upload( $file_key, $post_id );
+            if ( ! is_wp_error( $attachment_id ) ) {
+                $img_url = wp_get_attachment_url( $attachment_id );
+                update_post_meta( $post_id, "_car_gallery_image_{$i}", $img_url );
+                if ( ! $first_img_set ) {
+                    set_post_thumbnail( $post_id, $attachment_id );
+                    $first_img_set = true;
+                }
+            }
+        }
+    }
+
+    // Handle Video File Upload or YouTube Link
+    $final_video_url = '';
+    if ( ! empty( $_FILES['riksha_video_file']['name'] ) ) {
+        $video_attachment_id = media_handle_upload( 'riksha_video_file', $post_id );
+        if ( ! is_wp_error( $video_attachment_id ) ) {
+            $final_video_url = wp_get_attachment_url( $video_attachment_id );
+        }
+    }
+
+    if ( empty( $final_video_url ) && ! empty( $youtube_url ) ) {
+        $final_video_url = $youtube_url;
+    }
+
+    if ( ! empty( $final_video_url ) ) {
+        update_post_meta( $post_id, '_car_video_url', $final_video_url );
+    }
+
+    wp_send_json_success( array( 'message' => 'Thank you! Your Riksha details and video have been submitted successfully and are pending approval.' ) );
+}
+add_action( 'wp_ajax_rikshawale_sell_car', 'rikshawale_handle_sell_car_ajax' );
+add_action( 'wp_ajax_nopriv_rikshawale_sell_car', 'rikshawale_handle_sell_car_ajax' );
+

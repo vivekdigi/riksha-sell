@@ -502,7 +502,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         var modalEl = document.getElementById('bookingModal');
                         var modal = bootstrap.Modal.getInstance(modalEl);
                         if (modal) modal.hide();
-                    }, 2500);
+                        if (data.data && data.data.logged_in) {
+                            window.location.reload();
+                        }
+                    }, 2000);
                 } else {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';
