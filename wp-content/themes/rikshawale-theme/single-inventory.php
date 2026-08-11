@@ -148,6 +148,30 @@ while ( have_posts() ) : the_post();
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
+
+                <!-- 2.5 Dedicated Riksha Video Section Card under Gallery Slider -->
+                <?php if ( $car_video_url ) : ?>
+                <div class="card border-0 shadow-sm rounded-4 p-4 mt-4 mb-2">
+                    <div class="mb-3 pb-2 border-bottom d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-circle-play text-danger me-2"></i> Riksha Video Tour</h5>
+                            <div style="width: 35px; height: 3px; background: var(--primary-color, #db2d2e); border-radius: 2px;"></div>
+                        </div>
+                        <span class="badge bg-danger px-3 py-2 text-uppercase fw-semibold" style="background-color: var(--primary-color, #db2d2e) !important;">Verified Video</span>
+                    </div>
+
+                    <div class="position-relative bg-black rounded-3 overflow-hidden shadow-sm text-center" style="aspect-ratio: 16/9; width: 100%;">
+                        <?php if ( strpos( $car_video_url, 'youtube.com' ) !== false || strpos( $car_video_url, 'youtu.be' ) !== false ) : 
+                            preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $car_video_url, $yt_match );
+                            $yt_id = $yt_match[1] ?? '';
+                        ?>
+                            <iframe class="w-100 h-100 border-0" src="https://www.youtube.com/embed/<?php echo esc_attr($yt_id); ?>?rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <?php else : ?>
+                            <video src="<?php echo esc_url($car_video_url); ?>" class="w-100 h-100 object-fit-cover" controls preload="metadata"></video>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- RIGHT COLUMN: Purchase Card sitting on top right next to Featured Image -->
