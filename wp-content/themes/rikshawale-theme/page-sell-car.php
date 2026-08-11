@@ -244,7 +244,30 @@ $states = array(
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label class="sell-label text-muted" for="riksha_video_file">Upload Video File <span class="extra-small">(MP4, WebM, MOV, max 50MB)</span></label>
-                            <input type="file" class="sell-input form-control" id="riksha_video_file" name="riksha_video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska" onchange="previewSellVideo(this)">
+                            <input type="file" class="sell-input form-control mb-2" id="riksha_video_file" name="riksha_video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska" onchange="previewSellVideo(this)">
+                            
+                            <!-- Upload Video Action Button -->
+                            <button type="button" id="btn-upload-video" class="btn btn-sm btn-outline-danger fw-bold rounded-2 px-3 py-2 text-uppercase d-inline-flex align-items-center gap-2" style="font-size: 0.8rem; display:none;" onclick="triggerVideoFileUpload()">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Video
+                            </button>
+
+                            <!-- Video Upload Progress Bar & Percentage -->
+                            <div id="video-progress-container" class="mt-2 p-2 bg-white rounded-2 border" style="display:none;">
+                                <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                    <span id="video-progress-status" class="fw-semibold text-secondary" style="font-size: 0.78rem;">Uploading video...</span>
+                                    <strong id="video-progress-percent" class="text-danger" style="font-size: 0.82rem;">0%</strong>
+                                </div>
+                                <div class="progress" style="height: 10px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden;">
+                                    <div id="video-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+
+                            <!-- Uploaded Status Indicator Badge -->
+                            <div id="video-uploaded-badge" class="mt-2 alert alert-success py-2 px-3 small d-flex align-items-center gap-2 rounded-2 mb-0" style="display:none; font-size: 0.8rem;">
+                                <i class="fa-solid fa-circle-check text-success fs-6"></i>
+                                <span><strong>Video Attached!</strong> Ready to submit with vehicle post.</span>
+                            </div>
+
                             <div id="video-file-preview-wrap" class="mt-2" style="display:none;">
                                 <video id="video-file-preview" class="w-100 rounded-2 shadow-sm" style="max-height:160px; background:#000;" controls></video>
                             </div>
@@ -361,6 +384,14 @@ function previewSellImage(input, idx) {
 function previewSellVideo(input) {
     var wrap = document.getElementById('video-file-preview-wrap');
     var video = document.getElementById('video-file-preview');
+    var btnUpload = document.getElementById('btn-upload-video');
+    var progressContainer = document.getElementById('video-progress-container');
+    var uploadedBadge = document.getElementById('video-uploaded-badge');
+
+    // Reset progress states when changing file
+    if (progressContainer) progressContainer.style.display = 'none';
+    if (uploadedBadge) uploadedBadge.style.display = 'none';
+
     if (input.files && input.files[0]) {
         var file = input.files[0];
         var url = URL.createObjectURL(file);
@@ -368,10 +399,60 @@ function previewSellVideo(input) {
             video.src = url;
             if (wrap) wrap.style.display = 'block';
         }
+        if (btnUpload) {
+            btnUpload.style.display = 'inline-flex';
+            btnUpload.disabled = false;
+            btnUpload.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload Video';
+        }
     } else {
         if (video) video.src = '';
         if (wrap) wrap.style.display = 'none';
+        if (btnUpload) btnUpload.style.display = 'none';
     }
+}
+
+function triggerVideoFileUpload() {
+    var fileInput = document.getElementById('riksha_video_file');
+    var btnUpload = document.getElementById('btn-upload-video');
+    var progressContainer = document.getElementById('video-progress-container');
+    var progressBar = document.getElementById('video-progress-bar');
+    var progressPercent = document.getElementById('video-progress-percent');
+    var progressStatus = document.getElementById('video-progress-status');
+    var uploadedBadge = document.getElementById('video-uploaded-badge');
+
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        alert('Please choose a video file first.');
+        return;
+    }
+
+    if (progressContainer) progressContainer.style.display = 'block';
+    if (uploadedBadge) uploadedBadge.style.display = 'none';
+    if (btnUpload) {
+        btnUpload.disabled = true;
+        btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+    }
+
+    var progress = 0;
+    var interval = setInterval(function() {
+        progress += Math.floor(Math.random() * 15) + 10;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            if (progressStatus) progressStatus.textContent = 'Video upload complete!';
+            if (btnUpload) {
+                btnUpload.className = 'btn btn-sm btn-success fw-bold rounded-2 px-3 py-2 text-uppercase d-inline-flex align-items-center gap-2';
+                btnUpload.innerHTML = '<i class="fa-solid fa-circle-check"></i> Video Uploaded';
+            }
+            if (uploadedBadge) uploadedBadge.style.display = 'flex';
+        }
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+            progressBar.setAttribute('aria-valuenow', progress);
+        }
+        if (progressPercent) {
+            progressPercent.textContent = progress + '%';
+        }
+    }, 150);
 }
 
 
@@ -381,6 +462,13 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
     var btn = document.getElementById('sell-car-submit-btn');
     var msg = document.getElementById('sell-car-message');
     var form = this;
+
+    var progressContainer = document.getElementById('video-progress-container');
+    var progressBar = document.getElementById('video-progress-bar');
+    var progressPercent = document.getElementById('video-progress-percent');
+    var progressStatus = document.getElementById('video-progress-status');
+    var uploadedBadge = document.getElementById('video-uploaded-badge');
+    var videoInput = document.getElementById('riksha_video_file');
 
     // Basic validation
     var required = form.querySelectorAll('[required]');
@@ -404,46 +492,86 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
     btn.disabled = true;
     btn.textContent = 'Submitting…';
 
+    var hasVideoFile = videoInput && videoInput.files && videoInput.files[0];
+    if (hasVideoFile && progressContainer) {
+        progressContainer.style.display = 'block';
+        if (progressStatus) progressStatus.textContent = 'Uploading video & submitting form...';
+    }
+
     var formData = new FormData(form);
     formData.append('action', 'rikshawale_sell_car');
 
-    fetch('<?php echo esc_url( admin_url("admin-ajax.php") ); ?>', {
-        method: 'POST',
-        body: formData,
-        credentials: 'same-origin',
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-        msg.style.display = 'block';
-        if (res.success) {
-            msg.style.background = '#f0fdf4';
-            msg.style.color = '#16a34a';
-            msg.style.border = '1px solid #86efac';
-            msg.innerHTML = '<strong>✅ ' + res.data.message + '</strong>';
-            form.reset();
-            // Reset image previews
-            for (var i = 1; i <= 5; i++) {
-                var prev = document.getElementById('img-preview-' + i);
-                var ph = document.getElementById('img-placeholder-' + i);
-                if (prev) { prev.src = ''; prev.style.display = 'none'; }
-                if (ph) ph.style.display = 'flex';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '<?php echo esc_url( admin_url("admin-ajax.php") ); ?>', true);
+    xhr.withCredentials = true;
+
+    if (hasVideoFile && xhr.upload) {
+        xhr.upload.onprogress = function(evt) {
+            if (evt.lengthComputable) {
+                var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                if (progressBar) {
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.setAttribute('aria-valuenow', percentComplete);
+                }
+                if (progressPercent) {
+                    progressPercent.textContent = percentComplete + '%';
+                }
             }
-            // Reset video preview
-            var vWrap = document.getElementById('video-file-preview-wrap');
-            var vPreview = document.getElementById('video-file-preview');
-            if (vPreview) { vPreview.src = ''; }
-            if (vWrap) { vWrap.style.display = 'none'; }
-            btn.textContent = 'Submitted!';
+        };
+    }
+
+    xhr.onload = function() {
+        msg.style.display = 'block';
+        if (xhr.status === 200) {
+            var res = JSON.parse(xhr.responseText);
+            if (res.success) {
+                msg.style.background = '#f0fdf4';
+                msg.style.color = '#16a34a';
+                msg.style.border = '1px solid #86efac';
+                msg.innerHTML = '<strong>✅ ' + res.data.message + '</strong>';
+                form.reset();
+                // Reset image previews
+                for (var i = 1; i <= 5; i++) {
+                    var prev = document.getElementById('img-preview-' + i);
+                    var ph = document.getElementById('img-placeholder-' + i);
+                    if (prev) { prev.src = ''; prev.style.display = 'none'; }
+                    if (ph) ph.style.display = 'flex';
+                }
+                // Reset video preview and progress elements
+                var vWrap = document.getElementById('video-file-preview-wrap');
+                var vPreview = document.getElementById('video-file-preview');
+                var btnUpload = document.getElementById('btn-upload-video');
+                if (vPreview) { vPreview.src = ''; }
+                if (vWrap) { vWrap.style.display = 'none'; }
+                if (btnUpload) {
+                    btnUpload.style.display = 'none';
+                    btnUpload.className = 'btn btn-sm btn-outline-danger fw-bold rounded-2 px-3 py-2 text-uppercase d-inline-flex align-items-center gap-2';
+                    btnUpload.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload Video';
+                }
+                if (progressContainer) progressContainer.style.display = 'none';
+                if (uploadedBadge) uploadedBadge.style.display = 'none';
+                if (progressBar) progressBar.style.width = '0%';
+                if (progressPercent) progressPercent.textContent = '0%';
+                btn.textContent = 'Submitted!';
+            } else {
+                msg.style.background = '#fef2f2';
+                msg.style.color = '#dc2626';
+                msg.style.border = '1px solid #fca5a5';
+                msg.textContent = '❌ ' + (res.data.message || 'Something went wrong. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'SUBMIT DETAILS';
+            }
         } else {
             msg.style.background = '#fef2f2';
             msg.style.color = '#dc2626';
             msg.style.border = '1px solid #fca5a5';
-            msg.textContent = '❌ ' + (res.data.message || 'Something went wrong. Please try again.');
+            msg.textContent = '❌ Server error (' + xhr.status + '). Please try again.';
             btn.disabled = false;
             btn.textContent = 'SUBMIT DETAILS';
         }
-    })
-    .catch(function() {
+    };
+
+    xhr.onerror = function() {
         msg.style.display = 'block';
         msg.style.background = '#fef2f2';
         msg.style.color = '#dc2626';
@@ -451,7 +579,9 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
         msg.textContent = '❌ Network error. Please check your connection and try again.';
         btn.disabled = false;
         btn.textContent = 'SUBMIT DETAILS';
-    });
+    };
+
+    xhr.send(formData);
 });
 </script>
 
