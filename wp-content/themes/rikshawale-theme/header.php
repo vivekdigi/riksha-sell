@@ -271,7 +271,7 @@
 
 <header>
     <!-- Top Marquee Ticker -->
-    <div class="header-marquee-ticker text-white overflow-hidden" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%) !important; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2), inset 0 -3px 8px rgba(0, 0, 0, 0.4); border-bottom: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.82rem; font-weight: 500; padding: 15px 0;">
+    <div class="header-marquee-ticker text-white overflow-hidden" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 50%, #0f172a 100%) !important; box-shadow: 0 2px 10px rgba(14, 165, 233, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.8rem; font-weight: 500; padding: 5px 0;">
         <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" style="line-height: 1.15;">
             <span class="me-3">✅ Certified Vehicles</span>
             <span class="me-3 opacity-50">|</span>
