@@ -103,9 +103,9 @@ while ( have_posts() ) : the_post();
             
             <!-- LEFT COLUMN: Featured Image / Video + 4-Thumbnail Carousel -->
             <div class="col-lg-7">
-                <!-- 1. Main Featured Image / Video Container -->
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
-                    <div class="position-relative bg-black text-center" style="height: 440px;" id="mainDetailMediaFrame">
+                <!-- 1. Main Featured Image / Video Container with Zoom Effect -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3 position-relative">
+                    <div class="position-relative bg-black text-center main-img-zoom-container" style="height: 440px; cursor: zoom-in;" id="mainDetailMediaFrame" onclick="openFrontLightbox()">
                         <?php if ( $is_coming_soon ) : ?>
                             <div class="coming-soon-img-placeholder d-flex flex-column align-items-center justify-content-center w-100 h-100 p-4 text-white position-relative">
                                 <div class="coming-soon-glossy-icon mb-3" style="width: 80px; height: 80px;">
@@ -115,9 +115,15 @@ while ( have_posts() ) : the_post();
                                 <p class="text-white-50 small mb-0">This vehicle will be arriving live in inventory soon.</p>
                             </div>
                         <?php else : ?>
-                            <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover" alt="<?php the_title_attribute(); ?>">
-                            <video id="mainDetailVideo" class="w-100 h-100 object-fit-cover" style="display:none;" controls></video>
-                            <iframe id="mainDetailIframe" class="w-100 h-100 border-0" style="display:none;"></iframe>
+                            <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover zoom-img-target" alt="<?php the_title_attribute(); ?>">
+                            
+                            <!-- Floating Zoom Hint Icon Badge -->
+                            <div id="zoomHintBadge" class="position-absolute bottom-0 end-0 m-3 bg-dark text-white px-3 py-2 rounded-pill shadow-lg opacity-85 d-flex align-items-center gap-2" style="z-index:5; font-size:0.75rem; backdrop-filter:blur(4px); pointer-events:none;">
+                                <i class="fa-solid fa-magnifying-glass-plus text-danger"></i> Hover/Click to Zoom
+                            </div>
+
+                            <video id="mainDetailVideo" class="w-100 h-100 object-fit-cover" style="display:none;" controls onclick="event.stopPropagation()"></video>
+                            <iframe id="mainDetailIframe" class="w-100 h-100 border-0" style="display:none;" onclick="event.stopPropagation()"></iframe>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -676,15 +682,206 @@ window.addEventListener('load', calculateEMI);
     </div>
 </div>
 
+<!-- Front-End Full-Size Lightbox Modal for Slider -->
+<div id="front-lightbox-modal" class="front-lightbox-overlay" onclick="closeFrontLightbox(event)">
+    <div class="front-lightbox-header" onclick="event.stopPropagation()">
+        <div class="front-lightbox-counter" id="front-lightbox-counter">Image 1 of 5</div>
+        <span class="front-lightbox-close" onclick="closeFrontLightbox(event)">&times;</span>
+    </div>
+    
+    <div class="front-lightbox-body">
+        <button type="button" class="front-lightbox-nav front-lightbox-prev" onclick="navFrontLightbox(-1, event)">&#10094;</button>
+        <div class="front-lightbox-img-wrapper" onclick="event.stopPropagation()">
+            <img id="front-lightbox-img" src="" alt="Full View">
+        </div>
+        <button type="button" class="front-lightbox-nav front-lightbox-next" onclick="navFrontLightbox(1, event)">&#10095;</button>
+    </div>
+
+    <!-- Thumbnail Strip -->
+    <div class="front-lightbox-thumb-strip" onclick="event.stopPropagation()">
+        <?php foreach ( $slides as $s_idx => $s_url ) : ?>
+            <img src="<?php echo esc_url($s_url); ?>" class="front-lightbox-thumb-item <?php echo $s_idx === 0 ? 'active' : ''; ?>" id="front-thumb-<?php echo $s_idx; ?>" onclick="openFrontLightbox(<?php echo $s_idx; ?>)" alt="Thumb <?php echo $s_idx+1; ?>">
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<style>
+/* Hover Magnifier Zoom Effect */
+.main-img-zoom-container {
+    overflow: hidden;
+    position: relative;
+}
+.zoom-img-target {
+    transition: transform 0.25s ease-out;
+    transform-origin: center center;
+}
+.main-img-zoom-container:hover .zoom-img-target {
+    transform: scale(2.2);
+}
+
+/* Front-End Lightbox Modal Styles */
+.front-lightbox-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 999999;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.front-lightbox-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.front-lightbox-counter {
+    color: #f8fafc;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.12);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.front-lightbox-close {
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(255,255,255,0.2);
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 1px solid rgba(255,255,255,0.3);
+    transition: background 0.2s, transform 0.2s;
+}
+.front-lightbox-close:hover {
+    background: #db2d2e;
+    border-color: #db2d2e;
+    transform: scale(1.1);
+}
+.front-lightbox-body {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: calc(100vh - 160px);
+}
+.front-lightbox-img-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 85vw;
+    max-height: 72vh;
+}
+.front-lightbox-overlay img#front-lightbox-img {
+    max-width: 85vw;
+    max-height: 70vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    object-fit: contain;
+}
+.front-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: none;
+    font-size: 24px;
+    width: 50px; height: 50px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+    z-index: 1000000;
+    outline: none;
+}
+.front-lightbox-nav:hover {
+    background: #db2d2e;
+    transform: translateY(-50%) scale(1.1);
+}
+.front-lightbox-prev { left: 20px; }
+.front-lightbox-next { right: 20px; }
+
+.front-lightbox-thumb-strip {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    max-width: 90vw;
+    padding: 10px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.front-lightbox-thumb-item {
+    width: 70px; height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    opacity: 0.5;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+}
+.front-lightbox-thumb-item:hover, .front-lightbox-thumb-item.active {
+    opacity: 1;
+    border-color: #db2d2e;
+    transform: scale(1.08);
+}
+</style>
+
 <script>
+var frontGalleryUrls = <?php echo json_encode( array_values($slides) ); ?>;
+var frontCurrentIdx = 0;
+
+// Mouse move pan-zoom lens effect
+document.addEventListener('DOMContentLoaded', function() {
+    var zoomBox = document.getElementById('mainDetailMediaFrame');
+    var zoomImg = document.getElementById('mainDetailImage');
+
+    if (zoomBox && zoomImg) {
+        zoomBox.addEventListener('mousemove', function(e) {
+            if (zoomImg.style.display === 'none') return;
+            var rect = zoomBox.getBoundingClientRect();
+            var x = ((e.clientX - rect.left) / rect.width) * 100;
+            var y = ((e.clientY - rect.top) / rect.height) * 100;
+            zoomImg.style.transformOrigin = x + '% ' + y + '%';
+        });
+
+        zoomBox.addEventListener('mouseleave', function() {
+            zoomImg.style.transformOrigin = 'center center';
+        });
+    }
+});
+
 function changeMainImage(url, el) {
     var img = document.getElementById('mainDetailImage');
     var vid = document.getElementById('mainDetailVideo');
     var iframe = document.getElementById('mainDetailIframe');
+    var badge = document.getElementById('zoomHintBadge');
+    var zoomBox = document.getElementById('mainDetailMediaFrame');
 
     if (vid) { vid.pause(); vid.style.display = 'none'; }
     if (iframe) { iframe.style.display = 'none'; }
     if (img) { img.src = url; img.style.display = 'block'; }
+    if (badge) { badge.style.display = 'flex'; }
+    if (zoomBox) { zoomBox.style.cursor = 'zoom-in'; }
+
+    // Update frontCurrentIdx match
+    var idx = frontGalleryUrls.indexOf(url);
+    if (idx !== -1) frontCurrentIdx = idx;
 
     document.querySelectorAll('.thumb-carousel-item').forEach(function(b) {
         b.classList.remove('active');
@@ -696,8 +893,12 @@ function playBannerVideo(url, el) {
     var img = document.getElementById('mainDetailImage');
     var vid = document.getElementById('mainDetailVideo');
     var iframe = document.getElementById('mainDetailIframe');
+    var badge = document.getElementById('zoomHintBadge');
+    var zoomBox = document.getElementById('mainDetailMediaFrame');
 
     if (img) img.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    if (zoomBox) zoomBox.style.cursor = 'default';
 
     if (url.indexOf('youtube.com') !== -1 || url.indexOf('youtu.be') !== -1) {
         if (vid) { vid.pause(); vid.style.display = 'none'; }
@@ -722,6 +923,60 @@ function playBannerVideo(url, el) {
     if (el) el.classList.add('active');
 }
 
+function openFrontLightbox(idx) {
+    var img = document.getElementById('mainDetailImage');
+    if (img && img.style.display === 'none') return; // Don't open lightbox if video is playing
+
+    if (typeof idx === 'number') {
+        frontCurrentIdx = idx;
+    }
+    updateFrontLightbox();
+    var modal = document.getElementById('front-lightbox-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function updateFrontLightbox() {
+    if (frontCurrentIdx < 0) frontCurrentIdx = frontGalleryUrls.length - 1;
+    if (frontCurrentIdx >= frontGalleryUrls.length) frontCurrentIdx = 0;
+
+    var img = document.getElementById('front-lightbox-img');
+    var counter = document.getElementById('front-lightbox-counter');
+    if (img) img.src = frontGalleryUrls[frontCurrentIdx];
+    if (counter) counter.textContent = 'Image ' + (frontCurrentIdx + 1) + ' of ' + frontGalleryUrls.length;
+
+    for (var i = 0; i < frontGalleryUrls.length; i++) {
+        var th = document.getElementById('front-thumb-' + i);
+        if (th) {
+            if (i === frontCurrentIdx) {
+                th.classList.add('active');
+                th.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            } else {
+                th.classList.remove('active');
+            }
+        }
+    }
+}
+
+function navFrontLightbox(step, e) {
+    if (e) e.stopPropagation();
+    frontCurrentIdx += step;
+    updateFrontLightbox();
+}
+
+function closeFrontLightbox(e) {
+    var modal = document.getElementById('front-lightbox-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+    var modal = document.getElementById('front-lightbox-modal');
+    if (modal && modal.style.display === 'flex') {
+        if (e.key === 'ArrowRight') navFrontLightbox(1);
+        if (e.key === 'ArrowLeft') navFrontLightbox(-1);
+        if (e.key === 'Escape') closeFrontLightbox();
+    }
+});
+
 function scrollThumbCarousel(direction) {
     var track = document.getElementById('thumbCarouselTrack');
     if (!track) return;
@@ -742,3 +997,4 @@ function calculateEMI() {
 <?php endwhile;
 
 get_footer();
+
