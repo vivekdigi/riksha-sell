@@ -239,11 +239,11 @@ $states = array(
                 <!-- Row 8: Riksha Video Options (Upload Video File or YouTube Link) -->
                 <div class="mb-4 p-3 border rounded-3 bg-light" id="video-section-container">
                     <label class="sell-label mb-2 d-block text-dark fw-bold">
-                        <i class="fa-solid fa-video text-danger me-1"></i> Upload Riksha Video / YouTube Link <span class="text-danger">*</span>
+                        <i class="fa-solid fa-video text-danger me-1"></i> Upload Riksha Video / YouTube Link <span class="text-muted" style="font-weight:400;">(Optional)</span>
                     </label>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
-                            <label class="sell-label text-muted" for="riksha_video_file">Upload Video File <span class="text-danger">*</span> <span class="extra-small">(MP4, WebM, MOV, max 50MB)</span></label>
+                            <label class="sell-label text-muted" for="riksha_video_file">Upload Video File <span class="extra-small">(MP4, WebM, MOV, max 50MB — Optional)</span></label>
                             <input type="file" class="sell-input form-control mb-2" id="riksha_video_file" name="riksha_video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska" onchange="previewSellVideo(this)">
                             
                             <!-- Upload Video Action Button -->
@@ -273,12 +273,12 @@ $states = array(
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="sell-label text-muted" for="riksha_video_url">Or YouTube Video URL <span class="text-danger">*</span></label>
+                            <label class="sell-label text-muted" for="riksha_video_url">Or YouTube Video URL <span class="extra-small">(Optional)</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-white text-danger border-end-0" style="border-radius:8px 0 0 8px;"><i class="fa-brands fa-youtube fs-5"></i></span>
                                 <input type="url" class="sell-input form-control border-start-0" id="riksha_video_url" name="riksha_video_url" placeholder="https://www.youtube.com/watch?v=..." style="border-radius:0 8px 8px 0;">
                             </div>
-                            <span class="extra-small text-muted d-block mt-1">Paste YouTube link OR upload video file (at least one is required)</span>
+                            <span class="extra-small text-muted d-block mt-1">Paste YouTube link OR upload video file (Optional)</span>
                         </div>
                     </div>
                 </div>
@@ -481,25 +481,9 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
         }
     });
 
-    // Mandatory Video check (User MUST upload a video file or provide a YouTube URL)
-    var videoFile = document.getElementById('riksha_video_file');
-    var videoUrl = document.getElementById('riksha_video_url');
+    // Video check is optional (User can upload a video file or provide a YouTube URL if available)
     var videoSection = document.getElementById('video-section-container');
-    var hasVideo = (videoFile && videoFile.files && videoFile.files[0]) || (videoUrl && videoUrl.value.trim().length > 0);
-
     if (videoSection) videoSection.style.borderColor = '';
-    if (!hasVideo) {
-        if (videoSection) {
-            videoSection.style.borderColor = '#db2d2e';
-            videoSection.style.borderWidth = '2px';
-        }
-        msg.style.display = 'block';
-        msg.style.background = '#fef2f2';
-        msg.style.color = '#dc2626';
-        msg.style.border = '1px solid #fca5a5';
-        msg.innerHTML = '<strong>📹 Video Required:</strong> Please upload a vehicle video file OR paste a YouTube video link before submitting.';
-        return;
-    }
 
     if (!valid) {
         msg.style.display = 'block';
