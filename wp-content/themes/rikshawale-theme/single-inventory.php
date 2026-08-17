@@ -92,16 +92,15 @@ while ( have_posts() ) : the_post();
             $slides[] = $g_img;
         }
     }
-    $fallback_imgs = array(
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1566838234674-d4508496bf28?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80'
-    );
-    while ( count( $slides ) < 4 ) {
-        $slides[] = $fallback_imgs[ count($slides) % count($fallback_imgs) ];
+    $has_gallery = count($slides) > 0;
+    
+    // If no images at all, add a single placeholder so the main image frame doesn't break
+    if ( ! $has_gallery ) {
+        $slides[] = 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80';
+    } else {
+        // If there are images, we might want to slice to max 5.
+        $slides = array_slice( $slides, 0, 5 );
     }
-    $slides = array_slice( $slides, 0, 5 );
 ?>
 
 <div class="inventory-elite-detail bg-light py-4" style="font-family: var(--font-body, 'Inter', sans-serif);">
@@ -127,7 +126,7 @@ while ( have_posts() ) : the_post();
                             <img id="mainDetailImage" src="<?php echo esc_url($slides[0]); ?>" class="w-100 h-100 object-fit-cover zoom-img-target" alt="<?php the_title_attribute(); ?>">
                             
                             <!-- Floating Zoom Hint Icon Badge -->
-                            <div id="zoomHintBadge" class="position-absolute bottom-0 end-0 m-3 bg-dark text-white px-3 py-2 rounded-pill shadow-lg opacity-85 d-flex align-items-center gap-2" style="z-index:5; font-size:0.75rem; backdrop-filter:blur(4px); pointer-events:none;">
+                            <div id="zoomHintBadge" class="position-absolute bottom-0 end-0 m-3 bg-dark text-white px-3 py-2 rounded-pill shadow-lg opacity-85 d-flex align-items-center gap-2 d-none" style="z-index:5; font-size:0.75rem; backdrop-filter:blur(4px); pointer-events:none;">
                                 <i class="fa-solid fa-magnifying-glass-plus text-danger"></i> Hover/Click to Zoom
                             </div>
 
@@ -138,6 +137,7 @@ while ( have_posts() ) : the_post();
                 </div>
 
                 <!-- 2. Thumbnail Carousel Row with Video Thumbnail (if present) -->
+                <?php if ( $has_gallery && count($slides) > 1 || $car_video_url ) : ?>
                 <div class="thumb-carousel-wrapper">
                     <button type="button" class="thumb-carousel-arrow thumb-carousel-prev" onclick="scrollThumbCarousel(-1)" aria-label="Previous">
                         <i class="fa-solid fa-chevron-left"></i>
@@ -163,6 +163,7 @@ while ( have_posts() ) : the_post();
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
+                <?php endif; ?>
 
                 <!-- 2.5 Dedicated Riksha Video Section Card under Gallery Slider -->
                 <?php if ( $car_video_url ) : ?>
@@ -763,7 +764,7 @@ window.addEventListener('load', calculateEMI);
     transform-origin: center center;
 }
 .main-img-zoom-container:hover .zoom-img-target {
-    transform: scale(2.2);
+    /* transform: scale(2.2); - Disabled Zoom Effect */
 }
 
 /* Front-End Lightbox Modal Styles */
@@ -893,7 +894,8 @@ window.addEventListener('load', calculateEMI);
 var frontGalleryUrls = <?php echo json_encode( array_values($slides) ); ?>;
 var frontCurrentIdx = 0;
 
-// Mouse move pan-zoom lens effect
+// Mouse move pan-zoom lens effect (Disabled)
+/*
 document.addEventListener('DOMContentLoaded', function() {
     var zoomBox = document.getElementById('mainDetailMediaFrame');
     var zoomImg = document.getElementById('mainDetailImage');
@@ -912,6 +914,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+*/
 
 function changeMainImage(url, el) {
     var img = document.getElementById('mainDetailImage');
