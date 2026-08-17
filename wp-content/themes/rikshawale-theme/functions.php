@@ -3735,6 +3735,16 @@ function rikshawale_approve_car_submission_handler() {
         update_post_meta( $inventory_id, '_car_indicative_price', $indicative_str );
     }
 
+    // Save exact predicted price and depreciation
+    $exact_price = $m('_car_indicative_price'); // On submission, this holds the exact price
+    if ( $exact_price ) {
+        update_post_meta( $inventory_id, '_car_ai_exact_price', $exact_price );
+    }
+    $depreciation = $m('_car_ai_depreciation');
+    if ( $depreciation ) {
+        update_post_meta( $inventory_id, '_car_ai_depreciation', $depreciation );
+    }
+
     // Automatically set Taxonomy terms based on provided data
     $tax_map = array(
         'riksha_brand'      => $brand,
@@ -3806,10 +3816,17 @@ function rikshawale_render_inventory_ai_metabox( $post ) {
     $val_max    = get_post_meta( $post->ID, '_car_ai_valuation_max', true );
     $score      = get_post_meta( $post->ID, '_car_ai_condition_score', true );
     $summary    = get_post_meta( $post->ID, '_car_ai_summary', true );
+    $exact_price = get_post_meta( $post->ID, '_car_ai_exact_price', true );
+    $depreciation = get_post_meta( $post->ID, '_car_ai_depreciation', true );
     ?>
     <div style="padding: 6px 0;">
+        <div style="background: #1e3a8a; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: center;">
+            <label style="color: #bfdbfe; font-size: 11px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">Estimated Market Resale Price</label>
+            <input type="text" name="_car_ai_exact_price" value="<?php echo esc_attr($exact_price); ?>" placeholder="e.g. Rs. 55,764.21" style="width:100%; text-align:center; padding:6px 8px; border-radius:4px; border:1px solid #3b82f6; font-size: 16px; font-weight: bold; background: #fff; color: #1e3a8a;">
+        </div>
+
         <p style="margin-bottom: 8px;">
-            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Indicative / Incentive Price</label>
+            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Indicative / Incentive Price (Range)</label>
             <input type="text" name="_car_indicative_price" value="<?php echo esc_attr($indicative); ?>" placeholder="e.g. ₹1,20,000 – ₹1,40,000" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
         </p>
         <div style="display:flex; gap:8px; margin-bottom:8px;">
@@ -3825,6 +3842,10 @@ function rikshawale_render_inventory_ai_metabox( $post ) {
         <p style="margin-bottom: 8px;">
             <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Condition Rating Score (1-10)</label>
             <input type="text" name="_car_ai_condition_score" value="<?php echo esc_attr($score); ?>" placeholder="8.5" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+        </p>
+        <p style="margin-bottom: 8px;">
+            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Depreciation Percentage (%)</label>
+            <input type="text" name="_car_ai_depreciation" value="<?php echo esc_attr($depreciation); ?>" placeholder="e.g. 68.1" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
         </p>
         <p style="margin-bottom: 0;">
             <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">AI Condition Summary</label>
@@ -3844,7 +3865,7 @@ function rikshawale_save_inventory_ai_metabox( $post_id ) {
     if ( ! current_user_can( 'edit_post', $post_id ) ) {
         return;
     }
-    $fields = array( '_car_indicative_price', '_car_ai_valuation_min', '_car_ai_valuation_max', '_car_ai_condition_score', '_car_ai_summary' );
+    $fields = array( '_car_indicative_price', '_car_ai_valuation_min', '_car_ai_valuation_max', '_car_ai_condition_score', '_car_ai_summary', '_car_ai_exact_price', '_car_ai_depreciation' );
     foreach ( $fields as $f ) {
         if ( isset( $_POST[$f] ) ) {
             update_post_meta( $post_id, $f, sanitize_text_field( $_POST[$f] ) );
