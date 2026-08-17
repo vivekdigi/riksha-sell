@@ -595,8 +595,8 @@ foreach ( $section_order as $sec_key ) {
             ?>
             <section class="contact-split-banner py-3 my-1 overflow-hidden">
                 <div class="container">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-md-3 text-center d-none d-md-block">
+                    <div class="row align-items-center justify-content-center g-0">
+                        <div class="col-md-4 text-end d-none d-md-block pe-4">
                             <?php 
                             $left_img = get_theme_mod( 'contact_banner_left_img', 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80' );
                             if ( $left_img ) :
@@ -604,19 +604,19 @@ foreach ( $section_order as $sec_key ) {
                                 <img src="<?php echo esc_url( $left_img ); ?>" class="img-fluid split-car-left" alt="Left Vehicle">
                             <?php endif; ?>
                         </div>
-                        <div class="col-md-6 text-center py-3">
-                            <div class="contact-avatar-container mb-2">
+                        <div class="col-md-4 text-center py-3">
+                            <div class="contact-avatar-container mb-3">
                                 <?php 
                                 $avatar_img = get_theme_mod( 'contact_banner_avatar', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80' );
                                 if ( $avatar_img ) :
                                 ?>
-                                    <img src="<?php echo esc_url( $avatar_img ); ?>" class="rounded-circle shadow-sm" alt="Contact Support" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #f8f9fa;">
+                                    <img src="<?php echo esc_url( $avatar_img ); ?>" class="rounded-circle shadow-sm" alt="Contact Support" style="width: 130px; height: 130px; object-fit: cover; border: 4px solid #f8f9fa;">
                                 <?php endif; ?>
                             </div>
-                            <h5 class="text-muted fw-semibold mb-2" style="font-size: 1rem; letter-spacing: 0.5px;"><?php echo esc_html( get_theme_mod( 'contact_banner_subtitle', '' ) ); ?></h5>
-                            <h2 class="fw-bold display-6 text-danger" style="color: var(--primary-color) !important; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'topbar_phone', '' ) ); ?></h2>
+                            <h5 class="text-muted fw-semibold mb-2" style="font-size: 1.1rem; letter-spacing: 0.5px;"><?php echo esc_html( get_theme_mod( 'contact_banner_subtitle', '' ) ); ?></h5>
+                            <h2 class="fw-bold display-4 text-danger" style="color: var(--primary-color) !important; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'topbar_phone', '' ) ); ?></h2>
                         </div>
-                        <div class="col-md-3 text-center d-none d-md-block">
+                        <div class="col-md-4 text-start d-none d-md-block ps-4">
                             <?php 
                             $right_img = get_theme_mod( 'contact_banner_right_img', 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=500&q=80' );
                             if ( $right_img ) :
@@ -692,48 +692,7 @@ foreach ( $section_order as $sec_key ) {
             break;
 
         case 'why_choose':
-            if ( get_theme_mod( 'show_why_choose_us', 1 ) ) :
-            ?>
-            <section class="why-choose-us py-3 my-1">
-                <div class="container">
-                    <div class="text-center mb-3">
-                        <h2 class="fw-bold uppercase reveal"><?php echo esc_html( get_theme_mod( 'why_choose_title', '' ) ); ?></h2>
-                        <p class="text-muted reveal reveal-delay-1 mb-2"><?php echo esc_html( get_theme_mod( 'why_choose_subtitle', '' ) ); ?></p>
-                        <div class="gradient-divider"></div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="icon-box-card">
-                                <div class="icon-wrapper">
-                                    <i class="<?php echo esc_attr( get_theme_mod( 'why_choose_box1_icon', 'fa-solid fa-shield-halved' ) ); ?>"></i>
-                                </div>
-                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box1_title', '' ) ); ?></h4>
-                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box1_desc', '' ) ); ?></p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="icon-box-card">
-                                <div class="icon-wrapper">
-                                    <i class="<?php echo esc_attr( get_theme_mod( 'why_choose_box2_icon', 'fa-solid fa-indian-rupee-sign' ) ); ?>"></i>
-                                </div>
-                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box2_title', '' ) ); ?></h4>
-                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box2_desc', '' ) ); ?></p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="icon-box-card">
-                                <div class="icon-wrapper">
-                                    <i class="<?php echo esc_attr( get_theme_mod( 'why_choose_box3_icon', 'fa-solid fa-screwdriver-wrench' ) ); ?>"></i>
-                                </div>
-                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box3_title', '' ) ); ?></h4>
-                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box3_desc', '' ) ); ?></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <?php
-            endif;
+            // Section removed per user request
             break;
 
         case 'testimonials':

@@ -59,20 +59,20 @@ add_action( 'wp_enqueue_scripts', 'rikshawale_theme_scripts' );
  */
 function rikshawale_register_riksha_cpt() {
 	$labels = array(
-		'name'               => _x( 'Rikshas', 'post type general name', 'rikshawale-theme' ),
-		'singular_name'      => _x( 'Riksha', 'post type singular name', 'rikshawale-theme' ),
-		'menu_name'          => _x( 'Rikshas', 'admin menu', 'rikshawale-theme' ),
-		'name_admin_bar'     => _x( 'Riksha', 'add new on admin bar', 'rikshawale-theme' ),
+		'name'               => _x( 'Riksha Banners', 'post type general name', 'rikshawale-theme' ),
+		'singular_name'      => _x( 'Riksha Banner', 'post type singular name', 'rikshawale-theme' ),
+		'menu_name'          => _x( 'Riksha Banners', 'admin menu', 'rikshawale-theme' ),
+		'name_admin_bar'     => _x( 'Riksha Banner', 'add new on admin bar', 'rikshawale-theme' ),
 		'add_new'            => _x( 'Add New', 'riksha', 'rikshawale-theme' ),
-		'add_new_item'       => __( 'Add New Riksha', 'rikshawale-theme' ),
-		'new_item'           => __( 'New Riksha', 'rikshawale-theme' ),
-		'edit_item'          => __( 'Edit Riksha', 'rikshawale-theme' ),
-		'view_item'          => __( 'View Riksha', 'rikshawale-theme' ),
-		'all_items'          => __( 'All Rikshas', 'rikshawale-theme' ),
-		'search_items'       => __( 'Search Rikshas', 'rikshawale-theme' ),
-		'parent_item_colon'  => __( 'Parent Rikshas:', 'rikshawale-theme' ),
-		'not_found'          => __( 'No Rikshas found.', 'rikshawale-theme' ),
-		'not_found_in_trash' => __( 'No Rikshas found in Trash.', 'rikshawale-theme' )
+		'add_new_item'       => __( 'Add New Riksha Banner', 'rikshawale-theme' ),
+		'new_item'           => __( 'New Riksha Banner', 'rikshawale-theme' ),
+		'edit_item'          => __( 'Edit Riksha Banner', 'rikshawale-theme' ),
+		'view_item'          => __( 'View Riksha Banner', 'rikshawale-theme' ),
+		'all_items'          => __( 'All Riksha Banners', 'rikshawale-theme' ),
+		'search_items'       => __( 'Search Riksha Banners', 'rikshawale-theme' ),
+		'parent_item_colon'  => __( 'Parent Riksha Banners:', 'rikshawale-theme' ),
+		'not_found'          => __( 'No Riksha Banners found.', 'rikshawale-theme' ),
+		'not_found_in_trash' => __( 'No Riksha Banners found in Trash.', 'rikshawale-theme' )
 	);
 
 	$args = array(
@@ -1260,7 +1260,7 @@ function rikshawale_add_riksha_metabox() {
         'high'
     );
 }
-add_action( 'add_meta_boxes', 'rikshawale_add_riksha_metabox' );
+// add_action( 'add_meta_boxes', 'rikshawale_add_riksha_metabox' );
 
 /**
  * Render Riksha Specifications Metabox Content
@@ -3795,7 +3795,7 @@ add_action( 'wp_ajax_rikshawale_approve_submission', 'rikshawale_approve_car_sub
    ============================================================ */
 
 function rikshawale_add_inventory_ai_metabox() {
-    $post_types = array( 'inventory', 'riksha' );
+    $post_types = array( 'inventory' );
     foreach ( $post_types as $pt ) {
         add_meta_box(
             'rikshawale_inventory_ai_details',
