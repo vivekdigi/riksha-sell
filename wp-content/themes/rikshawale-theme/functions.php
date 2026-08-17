@@ -2769,13 +2769,9 @@ function rikshawale_handle_sell_car_submission() {
     $video_url_input = sanitize_text_field( $_POST['riksha_video_url'] ?? '' );
     $has_video_file  = ! empty( $_FILES['riksha_video_file']['name'] );
 
-    // Required field check (including compulsory Video File or YouTube Link)
+    // Required field check
     if ( empty($seller_name) || empty($seller_phone) || empty($brand_name) || empty($model_name) ) {
         wp_send_json_error( array( 'message' => 'Please fill all required fields.' ) );
-    }
-
-    if ( ! $has_video_file && empty($video_url_input) ) {
-        wp_send_json_error( array( 'message' => 'Video is mandatory! Please upload a Riksha video file or provide a YouTube video URL.' ) );
     }
 
     // Create the submission post (pending review)
@@ -2910,7 +2906,8 @@ function rikshawale_handle_sell_car_submission() {
     $api_response = wp_remote_post( 'https://ai-ev.questdigiflex.in/api/predict', array(
         'body'    => wp_json_encode( $api_payload ),
         'headers' => array( 'Content-Type' => 'application/json' ),
-        'timeout' => 15
+        'timeout' => 15,
+        'sslverify' => false
     ));
 
     $ai_res = null;
