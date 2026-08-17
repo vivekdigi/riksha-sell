@@ -101,10 +101,10 @@ get_header(); ?>
                     <p class="small text-muted mb-4">Contact our dealership representatives directly to schedule a showroom visit, test drive, or finance consultation.</p>
                     <div class="row g-3">
                         <div class="col-sm-6">
-                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?>" class="btn btn-danger btn-lg fw-bold w-100 py-3 uppercase" style="background-color: var(--primary-color); border-color: var(--primary-color); font-size: 0.9rem;"><i class="fa fa-phone me-2"></i> Call Showroom</a>
+                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '' ) ); ?>" class="btn btn-danger btn-lg fw-bold w-100 py-3 uppercase" style="background-color: var(--primary-color); border-color: var(--primary-color); font-size: 0.9rem;"><i class="fa fa-phone me-2"></i> Call Showroom</a>
                         </div>
                         <div class="col-sm-6">
-                            <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>" class="btn btn-outline-dark btn-lg fw-bold w-100 py-3 uppercase" style="font-size: 0.9rem;"><i class="fa fa-envelope me-2"></i> Email Inquiry</a>
+                            <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', '' ) ); ?>" class="btn btn-outline-dark btn-lg fw-bold w-100 py-3 uppercase" style="font-size: 0.9rem;"><i class="fa fa-envelope me-2"></i> Email Inquiry</a>
                         </div>
                     </div>
                 </div>

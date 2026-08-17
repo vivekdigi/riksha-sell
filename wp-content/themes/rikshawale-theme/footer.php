@@ -106,10 +106,10 @@
                 }
                 ?>
                 <div class="footer-tagline-box my-2 px-2 py-1">
-                    <?php echo esc_html( get_theme_mod( 'footer_tagline', 'INDIA\'S TRUSTED PRE-OWNED THREE-WHEELER MARKETPLACE' ) ); ?>
+                    <?php echo esc_html( get_theme_mod( 'footer_tagline', '' ) ); ?>
                 </div>
                 <p class="mb-0">
-                    <?php echo esc_html( get_theme_mod( 'footer_description', 'Quality, trust, and transparency — handpicked pre-owned commercial rikshas & e-vehicles.' ) ); ?>
+                    <?php echo esc_html( get_theme_mod( 'footer_description', '' ) ); ?>
                 </p>
             </div>
 
@@ -167,8 +167,8 @@
                             <i class="fa-solid fa-phone"></i>
                         </div>
                         <div>
-                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+911234567890' ) ); ?>">
-                                <?php echo esc_html( get_theme_mod( 'topbar_phone', '+911234567890' ) ); ?>
+                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '' ) ); ?>">
+                                <?php echo esc_html( get_theme_mod( 'topbar_phone', '' ) ); ?>
                             </a>
                         </div>
                     </li>
@@ -177,8 +177,8 @@
                             <i class="fa-solid fa-envelope"></i>
                         </div>
                         <div>
-                            <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>">
-                                <?php echo esc_html( get_theme_mod( 'topbar_email', 'info@rikshawale.com' ) ); ?>
+                            <a href="mailto:<?php echo esc_attr( get_theme_mod( 'topbar_email', '' ) ); ?>">
+                                <?php echo esc_html( get_theme_mod( 'topbar_email', '' ) ); ?>
                             </a>
                         </div>
                     </li>
@@ -187,7 +187,7 @@
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
                         <div style="font-size: 0.81rem; color: #94a3b8; line-height: 1.5;">
-                            <?php echo nl2br( esc_html( get_theme_mod( 'footer_address', "Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028" ) ) ); ?>
+                            <?php echo nl2br( esc_html( get_theme_mod( 'footer_address', '' ) ) ); ?>
                         </div>
                     </li>
                 </ul>

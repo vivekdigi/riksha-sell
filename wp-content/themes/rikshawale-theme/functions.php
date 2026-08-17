@@ -344,13 +344,9 @@ add_action( 'wp_ajax_nopriv_rikshawale_contact', 'rikshawale_handle_contact_form
  */
 function rikshawale_contact_customizer( $wp_customize ) {
 	$wp_customize->add_section( 'rikshawale_contact_info_section', array(
-		'title'    => __( 'Contact Page Info', 'rikshawale-theme' ),
-		'priority' => 35,
-	) );
-
-	// Phone
+		'title'    => __( 'Contact Page Info', 'ri	// Phone
 	$wp_customize->add_setting( 'contact_phone', array(
-		'default'           => '+911234567890',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 	$wp_customize->add_control( 'contact_phone', array(
@@ -372,7 +368,7 @@ function rikshawale_contact_customizer( $wp_customize ) {
 
 	// Address
 	$wp_customize->add_setting( 'contact_address', array(
-		'default'           => 'Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
 	) );
 	$wp_customize->add_control( 'contact_address', array(
@@ -383,7 +379,7 @@ function rikshawale_contact_customizer( $wp_customize ) {
 
 	// Working Hours
 	$wp_customize->add_setting( 'contact_working_hours', array(
-		'default'           => 'Mon-Sun: 11:00am - 7:00pm',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 	$wp_customize->add_control( 'contact_working_hours', array(
@@ -394,7 +390,7 @@ function rikshawale_contact_customizer( $wp_customize ) {
 
 	// Subtitle / Intro text
 	$wp_customize->add_setting( 'contact_form_title', array(
-		'default'           => 'Get in touch',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 	$wp_customize->add_control( 'contact_form_title', array(
@@ -404,8 +400,9 @@ function rikshawale_contact_customizer( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'contact_intro_text', array(
-		'default'           => ''' is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
+	) );ize_callback' => 'sanitize_textarea_field',
 	) );
 	$wp_customize->add_control( 'contact_intro_text', array(
 		'label'   => __( 'Get In Touch Description', 'rikshawale-theme' ),
@@ -1642,7 +1639,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Admin WhatsApp Mobile Number
 	$wp_customize->add_setting( 'whatsapp_number', array(
-		'default'           => '919876543210',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1656,7 +1653,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Preset Welcome Message Text
 	$wp_customize->add_setting( 'whatsapp_message', array(
-		'default'           => 'Hi Rikshawale, I am interested in buying/selling a commercial rickshaw.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1676,7 +1673,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Phone Number
 	$wp_customize->add_setting( 'topbar_phone', array(
-		'default'           => '+91 98765 43210',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1689,7 +1686,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Email Address
 	$wp_customize->add_setting( 'topbar_email', array(
-		'default'           => 'info@rikshawale.com',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_email',
 		'transport'         => 'refresh',
 	) );
@@ -1702,7 +1699,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Address/Hours
 	$wp_customize->add_setting( 'topbar_hours', array(
-		'default'           => 'Mon - Sat: 8:00 AM - 6:00 PM',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1715,7 +1712,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Facebook Link
 	$wp_customize->add_setting( 'topbar_facebook', array(
-		'default'           => '#',
+		'default'           => '',
 		'sanitize_callback' => 'esc_url_raw',
 		'transport'         => 'refresh',
 	) );
@@ -1728,7 +1725,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Twitter/X Link
 	$wp_customize->add_setting( 'topbar_twitter', array(
-		'default'           => '#',
+		'default'           => '',
 		'sanitize_callback' => 'esc_url_raw',
 		'transport'         => 'refresh',
 	) );
@@ -1741,7 +1738,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Instagram Link
 	$wp_customize->add_setting( 'topbar_instagram', array(
-		'default'           => '#',
+		'default'           => '',
 		'sanitize_callback' => 'esc_url_raw',
 		'transport'         => 'refresh',
 	) );
@@ -1850,7 +1847,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Footer Copyright Text Setting
 	$wp_customize->add_setting( 'footer_copyright_text', array(
-		'default'           => '© ' . date('Y') . ' Rikshawale. All rights reserved.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1863,7 +1860,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Footer Tagline Setting
 	$wp_customize->add_setting( 'footer_tagline', array(
-		'default'           => 'PREMIUM PRE-OWNED AUTOMOTIVE EXPERIENCE',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1876,7 +1873,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Footer Description Setting
 	$wp_customize->add_setting( 'footer_description', array(
-		'default'           => 'Trusted marketplace for certified pre-owned three-wheelers — transparent pricing, easy finance & 30-day warranty.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
 		'transport'         => 'refresh',
 	) );
@@ -1889,7 +1886,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Footer Address Setting
 	$wp_customize->add_setting( 'footer_address', array(
-		'default'           => "Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028",
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
 		'transport'         => 'refresh',
 	) );
@@ -1921,7 +1918,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Subtitle
 	$wp_customize->add_setting( 'welcome_subtitle', array(
-		'default'           => 'BUILDING INDIA\'S LARGEST TRUSTED MARKETPLACE',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1934,7 +1931,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Title
 	$wp_customize->add_setting( 'welcome_title', array(
-		'default'           => 'ABOUT US',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -1947,7 +1944,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Description
 	$wp_customize->add_setting( 'welcome_description', array(
-		'default'           => 'Rikshawale.com is a technology-driven marketplace for certified pre-owned three-wheelers, connecting buyers and sellers through a trusted, transparent, and hassle-free platform. Every vehicle undergoes a standardized inspection and quality check, with access to refurbishment, financing assistance, warranty support, and seamless ownership transfer. Our mission is to organize and modernize India\'s highly fragmented used commercial vehicle market, making every transaction simple, secure, and reliable.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
 		'transport'         => 'refresh',
 	) );
@@ -1996,7 +1993,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 1 Title
 	$wp_customize->add_setting( 'welcome_feature1_title', array(
-		'default'           => 'ALL RIKSHAS',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2009,7 +2006,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 1 Description
 	$wp_customize->add_setting( 'welcome_feature1_desc', array(
-		'default'           => 'Every riksha undergoes a rigorous 40-point inspection and quality certification before listing.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2035,7 +2032,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 2 Title
 	$wp_customize->add_setting( 'welcome_feature2_title', array(
-		'default'           => 'FREE SUPPORT',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2048,7 +2045,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 2 Description
 	$wp_customize->add_setting( 'welcome_feature2_desc', array(
-		'default'           => 'Our team is available 7 days a week to assist with financing, RC transfer, and after-sale support.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2074,7 +2071,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 3 Title
 	$wp_customize->add_setting( 'welcome_feature3_title', array(
-		'default'           => 'CERTIFIED',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2087,7 +2084,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 3 Description
 	$wp_customize->add_setting( 'welcome_feature3_desc', array(
-		'default'           => 'Buy with confidence — every riksha comes with transparent pricing and a verified ownership history.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2113,7 +2110,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 4 Title
 	$wp_customize->add_setting( 'welcome_feature4_title', array(
-		'default'           => 'EASY FINANCE',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2126,7 +2123,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Feature 4 Description
 	$wp_customize->add_setting( 'welcome_feature4_desc', array(
-		'default'           => 'Low EMI options with instant loan approvals and flexible repayment plans for every budget.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2169,7 +2166,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) ) );
 
 	$wp_customize->add_setting( 'contact_banner_subtitle', array(
-		'default'           => 'Have any question ?',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2204,7 +2201,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// 2. Why Choose Us Settings
 	$wp_customize->add_setting( 'why_choose_title', array(
-		'default'           => 'Why Choose Rikshawale',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2216,7 +2213,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'why_choose_subtitle', array(
-		'default'           => 'We provide unmatched commercial transport solutions',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2229,7 +2226,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Column 1
 	$wp_customize->add_setting( 'why_choose_box1_title', array(
-		'default'           => 'Verified Inventory',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2240,7 +2237,7 @@ function rikshawale_customize_register( $wp_customize ) {
 		'settings' => 'why_choose_box1_title',
 	) );
 	$wp_customize->add_setting( 'why_choose_box1_desc', array(
-		'default'           => 'Every auto or e-rickshaw listed on our platform undergoes extensive quality assessments and certification checks.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2264,7 +2261,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Column 2
 	$wp_customize->add_setting( 'why_choose_box2_title', array(
-		'default'           => 'Flexible Finance',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2275,7 +2272,7 @@ function rikshawale_customize_register( $wp_customize ) {
 		'settings' => 'why_choose_box2_title',
 	) );
 	$wp_customize->add_setting( 'why_choose_box2_desc', array(
-		'default'           => 'Get instant commercial approvals, affordable EMI interest options, and flexible auto lease programs customized for you.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2299,7 +2296,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// Column 3
 	$wp_customize->add_setting( 'why_choose_box3_title', array(
-		'default'           => '24/7 Roadside Support',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2310,7 +2307,7 @@ function rikshawale_customize_register( $wp_customize ) {
 		'settings' => 'why_choose_box3_title',
 	) );
 	$wp_customize->add_setting( 'why_choose_box3_desc', array(
-		'default'           => 'We keep your business moving with dedicated call assistance, roadside towing, and certified mechanics nearby.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2334,7 +2331,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// 3. CTA Banner Settings
 	$wp_customize->add_setting( 'cta_banner_title', array(
-		'default'           => 'Looking for a custom commercial fleet?',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2346,7 +2343,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'cta_banner_desc', array(
-		'default'           => 'Connect with our executives to get custom branding, bulk order discount rates, and tax rebates.',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2358,7 +2355,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'cta_banner_btn_text', array(
-		'default'           => 'Contact Us Today',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2371,7 +2368,7 @@ function rikshawale_customize_register( $wp_customize ) {
 
 	// 4. Testimonials Settings
 	$wp_customize->add_setting( 'testimonials_title', array(
-		'default'           => 'Customer Testimonials',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2383,7 +2380,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'testimonials_subtitle', array(
-		'default'           => 'What our fleet managers and drivers say about us',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2520,13 +2517,13 @@ function rikshawale_customize_register( $wp_customize ) {
 		'panel'    => 'rikshawale_homepage_panel',
 		'priority' => 10,
 	) );
-	$wp_customize->add_setting( 'inventory_subtitle', array( 'default' => 'Browse Our Collection', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'inventory_subtitle', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'inventory_subtitle', array( 'type' => 'text', 'label' => 'Inventory Section Subtitle/Eyebrow', 'section' => 'rikshawale_inventory_section' ) );
 
-	$wp_customize->add_setting( 'inventory_title', array( 'default' => 'Car Inventory', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'inventory_title', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'inventory_title', array( 'type' => 'text', 'label' => 'Inventory Section Title', 'section' => 'rikshawale_inventory_section' ) );
 
-	$wp_customize->add_setting( 'inventory_description', array( 'default' => 'Certified pre-owned rikshas with 40-point inspection, transparent pricing, easy financing, and 30-day warranty.', 'sanitize_callback' => 'sanitize_textarea_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'inventory_description', array( 'default' => '', 'sanitize_callback' => 'sanitize_textarea_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'inventory_description', array( 'type' => 'textarea', 'label' => 'Inventory Section Description', 'section' => 'rikshawale_inventory_section' ) );
 
 	/* =====================================================
@@ -2552,10 +2549,10 @@ function rikshawale_customize_register( $wp_customize ) {
 		'priority' => 30,
 	) );
 
-	$wp_customize->add_setting( 'video_section_title', array( 'default' => 'Watch Us In Action', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'video_section_title', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'video_section_title', array( 'type' => 'text', 'label' => 'Video Section Title', 'section' => 'rikshawale_video_section' ) );
 
-	$wp_customize->add_setting( 'video_section_subtitle', array( 'default' => 'Explore our latest arrivals and customer stories', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'video_section_subtitle', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'video_section_subtitle', array( 'type' => 'text', 'label' => 'Video Section Subtitle', 'section' => 'rikshawale_video_section' ) );
 
 	for ( $v = 1; $v <= 4; $v++ ) {
@@ -2574,10 +2571,10 @@ function rikshawale_customize_register( $wp_customize ) {
 		'panel'    => 'rikshawale_homepage_panel',
 		'priority' => 40,
 	) );
-	$wp_customize->add_setting( 'new_arrivals_subtitle', array( 'default' => 'Explore', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'new_arrivals_subtitle', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'new_arrivals_subtitle', array( 'type' => 'text', 'label' => 'New Arrivals Subtitle/Eyebrow', 'section' => 'rikshawale_new_arrivals_section' ) );
 
-	$wp_customize->add_setting( 'new_arrivals_title', array( 'default' => 'New Arrivals', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'new_arrivals_title', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'new_arrivals_title', array( 'type' => 'text', 'label' => 'New Arrivals Title', 'section' => 'rikshawale_new_arrivals_section' ) );
 
 	/* =====================================================
@@ -2590,7 +2587,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'services_section_title', array(
-		'default'           => "Key Challenges in India's Pre-Owned Three-Wheeler Market",
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2601,7 +2598,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'services_insight_title', array(
-		'default'           => 'Key Investor Insight',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
 		'transport'         => 'refresh',
 	) );
@@ -2612,7 +2609,7 @@ function rikshawale_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'services_insight_text', array(
-		'default'           => "India's pre-owned three-wheeler market remains highly fragmented, creating a significant opportunity for a trusted, technology-enabled platform that standardizes sourcing, inspection, financing, and ownership transfer.",
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
 		'transport'         => 'refresh',
 	) );
@@ -2630,7 +2627,7 @@ function rikshawale_customize_register( $wp_customize ) {
 		'panel'    => 'rikshawale_homepage_panel',
 		'priority' => 50,
 	) );
-	$wp_customize->add_setting( 'faq_section_title', array( 'default' => 'Frequently Asked Questions', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+	$wp_customize->add_setting( 'faq_section_title', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'faq_section_title', array( 'type' => 'text', 'label' => 'FAQ Section Title', 'section' => 'rikshawale_faq_section' ) );
 }
 add_action( 'customize_register', 'rikshawale_customize_register' );

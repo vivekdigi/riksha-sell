@@ -206,11 +206,11 @@ foreach ( $section_order as $sec_key ) {
 
                         <div class="col-lg-6 reveal">
                             <div class="ps-lg-4 text-start">
-                                <span class="text-uppercase fw-bold text-muted d-block mb-2" style="font-size: 0.85rem; letter-spacing: 2px;"><?php echo esc_html( get_theme_mod( 'welcome_subtitle', "BUILDING INDIA'S LARGEST TRUSTED MARKETPLACE" ) ); ?></span>
-                                <h2 class="display-6 fw-bold mb-3 text-dark" style="text-transform: uppercase; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'welcome_title', 'ABOUT US' ) ); ?></h2>
+                                <span class="text-uppercase fw-bold text-muted d-block mb-2" style="font-size: 0.85rem; letter-spacing: 2px;"><?php echo esc_html( get_theme_mod( 'welcome_subtitle', '' ) ); ?></span>
+                                <h2 class="display-6 fw-bold mb-3 text-dark" style="text-transform: uppercase; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'welcome_title', '' ) ); ?></h2>
                                 <div class="gradient-divider ms-0 mb-4" style="margin-left: 0 !important; background: linear-gradient(90deg, #0ea5e9, #ff6b35);"></div>
                                 <p class="lead text-muted mb-4" style="font-size: 0.98rem; line-height: 1.8;">
-                                    <?php echo nl2br( esc_html( get_theme_mod( 'welcome_description', "Rikshawale.com is a technology-driven marketplace for certified pre-owned three-wheelers, connecting buyers and sellers through a trusted, transparent, and hassle-free platform. Every vehicle undergoes a standardized inspection and quality check, with access to refurbishment, financing assistance, warranty support, and seamless ownership transfer. Our mission is to organize and modernize India's highly fragmented used commercial vehicle market, making every transaction simple, secure, and reliable." ) ) ); ?>
+                                    <?php echo nl2br( esc_html( get_theme_mod( 'welcome_description', '' ) ) ); ?>
                                 </p>
                             </div>
                         </div>
@@ -221,33 +221,33 @@ foreach ( $section_order as $sec_key ) {
                             <div class="feature-circle-box mx-auto mb-3">
                                 <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature1_icon', 'fa-solid fa-car-side' ) ); ?>"></i>
                             </div>
-                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature1_title', 'ALL RIKSHAS' ) ); ?></h6>
+                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature1_title', '' ) ); ?></h6>
                             <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature1_desc', 'Every riksha undergoes a rigorous 40-point inspection and quality certification before listing.' ) ); ?></p>
+                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature1_desc', '' ) ); ?></p>
                         </div>
                         <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-2">
                             <div class="feature-circle-box mx-auto mb-3">
                                 <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature2_icon', 'fa-solid fa-headset' ) ); ?>"></i>
                             </div>
-                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature2_title', 'FREE SUPPORT' ) ); ?></h6>
+                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature2_title', '' ) ); ?></h6>
                             <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature2_desc', 'Our team is available 7 days a week to assist with financing, RC transfer, and after-sale support.' ) ); ?></p>
+                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature2_desc', '' ) ); ?></p>
                         </div>
                         <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-3">
                             <div class="feature-circle-box mx-auto mb-3">
                                 <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature3_icon', 'fa-solid fa-hotel' ) ); ?>"></i>
                             </div>
-                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature3_title', 'CERTIFIED' ) ); ?></h6>
+                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature3_title', '' ) ); ?></h6>
                             <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature3_desc', 'Buy with confidence — every riksha comes with transparent pricing and a verified ownership history.' ) ); ?></p>
+                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature3_desc', '' ) ); ?></p>
                         </div>
                         <div class="col-lg-3 col-sm-6 text-center reveal reveal-delay-4">
                             <div class="feature-circle-box mx-auto mb-3">
                                 <i class="<?php echo esc_attr( get_theme_mod( 'welcome_feature4_icon', 'fa-solid fa-wallet' ) ); ?>"></i>
                             </div>
-                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature4_title', 'EASY FINANCE' ) ); ?></h6>
+                            <h6 class="fw-bold text-uppercase mb-2" style="font-size: 0.9rem; letter-spacing: 1px;"><?php echo esc_html( get_theme_mod( 'welcome_feature4_title', '' ) ); ?></h6>
                             <div class="mx-auto rounded mb-3" style="width: 20px; height: 2px; background-color: var(--primary-color);"></div>
-                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature4_desc', 'Low EMI options with instant loan approvals and flexible repayment plans for every budget.' ) ); ?></p>
+                            <p class="small text-muted px-3"><?php echo esc_html( get_theme_mod( 'welcome_feature4_desc', '' ) ); ?></p>
                         </div>
                     </div>
                 </div>
@@ -260,9 +260,9 @@ foreach ( $section_order as $sec_key ) {
             <section class="inventory-scroll-section py-3 my-1">
                 <div class="container">
                     <div class="text-center mb-3">
-                        <span class="text-uppercase fw-bold text-muted small" style="letter-spacing: 2px;"><?php echo esc_html( get_theme_mod('inventory_subtitle', 'Welcome to Rikshawale') ); ?></span>
-                        <h2 class="fw-bold mt-1 mb-2 text-uppercase" style="font-family: var(--font-heading);"><?php echo esc_html( get_theme_mod('inventory_title', 'Riksha Inventory') ); ?></h2>
-                        <p class="text-muted small mx-auto" style="max-width: 650px;"><?php echo esc_html( get_theme_mod('inventory_description', 'Certified pre-owned rikshas with 40-point inspection, transparent pricing, easy financing, and 30-day warranty.') ); ?></p>
+                        <span class="text-uppercase fw-bold text-muted small" style="letter-spacing: 2px;"><?php echo esc_html( get_theme_mod('inventory_subtitle', '') ); ?></span>
+                        <h2 class="fw-bold mt-1 mb-2 text-uppercase" style="font-family: var(--font-heading);"><?php echo esc_html( get_theme_mod('inventory_title', '') ); ?></h2>
+                        <p class="text-muted small mx-auto" style="max-width: 650px;"><?php echo esc_html( get_theme_mod('inventory_description', '') ); ?></p>
                         <div class="gradient-divider mt-2"></div>
                     </div>
                     
@@ -613,8 +613,8 @@ foreach ( $section_order as $sec_key ) {
                                     <img src="<?php echo esc_url( $avatar_img ); ?>" class="rounded-circle shadow-sm" alt="Contact Support" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #f8f9fa;">
                                 <?php endif; ?>
                             </div>
-                            <h5 class="text-muted fw-semibold mb-2" style="font-size: 1rem; letter-spacing: 0.5px;"><?php echo esc_html( get_theme_mod( 'contact_banner_subtitle', 'Have any question ?' ) ); ?></h5>
-                            <h2 class="fw-bold display-6 text-danger" style="color: var(--primary-color) !important; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'topbar_phone', '+1 234 567 8900' ) ); ?></h2>
+                            <h5 class="text-muted fw-semibold mb-2" style="font-size: 1rem; letter-spacing: 0.5px;"><?php echo esc_html( get_theme_mod( 'contact_banner_subtitle', '' ) ); ?></h5>
+                            <h2 class="fw-bold display-6 text-danger" style="color: var(--primary-color) !important; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'topbar_phone', '' ) ); ?></h2>
                         </div>
                         <div class="col-md-3 text-center d-none d-md-block">
                             <?php 
@@ -697,8 +697,8 @@ foreach ( $section_order as $sec_key ) {
             <section class="why-choose-us py-3 my-1">
                 <div class="container">
                     <div class="text-center mb-3">
-                        <h2 class="fw-bold uppercase reveal"><?php echo esc_html( get_theme_mod( 'why_choose_title', 'Why Choose Rikshawale' ) ); ?></h2>
-                        <p class="text-muted reveal reveal-delay-1 mb-2"><?php echo esc_html( get_theme_mod( 'why_choose_subtitle', 'We provide unmatched commercial transport solutions' ) ); ?></p>
+                        <h2 class="fw-bold uppercase reveal"><?php echo esc_html( get_theme_mod( 'why_choose_title', '' ) ); ?></h2>
+                        <p class="text-muted reveal reveal-delay-1 mb-2"><?php echo esc_html( get_theme_mod( 'why_choose_subtitle', '' ) ); ?></p>
                         <div class="gradient-divider"></div>
                     </div>
                     <div class="row g-3">
@@ -707,8 +707,8 @@ foreach ( $section_order as $sec_key ) {
                                 <div class="icon-wrapper">
                                     <i class="<?php echo esc_attr( get_theme_mod( 'why_choose_box1_icon', 'fa-solid fa-shield-halved' ) ); ?>"></i>
                                 </div>
-                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box1_title', 'Verified Inventory' ) ); ?></h4>
-                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box1_desc', 'Every auto or e-rickshaw listed on our platform undergoes extensive quality assessments and certification checks.' ) ); ?></p>
+                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box1_title', '' ) ); ?></h4>
+                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box1_desc', '' ) ); ?></p>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -716,8 +716,8 @@ foreach ( $section_order as $sec_key ) {
                                 <div class="icon-wrapper">
                                     <i class="<?php echo esc_attr( get_theme_mod( 'why_choose_box2_icon', 'fa-solid fa-indian-rupee-sign' ) ); ?>"></i>
                                 </div>
-                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box2_title', 'Flexible Finance' ) ); ?></h4>
-                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box2_desc', 'Get instant commercial approvals, affordable EMI interest options, and flexible auto lease programs customized for you.' ) ); ?></p>
+                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box2_title', '' ) ); ?></h4>
+                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box2_desc', '' ) ); ?></p>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -725,8 +725,8 @@ foreach ( $section_order as $sec_key ) {
                                 <div class="icon-wrapper">
                                     <i class="<?php echo esc_attr( get_theme_mod( 'why_choose_box3_icon', 'fa-solid fa-screwdriver-wrench' ) ); ?>"></i>
                                 </div>
-                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box3_title', '24/7 Roadside Support' ) ); ?></h4>
-                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box3_desc', 'We keep your business moving with dedicated call assistance, roadside towing, and certified mechanics nearby.' ) ); ?></p>
+                                <h4><?php echo esc_html( get_theme_mod( 'why_choose_box3_title', '' ) ); ?></h4>
+                                <p><?php echo esc_html( get_theme_mod( 'why_choose_box3_desc', '' ) ); ?></p>
                             </div>
                         </div>
                     </div>
