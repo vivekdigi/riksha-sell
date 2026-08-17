@@ -304,6 +304,11 @@ $all_locations_terms = get_terms( array(
                                         </label>
                                     </div>
                                 <?php endforeach; ?>
+                                <div class="form-check p-0 mb-0">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill extra-small px-3 py-1 d-inline-flex align-items-center gap-1" onclick="resetColors()">
+                                        <i class="fa-solid fa-rotate-left"></i> Reset
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -675,6 +680,14 @@ function filterCheckboxes(inputElement) {
             item.style.display = "none";
         }
     });
+}
+
+function resetColors() {
+    let colorCheckboxes = document.querySelectorAll('input[name="color[]"]');
+    colorCheckboxes.forEach(function(cb) {
+        cb.checked = false;
+    });
+    triggerFilterAjax(1);
 }
 </script>
 <?php
