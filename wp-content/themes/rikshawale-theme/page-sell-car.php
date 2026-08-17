@@ -343,6 +343,17 @@ $states = array(
                     </div>
                 </div>
 
+                <!-- ===== ICE Specific Fields (Hidden by default) ===== -->
+                <div id="ice-fields-container" style="display:none; background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 16px;">
+                    <h6 class="fw-bold mb-3" style="color: #0f172a;">Engine Details</h6>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="sell-label" for="riksha_engine_cc">Engine Displacement (CC)</label>
+                            <input type="number" class="sell-input form-control" id="riksha_engine_cc" name="riksha_engine_cc" placeholder="e.g. 230">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Condition & Accident History -->
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-4">
@@ -663,10 +674,18 @@ function triggerVideoFileUpload() {
 
 document.getElementById('riksha_fuel').addEventListener('change', function() {
     var evFields = document.getElementById('ev-fields-container');
-    if (this.value.toLowerCase() === 'electric') {
+    var iceFields = document.getElementById('ice-fields-container');
+    var val = this.value.toLowerCase();
+    
+    if (val === 'electric') {
         evFields.style.display = 'block';
+        if (iceFields) iceFields.style.display = 'none';
+    } else if (val !== '') {
+        evFields.style.display = 'none';
+        if (iceFields) iceFields.style.display = 'block';
     } else {
         evFields.style.display = 'none';
+        if (iceFields) iceFields.style.display = 'none';
     }
 });
 

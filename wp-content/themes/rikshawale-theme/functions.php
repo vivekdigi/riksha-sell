@@ -3056,6 +3056,7 @@ function rikshawale_handle_get_valuation() {
     $vehicle_condition   = sanitize_text_field( $_POST['riksha_vehicle_condition'] ?? 'Good' );
     $accident_history    = sanitize_text_field( $_POST['riksha_accident_history'] ?? 'No' );
     $original_price      = floatval( $_POST['riksha_original_price'] ?? 0 );
+    $engine_cc           = intval( $_POST['riksha_engine_cc'] ?? 230 );
     
     // Parse driven km to integer
     $parsed_kms_driven = 10000;
@@ -3090,16 +3091,21 @@ function rikshawale_handle_get_valuation() {
         'number_of_owners' => $parsed_owners,
         'registration_year' => (int) $reg_year,
         'variant' => $variant ? $variant : 'Passenger',
-        'motor_condition' => $motor_condition,
         'vehicle_condition' => $vehicle_condition,
+        'fuel_type' => ucwords(strtolower($fuel))
     );
     
-    // Add EV and other detailed fields if provided
+    // Add EV or ICE specific fields
     if ( strtolower($fuel) === 'electric' ) {
+        $api_payload['motor_condition'] = $motor_condition;
         if ( !empty($battery_type) ) $api_payload['battery_type'] = $battery_type;
         if ( $battery_age_years > 0 ) $api_payload['battery_age_years'] = $battery_age_years;
         if ( !empty($battery_condition) ) $api_payload['battery_condition'] = $battery_condition;
         if ( !empty($battery_replaced) ) $api_payload['battery_replaced'] = $battery_replaced;
+    } else {
+        $api_payload['engine_condition'] = $motor_condition ? $motor_condition : 'Good';
+        $api_payload['engine_cc'] = $engine_cc > 0 ? $engine_cc : 230; 
+        $api_payload['engine_reconditioned'] = 'No';
     }
     
     if ( $original_price > 0 ) $api_payload['original_ex_showroom_price'] = $original_price;
