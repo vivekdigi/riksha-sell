@@ -171,23 +171,7 @@ class ElementsKit_Widget_Client_Logo extends Widget_Base {
                 'label' => esc_html__( 'Repeater List', 'elementskit-lite' ),
                 'type' => Controls_Manager::REPEATER,
                 'fields' => $repeater->get_controls(),
-                'default' => [
-                    [
-                        'ekit_client_logo_list_title' => esc_html__( 'Title #1', 'elementskit-lite' ),
-                    ],
-                    [
-                        'ekit_client_logo_list_title' => esc_html__( 'Title #2', 'elementskit-lite' ),
-					],
-					[
-                        'ekit_client_logo_list_title' => esc_html__( 'Title #3', 'elementskit-lite' ),
-                    ],
-					[
-                        'ekit_client_logo_list_title' => esc_html__( 'Title #4', 'elementskit-lite' ),
-                    ],
-					[
-                        'ekit_client_logo_list_title' => esc_html__( 'Title #5', 'elementskit-lite' ),
-                    ],
-                ],
+                'default' => [],
                 'title_field' => '{{{ ekit_client_logo_list_title }}}',
             ]
         );
