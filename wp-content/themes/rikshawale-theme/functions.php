@@ -344,7 +344,10 @@ add_action( 'wp_ajax_nopriv_rikshawale_contact', 'rikshawale_handle_contact_form
  */
 function rikshawale_contact_customizer( $wp_customize ) {
 	$wp_customize->add_section( 'rikshawale_contact_info_section', array(
-		'title'    => __( 'Contact Page Info', 'ri	// Phone
+		'title'    => __( 'Contact Page Info', 'rikshawale-theme' ),
+	) );
+
+	// Phone
 	$wp_customize->add_setting( 'contact_phone', array(
 		'default'           => '',
 		'sanitize_callback' => 'sanitize_text_field',
@@ -402,7 +405,6 @@ function rikshawale_contact_customizer( $wp_customize ) {
 	$wp_customize->add_setting( 'contact_intro_text', array(
 		'default'           => '',
 		'sanitize_callback' => 'sanitize_textarea_field',
-	) );ize_callback' => 'sanitize_textarea_field',
 	) );
 	$wp_customize->add_control( 'contact_intro_text', array(
 		'label'   => __( 'Get In Touch Description', 'rikshawale-theme' ),
