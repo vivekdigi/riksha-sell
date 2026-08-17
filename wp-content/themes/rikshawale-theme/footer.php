@@ -167,8 +167,8 @@
                             <i class="fa-solid fa-phone"></i>
                         </div>
                         <div>
-                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+91 97111-63000' ) ); ?>">
-                                <?php echo esc_html( get_theme_mod( 'topbar_phone', '+91 97111-63000' ) ); ?>
+                            <a href="tel:<?php echo esc_attr( get_theme_mod( 'topbar_phone', '+911234567890' ) ); ?>">
+                                <?php echo esc_html( get_theme_mod( 'topbar_phone', '+911234567890' ) ); ?>
                             </a>
                         </div>
                     </li>

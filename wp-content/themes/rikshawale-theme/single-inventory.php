@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Riksha Inventory Detail Template matching Elitecarz product page
+ * Single Riksha Inventory Detail Template matching '' product page
  */
 
 get_header();

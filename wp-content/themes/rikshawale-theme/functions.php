@@ -350,7 +350,7 @@ function rikshawale_contact_customizer( $wp_customize ) {
 
 	// Phone
 	$wp_customize->add_setting( 'contact_phone', array(
-		'default'           => '+91 97111-63000',
+		'default'           => '+911234567890',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 	$wp_customize->add_control( 'contact_phone', array(
@@ -361,7 +361,7 @@ function rikshawale_contact_customizer( $wp_customize ) {
 
 	// Email
 	$wp_customize->add_setting( 'contact_email', array(
-		'default'           => 'EliteCarzIndia@gmail.com',
+		'default'           => '',
 		'sanitize_callback' => 'sanitize_email',
 	) );
 	$wp_customize->add_control( 'contact_email', array(
@@ -404,7 +404,7 @@ function rikshawale_contact_customizer( $wp_customize ) {
 	) );
 
 	$wp_customize->add_setting( 'contact_intro_text', array(
-		'default'           => 'EliteCarz is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.',
+		'default'           => ''' is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.',
 		'sanitize_callback' => 'sanitize_textarea_field',
 	) );
 	$wp_customize->add_control( 'contact_intro_text', array(

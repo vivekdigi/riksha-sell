@@ -10,12 +10,12 @@
 get_header();
 
 // Fetch Theme Mod / Customizer values (same as topbar and footer)
-$phone         = get_theme_mod( 'topbar_phone',         get_theme_mod( 'contact_phone', '+91 97111-63000' ) );
-$email         = get_theme_mod( 'topbar_email',         get_theme_mod( 'contact_email', 'EliteCarzIndia@gmail.com' ) );
+$phone         = get_theme_mod( 'topbar_phone',         get_theme_mod( 'contact_phone', '' ) );
+$email         = get_theme_mod( 'topbar_email',         get_theme_mod( 'contact_email', '' ) );
 $address       = get_theme_mod( 'footer_address',       get_theme_mod( 'contact_address', 'Indra Market, CB-382, Ring Rd, Block CB, Naraina Village, Naraina, New Delhi, Delhi 110028' ) );
 $working_hours = get_theme_mod( 'topbar_hours',          get_theme_mod( 'contact_working_hours', 'Mon-Sun: 11:00am - 7:00pm' ) );
 $form_title    = get_theme_mod( 'contact_form_title',   'Get in touch' );
-$intro_text    = get_theme_mod( 'contact_intro_text',    get_theme_mod( 'footer_description', 'EliteCarz is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.' ) );
+$intro_text    = get_theme_mod( 'contact_intro_text',    get_theme_mod( 'footer_description', ''' is a pre-owned car dealership in Delhi NCR, offering handpicked, fully inspected vehicles with warranty and complete peace of mind.' ) );
 ?>
 
 <div class="contact-page-wrapper" style="font-family: var(--font-body, 'Inter', sans-serif); background: #ffffff; min-height: 80vh; padding: 60px 0;">
