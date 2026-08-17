@@ -165,12 +165,22 @@ $states = array(
                         <label class="sell-label" for="riksha_driven_km">Driven (KM) <span class="text-danger">*</span></label>
                         <select class="sell-input form-select" id="riksha_driven_km" name="riksha_driven_km" required>
                             <option value="">Choose km range</option>
-                            <option value="Less than 10,000 km">Less than 10,000 km</option>
-                            <option value="10,000 – 25,000 km">10,000 – 25,000 km</option>
-                            <option value="25,000 – 50,000 km">25,000 – 50,000 km</option>
-                            <option value="50,000 – 75,000 km">50,000 – 75,000 km</option>
-                            <option value="75,000 – 1,00,000 km">75,000 – 1,00,000 km</option>
-                            <option value="More than 1,00,000 km">More than 1,00,000 km</option>
+                            <option value="5000">5,000 km</option>
+                            <option value="10000">10,000 km</option>
+                            <option value="15000">15,000 km</option>
+                            <option value="20000">20,000 km</option>
+                            <option value="25000">25,000 km</option>
+                            <option value="30000">30,000 km</option>
+                            <option value="35000">35,000 km</option>
+                            <option value="40000">40,000 km</option>
+                            <option value="45000">45,000 km</option>
+                            <option value="50000">50,000 km</option>
+                            <option value="60000">60,000 km</option>
+                            <option value="70000">70,000 km</option>
+                            <option value="80000">80,000 km</option>
+                            <option value="90000">90,000 km</option>
+                            <option value="100000">1,00,000 km</option>
+                            <option value="120000">More than 1,00,000 km</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-4">
@@ -295,12 +305,22 @@ $states = array(
                         <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Verified team</span>
                         <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Free inspection</span>
                     </div>
-                    <button type="submit" id="sell-car-submit-btn"
-                        class="btn btn-dark rounded-3 px-5 py-3 fw-bold shadow-sm"
-                        style="font-size:0.95rem; letter-spacing:0.5px; background: #0f172a; border: none;">
-                        SUBMIT DETAILS <i class="fa-solid fa-arrow-right ms-2"></i>
-                    </button>
+                    <div id="form-actions" class="d-flex gap-2">
+                        <button type="button" id="get-valuation-btn"
+                            class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm"
+                            style="font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
+                            GET ESTIMATED PRICE <i class="fa-solid fa-calculator ms-2"></i>
+                        </button>
+                        <button type="submit" id="sell-car-submit-btn"
+                            class="btn btn-dark rounded-3 px-5 py-3 fw-bold shadow-sm"
+                            style="font-size:0.95rem; letter-spacing:0.5px; background: #0f172a; border: none; display:none;">
+                            BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Valuation Output Container (Appears before the success message) -->
+                <div id="valuation-result-container" style="display:none; margin-top:16px;"></div>
 
                 <!-- Success / Error Message -->
                 <div id="sell-car-message" style="display:none; margin-top:16px;" class="rounded-3 p-3"></div>
@@ -456,6 +476,112 @@ function triggerVideoFileUpload() {
 }
 
 
+document.getElementById('get-valuation-btn').addEventListener('click', function() {
+    var btn = this;
+    var form = document.getElementById('sell-car-form');
+    var msg = document.getElementById('sell-car-message');
+    var valContainer = document.getElementById('valuation-result-container');
+    
+    // Basic validation for Step 1
+    var required = form.querySelectorAll('[required]');
+    var valid = true;
+    required.forEach(function(field) {
+        field.style.borderColor = '';
+        if (!field.value.trim()) {
+            field.style.borderColor = '#db2d2e';
+            valid = false;
+        }
+    });
+
+    if (!valid) {
+        msg.style.display = 'block';
+        msg.style.background = '#fef2f2';
+        msg.style.color = '#dc2626';
+        msg.style.border = '1px solid #fca5a5';
+        msg.textContent = 'Please fill all required fields marked with * to get valuation.';
+        return;
+    }
+    
+    msg.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = 'CALCULATING... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
+    var formData = new FormData(form);
+    formData.append('action', 'rikshawale_get_valuation');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '<?php echo esc_url( admin_url("admin-ajax.php") ); ?>', true);
+    xhr.withCredentials = true;
+    
+    xhr.onload = function() {
+        btn.disabled = false;
+        btn.innerHTML = 'GET ESTIMATED PRICE <i class="fa-solid fa-calculator ms-2"></i>';
+        
+        if (xhr.status === 200) {
+            var res = JSON.parse(xhr.responseText);
+            if (res.success && res.data && res.data.ai_data) {
+                var ai = res.data.ai_data;
+                var aiScore = ai.condition_score ? ai.condition_score : '8.5';
+                var aiRange = ai.formatted_price_range ? (ai.formatted_price_range.min + ' - ' + ai.formatted_price_range.max) : (ai.formatted_price || 'N/A');
+                var aiFactors = (ai.key_factors && ai.key_factors.length) ? ai.key_factors.join('<br>') : 'Evaluated based on vehicle specifications, age, mileage, and brand resale data.';
+
+                var successHTML = '<div class="mt-2 p-4 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">' +
+                    '<h5 style="color: #1e3a8a; font-weight: 700; margin-bottom: 20px; font-size: 1.1rem; text-align:center;">Here is your car estimated price!</h5>' +
+                    '<div class="row g-3">' +
+                        '<div class="col-12 col-md-6">' +
+                            '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important; text-align:center;">' +
+                                '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Valuation Price Estimate</div>' +
+                                '<div style="color: #2563eb; font-weight: 700; font-size: 1.4rem;">' + aiRange + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-12 col-md-6">' +
+                            '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important; text-align:center;">' +
+                                '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Condition Score</div>' +
+                                '<div style="color: #059669; font-weight: 700; font-size: 1.4rem;"><i class="fa-solid fa-star text-warning me-1"></i>' + aiScore + '/10</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="mt-4 p-3 bg-white border rounded shadow-sm" style="border-color: #e2e8f0 !important;">' +
+                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Analysis Summary</div>' +
+                        '<div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">' + aiFactors + '</div>' +
+                    '</div>' +
+                '</div>';
+
+                valContainer.innerHTML = successHTML;
+                valContainer.style.display = 'block';
+                
+                // Swap buttons
+                document.getElementById('get-valuation-btn').style.display = 'none';
+                document.getElementById('sell-car-submit-btn').style.display = 'inline-block';
+            } else {
+                msg.style.display = 'block';
+                msg.style.background = '#fef2f2';
+                msg.style.color = '#dc2626';
+                msg.style.border = '1px solid #fca5a5';
+                msg.textContent = '❌ Could not calculate valuation. Please try again.';
+            }
+        } else {
+            msg.style.display = 'block';
+            msg.style.background = '#fef2f2';
+            msg.style.color = '#dc2626';
+            msg.style.border = '1px solid #fca5a5';
+            msg.textContent = '❌ Server error (' + xhr.status + '). Please try again.';
+        }
+    };
+    
+    xhr.onerror = function() {
+        btn.disabled = false;
+        btn.innerHTML = 'GET ESTIMATED PRICE <i class="fa-solid fa-calculator ms-2"></i>';
+        msg.style.display = 'block';
+        msg.style.background = '#fef2f2';
+        msg.style.color = '#dc2626';
+        msg.style.border = '1px solid #fca5a5';
+        msg.textContent = '❌ Network error. Please check your connection.';
+    };
+    
+    xhr.send(formData);
+});
+
 document.getElementById('sell-car-form').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -470,32 +596,9 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
     var uploadedBadge = document.getElementById('video-uploaded-badge');
     var videoInput = document.getElementById('riksha_video_file');
 
-    // Basic validation
-    var required = form.querySelectorAll('[required]');
-    var valid = true;
-    required.forEach(function(field) {
-        field.style.borderColor = '';
-        if (!field.value.trim()) {
-            field.style.borderColor = '#db2d2e';
-            valid = false;
-        }
-    });
-
-    // Video check is optional (User can upload a video file or provide a YouTube URL if available)
-    var videoSection = document.getElementById('video-section-container');
-    if (videoSection) videoSection.style.borderColor = '';
-
-    if (!valid) {
-        msg.style.display = 'block';
-        msg.style.background = '#fef2f2';
-        msg.style.color = '#dc2626';
-        msg.style.border = '1px solid #fca5a5';
-        msg.textContent = 'Please fill all required fields marked with *.';
-        return;
-    }
-
     btn.disabled = true;
-    btn.textContent = 'Submitting…';
+    btn.innerHTML = 'SUBMITTING... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+    msg.style.display = 'none';
 
     var hasVideoFile = videoInput && videoInput.files && videoInput.files[0];
     if (hasVideoFile && progressContainer) {
@@ -533,47 +636,8 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
                 msg.style.background = '#f0fdf4';
                 msg.style.color = '#16a34a';
                 msg.style.border = '1px solid #86efac';
-                var successHTML = '<strong>✅ ' + res.data.message + '</strong>';
+                msg.innerHTML = '<strong>✅ ' + res.data.message + '</strong>';
                 
-                if (res.data.ai_data) {
-                    var ai = res.data.ai_data;
-                    var aiScore = ai.condition_score ? ai.condition_score : '8.5';
-                    var aiRange = ai.formatted_price_range ? (ai.formatted_price_range.min + ' - ' + ai.formatted_price_range.max) : (ai.formatted_price || 'N/A');
-                    var aiExactPrice = ai.formatted_price || 'N/A';
-                    var aiFactors = (ai.key_factors && ai.key_factors.length) ? ai.key_factors.join('<br>') : 'Evaluated based on vehicle specifications, age, mileage, and brand resale data.';
-
-                    successHTML += '<div class="mt-4 pt-3 border-top" style="border-color: #93c5fd !important;">' +
-                        '<h5 style="color: #1e3a8a; font-weight: 700; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-robot text-primary me-2"></i>AI Vehicle Valuation Report</h5>' +
-                        '<div class="p-3 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">' +
-                            '<div class="row g-3">' +
-                                '<div class="col-12 col-md-4">' +
-                                    '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important;">' +
-                                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">AI Recommended Fair Range</div>' +
-                                        '<div style="color: #2563eb; font-weight: 700; font-size: 1.15rem;">' + aiRange + '</div>' +
-                                    '</div>' +
-                                '</div>' +
-                                '<div class="col-12 col-md-4">' +
-                                    '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important;">' +
-                                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Engine Predicted Price</div>' +
-                                        '<div style="color: #db2d2e; font-weight: 700; font-size: 1.15rem;">' + aiExactPrice + '</div>' +
-                                    '</div>' +
-                                '</div>' +
-                                '<div class="col-12 col-md-4">' +
-                                    '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important;">' +
-                                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">AI Condition Score</div>' +
-                                        '<div style="color: #059669; font-weight: 700; font-size: 1.15rem;"><i class="fa-solid fa-star text-warning me-1"></i>' + aiScore + '/10</div>' +
-                                    '</div>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="mt-3 p-3 bg-white border rounded shadow-sm" style="border-color: #e2e8f0 !important;">' +
-                                '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">AI Analysis Summary</div>' +
-                                '<div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">' + aiFactors + '</div>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>';
-                }
-
-                msg.innerHTML = successHTML;
                 form.reset();
                 // Reset image previews
                 for (var i = 1; i <= 5; i++) {
@@ -597,14 +661,21 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
                 if (uploadedBadge) uploadedBadge.style.display = 'none';
                 if (progressBar) progressBar.style.width = '0%';
                 if (progressPercent) progressPercent.textContent = '0%';
-                btn.textContent = 'Submitted!';
+                
+                // Hide Valuation Result & Reset buttons
+                document.getElementById('valuation-result-container').style.display = 'none';
+                document.getElementById('sell-car-submit-btn').style.display = 'none';
+                document.getElementById('get-valuation-btn').style.display = 'inline-block';
+                
+                btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';
+                btn.disabled = false;
             } else {
                 msg.style.background = '#fef2f2';
                 msg.style.color = '#dc2626';
                 msg.style.border = '1px solid #fca5a5';
                 msg.textContent = '❌ ' + (res.data.message || 'Something went wrong. Please try again.');
                 btn.disabled = false;
-                btn.textContent = 'SUBMIT DETAILS';
+                btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';
             }
         } else {
             msg.style.background = '#fef2f2';
@@ -612,7 +683,7 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
             msg.style.border = '1px solid #fca5a5';
             msg.textContent = '❌ Server error (' + xhr.status + '). Please try again.';
             btn.disabled = false;
-            btn.textContent = 'SUBMIT DETAILS';
+            btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';
         }
     };
 
@@ -623,7 +694,7 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
         msg.style.border = '1px solid #fca5a5';
         msg.textContent = '❌ Network error. Please check your connection and try again.';
         btn.disabled = false;
-        btn.textContent = 'SUBMIT DETAILS';
+        btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';
     };
 
     xhr.send(formData);
