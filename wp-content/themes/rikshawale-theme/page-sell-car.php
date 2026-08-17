@@ -11,6 +11,7 @@ get_header();
 
 // Fetch taxonomy terms for dropdowns
 $brands        = get_terms( array( 'taxonomy' => 'riksha_brand',       'hide_empty' => false ) );
+$models        = get_terms( array( 'taxonomy' => 'riksha_model',       'hide_empty' => false ) );
 $fuel_types    = get_terms( array( 'taxonomy' => 'riksha_fuel_type', 'hide_empty' => false ) );
 $trans_types   = get_terms( array( 'taxonomy' => 'riksha_trans_type','hide_empty' => false ) );
 $owner_types   = get_terms( array( 'taxonomy' => 'riksha_owner_type','hide_empty' => false ) );
@@ -54,10 +55,20 @@ $states = array(
             <div class="col-12 col-md-4 col-lg-3 d-none d-md-block">
                 <div class="stepper-sidebar p-4 bg-white rounded-4 shadow-sm h-100 border">
                     <div class="step active" id="step-nav-1">
-                        <div class="icon"><i class="fa-solid fa-car"></i></div>
+                        <div class="icon"><i class="fa-solid fa-truck-fast"></i></div>
                         <div class="text mt-1">
-                            <strong style="color:#0f172a; font-size: 0.95rem;">Car details</strong>
-                            <span class="text-muted d-block mt-1" style="font-size: 0.8rem; line-height:1.4;">Tell us about your car details</span>
+                            <strong style="color:#0f172a; font-size: 0.95rem;">Riksha details</strong>
+                            <span class="text-muted d-block mt-1" style="font-size: 0.8rem; line-height:1.4;">Tell us about your riksha</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step-connector"></div>
+                    
+                    <div class="step" id="step-nav-1b">
+                        <div class="icon"><i class="fa-solid fa-camera"></i></div>
+                        <div class="text mt-1">
+                            <strong style="color:#0f172a; font-size: 0.95rem;">Upload media</strong>
+                            <span class="text-muted d-block mt-1" style="font-size: 0.8rem; line-height:1.4;">Add photos and video</span>
                         </div>
                     </div>
                     
@@ -212,7 +223,19 @@ $states = array(
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="sell-label" for="riksha_model_name">Model Name <span class="text-danger">*</span></label>
-                        <input type="text" class="sell-input form-control" id="riksha_model_name" name="riksha_model_name" placeholder="Enter model name" required>
+                        <select class="sell-input form-select" id="riksha_model_name" name="riksha_model_name" required>
+                            <option value="">Choose model</option>
+                            <?php if ( ! empty($models) && ! is_wp_error($models) ) :
+                                foreach ( $models as $term ) : ?>
+                                <option value="<?php echo esc_attr($term->name); ?>"><?php echo esc_html($term->name); ?></option>
+                            <?php endforeach;
+                            else :
+                                $fallback_models = array('Compact', 'Maxima', 'Alfa', 'King', 'Yatri', 'Ele');
+                                foreach ( $fallback_models as $m ) : ?>
+                                <option value="<?php echo esc_attr($m); ?>"><?php echo esc_html($m); ?></option>
+                                <?php endforeach;
+                            endif; ?>
+                        </select>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="sell-label" for="riksha_variant">Variant <span class="text-muted" style="font-weight:400;">(Optional)</span></label>
@@ -350,6 +373,22 @@ $states = array(
                     <input type="text" class="sell-input form-control" id="riksha_expected_price" name="riksha_expected_price" placeholder="Enter expected price in ₹" required>
                 </div>
 
+                <!-- Step 1 Footer -->
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top mt-4">
+                    <button type="button" id="next-to-media-btn" class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm w-100" style="font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
+                        NEXT: UPLOAD MEDIA <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+                </div> <!-- End Step 1 Container -->
+
+                <!-- ===== STEP 1B: UPLOAD MEDIA ===== -->
+                <div id="step-1b-container" style="display:none;">
+                    
+                    <div class="mb-4">
+                        <h4 class="fw-bold" style="color: #0f172a;">Upload Riksha Photos & Video</h4>
+                        <p class="text-muted small">Adding photos increases trust and gives a better valuation.</p>
+                    </div>
+
                 <!-- Row 7: 5 Image Uploads -->
                 <div class="mb-4">
                     <label class="sell-label mb-2 d-block">Upload Photos <span class="text-muted" style="font-weight:400;">(up to 5 images — JPG/PNG, max 5MB each)</span></label>
@@ -426,22 +465,21 @@ $states = array(
                     By submitting this form, your details will be reviewed by the Rikshawale team for vehicle valuation and follow-up.
                 </p>
 
-                <!-- Step 1 Footer -->
+                <!-- Step 1b Footer -->
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top">
-                    <div class="d-flex gap-4 flex-wrap">
-                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Fast Review</span>
-                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Free Inspection</span>
-                    </div>
+                    <button type="button" id="back-to-step-1-btn" class="btn btn-outline-secondary rounded-3 px-4 py-3 fw-bold shadow-sm" style="font-size:0.95rem; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-arrow-left me-2"></i> BACK
+                    </button>
                     <button type="button" id="get-valuation-btn" class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm" style="font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
                         GET ESTIMATED PRICE <i class="fa-solid fa-calculator ms-2"></i>
                     </button>
                 </div>
-                </div> <!-- End Step 1 Container -->
+                </div> <!-- End Step 1b Container -->
 
                 <!-- ===== STEP 2: PRICE ESTIMATE & CONFIRM ===== -->
                 <div id="step-2-container" style="display:none;">
                     <div class="mb-4">
-                        <h4 class="fw-bold" style="color: #0f172a;">Your car details</h4>
+                        <h4 class="fw-bold" style="color: #0f172a;">Your riksha details</h4>
                         <div id="car-summary-pills" class="d-flex flex-wrap gap-2 mt-3 mb-3">
                             <!-- Filled dynamically via JS -->
                         </div>
@@ -632,14 +670,12 @@ document.getElementById('riksha_fuel').addEventListener('change', function() {
     }
 });
 
-document.getElementById('get-valuation-btn').addEventListener('click', function() {
-    var btn = this;
+document.getElementById('next-to-media-btn').addEventListener('click', function() {
     var form = document.getElementById('sell-car-form');
     var msg = document.getElementById('sell-car-message');
-    var valContainer = document.getElementById('valuation-result-container');
     
     // Basic validation for Step 1
-    var required = form.querySelectorAll('[required]');
+    var required = form.querySelectorAll('#step-1-container [required]');
     var valid = true;
     required.forEach(function(field) {
         field.style.borderColor = '';
@@ -654,9 +690,42 @@ document.getElementById('get-valuation-btn').addEventListener('click', function(
         msg.style.background = '#fef2f2';
         msg.style.color = '#dc2626';
         msg.style.border = '1px solid #fca5a5';
-        msg.textContent = 'Please fill all required fields marked with * to get valuation.';
+        msg.textContent = 'Please fill all required fields marked with * to proceed.';
         return;
     }
+    
+    msg.style.display = 'none';
+    
+    // Transition to Step 1b
+    document.getElementById('step-1-container').style.display = 'none';
+    document.getElementById('step-1b-container').style.display = 'block';
+    
+    // Update Stepper
+    document.getElementById('step-nav-1').classList.remove('active');
+    document.getElementById('step-nav-1').classList.add('completed');
+    document.getElementById('step-nav-1b').classList.add('active');
+    
+    var mobileIndicator = document.getElementById('mobile-step-indicator');
+    if (mobileIndicator) mobileIndicator.textContent = 'Step 2 of 4: Upload Media';
+});
+
+document.getElementById('back-to-step-1-btn').addEventListener('click', function() {
+    document.getElementById('step-1b-container').style.display = 'none';
+    document.getElementById('step-1-container').style.display = 'block';
+    
+    document.getElementById('step-nav-1b').classList.remove('active');
+    document.getElementById('step-nav-1').classList.remove('completed');
+    document.getElementById('step-nav-1').classList.add('active');
+    
+    var mobileIndicator = document.getElementById('mobile-step-indicator');
+    if (mobileIndicator) mobileIndicator.textContent = 'Step 1 of 4: Riksha Details';
+});
+
+document.getElementById('get-valuation-btn').addEventListener('click', function() {
+    var btn = this;
+    var form = document.getElementById('sell-car-form');
+    var msg = document.getElementById('sell-car-message');
+    var valContainer = document.getElementById('valuation-result-container');
     
     msg.style.display = 'none';
     btn.disabled = true;
@@ -679,27 +748,33 @@ document.getElementById('get-valuation-btn').addEventListener('click', function(
                 var ai = res.data.ai_data;
                 var aiScore = ai.condition_score ? ai.condition_score : '8.5';
                 var aiRange = ai.formatted_price_range ? (ai.formatted_price_range.min + ' - ' + ai.formatted_price_range.max) : (ai.formatted_price || 'N/A');
+                var exactPrice = ai.formatted_price || 'N/A';
+                
+                var depreciationText = '';
+                if (ai.depreciation_percentage) {
+                    depreciationText = '<div class="mt-3 text-center"><span style="background: #1e293b; color: #f59e0b; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #f59e0b;">Depreciation: ' + ai.depreciation_percentage + '% of original ex-showroom price</span></div>';
+                }
+                
                 var aiFactors = (ai.key_factors && ai.key_factors.length) ? ai.key_factors.join('<br>') : 'Evaluated based on vehicle specifications, age, mileage, and brand resale data.';
 
-                var successHTML = '<div class="mt-2 p-4 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">' +
-                    '<h5 style="color: #1e3a8a; font-weight: 700; margin-bottom: 20px; font-size: 1.1rem; text-align:center;">Here is your car estimated price!</h5>' +
-                    '<div class="row g-3">' +
-                        '<div class="col-12 col-md-6">' +
-                            '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important; text-align:center;">' +
-                                '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Valuation Price Estimate</div>' +
-                                '<div style="color: #2563eb; font-weight: 700; font-size: 1.4rem;">' + aiRange + '</div>' +
-                            '</div>' +
-                        '</div>' +
+                var successHTML = '<div class="mt-2 p-4 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; text-align:center;">' +
+                    '<div style="display:inline-block; background: #1e3a8a; color: white; padding: 4px 12px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0;">ESTIMATED MARKET RESALE PRICE</div><br>' +
+                    '<div style="background: #1d4ed8; color: white; font-weight: 700; font-size: 2.5rem; padding: 10px 30px; display: inline-block; margin-top: 5px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">' + exactPrice + '</div>' +
+                    '<div style="font-size: 1.1rem; color: #0f172a; font-weight: 600;">Expected Fair Range: <span style="color: #2563eb;">' + aiRange + '</span></div>' +
+                    depreciationText +
+                    '<div class="row g-3 mt-4 text-start">' +
                         '<div class="col-12 col-md-6">' +
                             '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important; text-align:center;">' +
                                 '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Condition Score</div>' +
                                 '<div style="color: #059669; font-weight: 700; font-size: 1.4rem;"><i class="fa-solid fa-star text-warning me-1"></i>' + aiScore + '/10</div>' +
                             '</div>' +
                         '</div>' +
-                    '</div>' +
-                    '<div class="mt-4 p-3 bg-white border rounded shadow-sm" style="border-color: #e2e8f0 !important;">' +
-                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Analysis Summary</div>' +
-                        '<div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">' + aiFactors + '</div>' +
+                        '<div class="col-12 col-md-6">' +
+                            '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important;">' +
+                                '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Analysis Summary</div>' +
+                                '<div style="font-size: 0.85rem; color: #334155; line-height: 1.4;">' + aiFactors + '</div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                 '</div>';
 
@@ -721,15 +796,15 @@ document.getElementById('get-valuation-btn').addEventListener('click', function(
                 document.getElementById('car-summary-pills').innerHTML = pillsHTML;
                 
                 // Switch UI to Step 2
-                document.getElementById('step-1-container').style.display = 'none';
+                document.getElementById('step-1b-container').style.display = 'none';
                 document.getElementById('step-2-container').style.display = 'block';
                 
                 // Update Stepper
-                document.getElementById('step-nav-1').classList.remove('active');
-                document.getElementById('step-nav-1').classList.add('completed');
+                document.getElementById('step-nav-1b').classList.remove('active');
+                document.getElementById('step-nav-1b').classList.add('completed');
                 document.getElementById('step-nav-2').classList.add('active');
                 var mobileIndicator = document.getElementById('mobile-step-indicator');
-                if (mobileIndicator) mobileIndicator.textContent = 'Step 2 of 3: Price Estimate';
+                if (mobileIndicator) mobileIndicator.textContent = 'Step 3 of 4: Price Estimate';
                 
             } else {
                 msg.style.display = 'block';
@@ -767,10 +842,11 @@ document.getElementById('btn-edit-details').addEventListener('click', function()
     
     // Update Stepper
     document.getElementById('step-nav-2').classList.remove('active');
+    document.getElementById('step-nav-1b').classList.remove('completed');
     document.getElementById('step-nav-1').classList.remove('completed');
     document.getElementById('step-nav-1').classList.add('active');
     var mobileIndicator = document.getElementById('mobile-step-indicator');
-    if (mobileIndicator) mobileIndicator.textContent = 'Step 1 of 3: Car Details';
+    if (mobileIndicator) mobileIndicator.textContent = 'Step 1 of 4: Riksha Details';
 });
 
 document.getElementById('sell-car-form').addEventListener('submit', function(e) {
@@ -862,7 +938,7 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
                 document.getElementById('step-nav-2').classList.add('completed');
                 document.getElementById('step-nav-3').classList.add('completed');
                 var mobileIndicator = document.getElementById('mobile-step-indicator');
-                if (mobileIndicator) mobileIndicator.textContent = 'Step 3 of 3: Success!';
+                if (mobileIndicator) mobileIndicator.textContent = 'Step 4 of 4: Success!';
                 
                 // We don't need to swap buttons back because we are on Step 3 now
                 // btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';

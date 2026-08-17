@@ -2967,6 +2967,9 @@ function rikshawale_handle_sell_car_submission() {
             update_post_meta( $post_id, '_car_ai_condition_score', 8.5 );
             update_post_meta( $post_id, '_car_ai_summary', $summary );
             update_post_meta( $post_id, '_car_indicative_price', $api_data['formatted_price'] );
+            if ( isset($api_data['depreciation_percentage']) ) {
+                update_post_meta( $post_id, '_car_ai_depreciation', $api_data['depreciation_percentage'] );
+            }
             
             $ai_res = array(
                 'indicative_price' => $api_data['formatted_price'],
@@ -3482,11 +3485,23 @@ function rikshawale_render_car_submission_metabox( $post ) {
     $ai_max   = get_post_meta( $post->ID, '_car_ai_valuation_max', true );
     $ai_score = get_post_meta( $post->ID, '_car_ai_condition_score', true );
     $ai_sum   = get_post_meta( $post->ID, '_car_ai_summary', true );
+    $ai_price = get_post_meta( $post->ID, '_car_indicative_price', true );
+    $ai_dep   = get_post_meta( $post->ID, '_car_ai_depreciation', true );
+
     if ( $ai_min || $ai_score ) : ?>
     <h3 style="border-bottom:2px solid #2563eb;padding-bottom:6px;color:#2563eb;">🤖 AI Vehicle Valuation Report</h3>
     <div class="car-sub-grid" style="background:#eff6ff; border:1px solid #bfdbfe; padding:15px; border-radius:8px;">
-        <div class="car-sub-field" style="background:#fff;"><label>AI Recommended Fair Range</label><strong style="color:#2563eb; font-size:16px;"><?php echo $ai_min ? '₹' . number_format((float)$ai_min) . ' – ₹' . number_format((float)$ai_max) : 'N/A'; ?></strong></div>
+        <div class="car-sub-field" style="background:#1e3a8a; color:#fff; grid-column: span 3; text-align:center;">
+            <label style="color:#bfdbfe;">Estimated Market Resale Price</label>
+            <strong style="color:#fff; font-size:24px; display:block; margin-top:5px;"><?php echo $ai_price ? esc_html($ai_price) : 'N/A'; ?></strong>
+        </div>
+        <div class="car-sub-field" style="background:#fff;"><label>AI Recommended Fair Range</label><strong style="color:#2563eb; font-size:16px;"><?php echo $ai_min ? 'Rs. ' . number_format((float)$ai_min, 2) . ' – Rs. ' . number_format((float)$ai_max, 2) : 'N/A'; ?></strong></div>
         <div class="car-sub-field" style="background:#fff;"><label>AI Condition Score</label><strong style="color:#16a34a; font-size:16px;">⭐ <?php echo $ai_score ? esc_html($ai_score) . '/10' : 'N/A'; ?></strong></div>
+        <?php if ($ai_dep) : ?>
+        <div class="car-sub-field" style="background:#fff;"><label>Depreciation</label><strong style="color:#d97706; font-size:16px;"><?php echo esc_html($ai_dep); ?>% of original ex-showroom</strong></div>
+        <?php else : ?>
+        <div class="car-sub-field" style="background:#fff;"><label>Depreciation</label><strong style="color:#d97706; font-size:16px;">N/A</strong></div>
+        <?php endif; ?>
         <div class="car-sub-field" style="background:#fff; grid-column: span 3;"><label>AI Analysis Summary</label><span><?php echo esc_html($ai_sum); ?></span></div>
     </div>
     <?php endif; ?>
@@ -3718,6 +3733,26 @@ function rikshawale_approve_car_submission_handler() {
     if ( $ai_min && $ai_max ) {
         $indicative_str = '₹' . number_format((float)$ai_min) . ' – ₹' . number_format((float)$ai_max);
         update_post_meta( $inventory_id, '_car_indicative_price', $indicative_str );
+    }
+
+    // Automatically set Taxonomy terms based on provided data
+    $tax_map = array(
+        'riksha_brand'      => $brand,
+        'riksha_model'      => $model,
+        'riksha_mfg_year'   => $mfg_year,
+        'riksha_reg_year'   => $m('_car_reg_year'),
+        'riksha_owner_type' => $m('_car_owner_type') ? rikshawale_normalize_owner_type($m('_car_owner_type')) : '',
+        'riksha_fuel_type'  => $m('_car_fuel'),
+        'riksha_trans_type' => $m('_car_transmission'),
+        'riksha_location'   => $m('_seller_city'),
+        'riksha_type'       => $m('_car_fuel'), // Maps fuel type (e.g. Electric) to Riksha Type taxonomy as well
+    );
+
+    foreach ( $tax_map as $tax => $term_name ) {
+        if ( ! empty( $term_name ) ) {
+            // Check if term exists, if not it will be created by wp_set_object_terms if passing the name directly
+            wp_set_object_terms( $inventory_id, trim( $term_name ), $tax, false );
+        }
     }
 
     // Copy seller info as extra meta
