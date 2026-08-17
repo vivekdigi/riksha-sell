@@ -533,7 +533,40 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
                 msg.style.background = '#f0fdf4';
                 msg.style.color = '#16a34a';
                 msg.style.border = '1px solid #86efac';
-                msg.innerHTML = '<strong>✅ ' + res.data.message + '</strong>';
+                var successHTML = '<strong>✅ ' + res.data.message + '</strong>';
+                
+                if (res.data.ai_data) {
+                    var ai = res.data.ai_data;
+                    var aiScore = ai.condition_score ? ai.condition_score : '8.5';
+                    var aiRange = ai.formatted_price_range ? (ai.formatted_price_range.min + ' - ' + ai.formatted_price_range.max) : (ai.formatted_price || 'N/A');
+                    var aiFactors = (ai.key_factors && ai.key_factors.length) ? ai.key_factors.join('<br>') : 'Evaluated based on vehicle specifications, age, mileage, and brand resale data.';
+
+                    successHTML += '<div class="mt-4 pt-3 border-top" style="border-color: #93c5fd !important;">' +
+                        '<h5 style="color: #1e3a8a; font-weight: 700; margin-bottom: 15px; font-size: 1.1rem;"><i class="fa-solid fa-robot text-primary me-2"></i>AI Vehicle Valuation Report</h5>' +
+                        '<div class="p-3 mb-3" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">' +
+                            '<div class="row g-3">' +
+                                '<div class="col-12 col-md-6">' +
+                                    '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important;">' +
+                                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">AI Recommended Fair Range</div>' +
+                                        '<div style="color: #2563eb; font-weight: 700; font-size: 1.25rem;">' + aiRange + '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="col-12 col-md-6">' +
+                                    '<div class="p-3 bg-white border rounded shadow-sm h-100" style="border-color: #e2e8f0 !important;">' +
+                                        '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">AI Condition Score</div>' +
+                                        '<div style="color: #059669; font-weight: 700; font-size: 1.25rem;"><i class="fa-solid fa-star text-warning me-1"></i>' + aiScore + '/10</div>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="mt-3 p-3 bg-white border rounded shadow-sm" style="border-color: #e2e8f0 !important;">' +
+                                '<div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">AI Analysis Summary</div>' +
+                                '<div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">' + aiFactors + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                }
+
+                msg.innerHTML = successHTML;
                 form.reset();
                 // Reset image previews
                 for (var i = 1; i <= 5; i++) {

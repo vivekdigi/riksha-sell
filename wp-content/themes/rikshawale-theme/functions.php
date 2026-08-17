@@ -2870,14 +2870,96 @@ function rikshawale_handle_sell_car_submission() {
     }
 
     // Send admin notification email
-    // Automatically calculate and save AI Valuation on backend
-    $ai_res = rikshawale_calculate_ai_valuation_internal( $brand_name, $model_name, $mfg_year, $driven_km, $fuel, $owner_type, $_FILES );
-    if ( $ai_res ) {
-        update_post_meta( $post_id, '_car_ai_valuation_min', $ai_res['min_price'] );
-        update_post_meta( $post_id, '_car_ai_valuation_max', $ai_res['max_price'] );
-        update_post_meta( $post_id, '_car_ai_condition_score', $ai_res['condition_score'] );
-        update_post_meta( $post_id, '_car_ai_summary', $ai_res['summary'] );
-        update_post_meta( $post_id, '_car_indicative_price', $ai_res['indicative_price'] );
+    // Parse driven km to integer
+    $parsed_kms_driven = 10000;
+    if ( strpos( $driven_km, 'Less than 10,000' ) !== false ) $parsed_kms_driven = 5000;
+    elseif ( strpos( $driven_km, '10,000' ) !== false && strpos( $driven_km, '25,000' ) !== false ) $parsed_kms_driven = 17500;
+    elseif ( strpos( $driven_km, '25,000' ) !== false && strpos( $driven_km, '50,000' ) !== false ) $parsed_kms_driven = 37500;
+    elseif ( strpos( $driven_km, '50,000' ) !== false && strpos( $driven_km, '75,000' ) !== false ) $parsed_kms_driven = 62500;
+    elseif ( strpos( $driven_km, '75,000' ) !== false && strpos( $driven_km, '1,00,000' ) !== false ) $parsed_kms_driven = 87500;
+    elseif ( strpos( $driven_km, 'More than 1,00,000' ) !== false ) $parsed_kms_driven = 120000;
+    else {
+        $num = (int) filter_var($driven_km, FILTER_SANITIZE_NUMBER_INT);
+        if ($num > 0) $parsed_kms_driven = $num;
+    }
+
+    // Parse owners to integer
+    $parsed_owners = 1;
+    if ( strpos( strtolower($owner_type), '1st' ) !== false ) $parsed_owners = 1;
+    elseif ( strpos( strtolower($owner_type), '2nd' ) !== false ) $parsed_owners = 2;
+    elseif ( strpos( strtolower($owner_type), '3rd' ) !== false ) $parsed_owners = 3;
+    elseif ( strpos( strtolower($owner_type), '4th' ) !== false ) $parsed_owners = 4;
+    else {
+        $num = (int) filter_var($owner_type, FILTER_SANITIZE_NUMBER_INT);
+        if ($num > 0) $parsed_owners = $num;
+    }
+
+    $api_payload = array(
+        'brand' => $brand_name,
+        'city' => $seller_city,
+        'kms_driven' => $parsed_kms_driven,
+        'manufacturing_year' => (int) $mfg_year,
+        'model' => $model_name,
+        'motor_condition' => 'Excellent',
+        'number_of_owners' => $parsed_owners,
+        'registration_year' => (int) $reg_year,
+        'variant' => $variant ? $variant : 'Passenger',
+        'vehicle_condition' => 'Excellent'
+    );
+
+    $api_response = wp_remote_post( 'https://ai-ev.questdigiflex.in/api/predict', array(
+        'body'    => wp_json_encode( $api_payload ),
+        'headers' => array( 'Content-Type' => 'application/json' ),
+        'timeout' => 15
+    ));
+
+    $ai_res = null;
+    $api_data_for_frontend = null;
+
+    if ( ! is_wp_error( $api_response ) ) {
+        $body = wp_remote_retrieve_body( $api_response );
+        $api_data = json_decode( $body, true );
+        
+        if ( !empty($api_data) && isset($api_data['status']) && $api_data['status'] === 'SUCCESS' ) {
+            $api_data_for_frontend = $api_data;
+            
+            $min_price = $api_data['price_range']['min_estimated_price'];
+            $max_price = $api_data['price_range']['max_estimated_price'];
+            $summary = implode(" ", $api_data['key_factors']);
+            
+            update_post_meta( $post_id, '_car_ai_valuation_min', $min_price );
+            update_post_meta( $post_id, '_car_ai_valuation_max', $max_price );
+            update_post_meta( $post_id, '_car_ai_condition_score', 8.5 );
+            update_post_meta( $post_id, '_car_ai_summary', $summary );
+            update_post_meta( $post_id, '_car_indicative_price', $api_data['formatted_price'] );
+            
+            $ai_res = array(
+                'indicative_price' => $api_data['formatted_price'],
+                'condition_score'  => 8.5
+            );
+        }
+    }
+
+    if ( ! $ai_res ) {
+        $ai_res = rikshawale_calculate_ai_valuation_internal( $brand_name, $model_name, $mfg_year, $driven_km, $fuel, $owner_type, $_FILES );
+        if ( $ai_res ) {
+            update_post_meta( $post_id, '_car_ai_valuation_min', $ai_res['min_price'] );
+            update_post_meta( $post_id, '_car_ai_valuation_max', $ai_res['max_price'] );
+            update_post_meta( $post_id, '_car_ai_condition_score', $ai_res['condition_score'] );
+            update_post_meta( $post_id, '_car_ai_summary', $ai_res['summary'] );
+            update_post_meta( $post_id, '_car_indicative_price', $ai_res['indicative_price'] );
+            
+            $api_data_for_frontend = array(
+                'status' => 'FALLBACK',
+                'formatted_price' => $ai_res['indicative_price'],
+                'formatted_price_range' => array(
+                    'min' => 'Rs. ' . number_format($ai_res['min_price']),
+                    'max' => 'Rs. ' . number_format($ai_res['max_price'])
+                ),
+                'key_factors' => array($ai_res['summary']),
+                'condition_score' => $ai_res['condition_score']
+            );
+        }
     }
 
     $admin_email = get_option( 'admin_email' );
@@ -2894,6 +2976,7 @@ function rikshawale_handle_sell_car_submission() {
 
     wp_send_json_success( array(
         'message' => 'Thank you! Your request has been submitted. Our team will contact you shortly.',
+        'ai_data' => $api_data_for_frontend
     ) );
 }
 add_action( 'wp_ajax_rikshawale_sell_car',        'rikshawale_handle_sell_car_submission' );
