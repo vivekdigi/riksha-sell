@@ -29,12 +29,71 @@ $states = array(
 
 <div class="sell-car-page py-4 py-md-5" style="font-family: var(--font-body, 'Inter', sans-serif); background: #f8fafc; min-height: 100vh; padding-bottom: 60px;">
 
-    <!-- ===== MAIN FORM CONTAINER WITH SIMPLE WHITE BACKGROUND & SHADOW ===== -->
-    <div class="container" style="max-width: 960px;">
-        <div class="bg-white rounded-4 shadow-sm px-4 px-md-5 py-4 py-md-5">
+    <!-- ===== CARS24 STYLE STEPPER CSS ===== -->
+    <style>
+    .stepper-sidebar { position: sticky; top: 100px; }
+    .stepper-sidebar .step { display: flex; gap: 15px; align-items: flex-start; position: relative; opacity: 0.5; transition: opacity 0.3s; margin-bottom: 0; }
+    .stepper-sidebar .step.active { opacity: 1; }
+    .stepper-sidebar .step.completed { opacity: 1; }
+    .stepper-sidebar .step .icon { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.95rem; z-index: 2; position: relative; flex-shrink: 0; }
+    .stepper-sidebar .step.active .icon { background: #2563eb; color: #fff; box-shadow: 0 0 0 4px #dbeafe; }
+    .stepper-sidebar .step.completed .icon { background: #059669; color: #fff; }
+    .stepper-sidebar .step-connector { height: 40px; width: 2px; background: #e2e8f0; margin-left: 17px; margin-top: -5px; margin-bottom: -5px; z-index: 1; position: relative; }
+    
+    /* Summary Pills */
+    .summary-pill { display: inline-flex; flex-direction: column; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 15px; min-width: 120px; }
+    .summary-pill-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .summary-pill-value { font-size: 0.95rem; font-weight: 600; color: #0f172a; }
+    </style>
+
+    <!-- ===== MAIN FORM CONTAINER ===== -->
+    <div class="container" style="max-width: 1100px;">
+        <div class="row g-4">
             
-            <!-- Feature Pills in Light Style -->
-            <div class="row g-3 mb-4">
+            <!-- LEFT SIDEBAR (STEPPER) -->
+            <div class="col-12 col-md-4 col-lg-3 d-none d-md-block">
+                <div class="stepper-sidebar p-4 bg-white rounded-4 shadow-sm h-100 border">
+                    <div class="step active" id="step-nav-1">
+                        <div class="icon"><i class="fa-solid fa-car"></i></div>
+                        <div class="text mt-1">
+                            <strong style="color:#0f172a; font-size: 0.95rem;">Car details</strong>
+                            <span class="text-muted d-block mt-1" style="font-size: 0.8rem; line-height:1.4;">Tell us about your car details</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step-connector"></div>
+                    
+                    <div class="step" id="step-nav-2">
+                        <div class="icon"><i class="fa-solid fa-calculator"></i></div>
+                        <div class="text mt-1">
+                            <strong style="color:#0f172a; font-size: 0.95rem;">Price estimate</strong>
+                            <span class="text-muted d-block mt-1" style="font-size: 0.8rem; line-height:1.4;">Estimated using market value</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step-connector"></div>
+                    
+                    <div class="step" id="step-nav-3">
+                        <div class="icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="text mt-1">
+                            <strong style="color:#0f172a; font-size: 0.95rem;">Book inspection</strong>
+                            <span class="text-muted d-block mt-1" style="font-size: 0.8rem; line-height:1.4;">At home or nearest branch</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT CONTENT -->
+            <div class="col-12 col-md-8 col-lg-9">
+                <div class="bg-white rounded-4 shadow-sm px-4 px-md-5 py-4 py-md-5 border">
+                    
+                    <!-- Mobile Stepper Text -->
+                    <div class="d-md-none mb-4 text-center">
+                        <span class="badge bg-primary px-3 py-2 rounded-pill" id="mobile-step-indicator">Step 1 of 3: Car Details</span>
+                    </div>
+
+                    <!-- Feature Pills in Light Style (Only visible in Step 1) -->
+                    <div class="row g-3 mb-4" id="feature-pills-row">
                 <?php
                 $pills = array(
                     array( 'Fast Review',       'Quick vehicle details review' ),
@@ -56,8 +115,10 @@ $states = array(
             <form id="sell-car-form" method="post" enctype="multipart/form-data" novalidate>
                 <?php wp_nonce_field( 'rikshawale_sell_car_action', 'rikshawale_sell_car_nonce' ); ?>
 
-                <!-- Row 1: Name / Mobile / WhatsApp -->
-                <div class="row g-3 mb-3">
+                <!-- ===== STEP 1: CAR DETAILS ===== -->
+                <div id="step-1-container">
+                    <!-- Row 1: Name / Mobile / WhatsApp -->
+                    <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6 col-lg-4">
                         <label class="sell-label" for="seller_name">Your Name <span class="text-danger">*</span></label>
                         <input type="text" class="sell-input form-control" id="seller_name" name="seller_name" placeholder="Enter your full name" required>
@@ -216,6 +277,73 @@ $states = array(
                     </div>
                 </div>
 
+                <!-- ===== EV Specific Fields (Hidden by default) ===== -->
+                <div id="ev-fields-container" style="display:none; background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 16px;">
+                    <h6 class="fw-bold mb-3" style="color: #0f172a;">Electric Vehicle Details</h6>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="sell-label" for="riksha_battery_type">Battery Chemistry</label>
+                            <select class="sell-input form-select" id="riksha_battery_type" name="riksha_battery_type">
+                                <option value="Lithium Ion">Lithium Ion</option>
+                                <option value="Lead Acid">Lead Acid</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="sell-label" for="riksha_battery_age">Battery Age (Years)</label>
+                            <input type="number" step="0.1" class="sell-input form-control" id="riksha_battery_age" name="riksha_battery_age" placeholder="e.g. 1.5">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="sell-label" for="riksha_battery_condition">Battery Condition</label>
+                            <select class="sell-input form-select" id="riksha_battery_condition" name="riksha_battery_condition">
+                                <option value="Good">Good</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="sell-label" for="riksha_battery_replaced">Battery Replaced?</label>
+                            <select class="sell-input form-select" id="riksha_battery_replaced" name="riksha_battery_replaced">
+                                <option value="No">No (Original)</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="sell-label" for="riksha_motor_condition">Electric Motor Condition</label>
+                            <select class="sell-input form-select" id="riksha_motor_condition" name="riksha_motor_condition">
+                                <option value="Good">Good</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Condition & Accident History -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-4">
+                        <label class="sell-label" for="riksha_vehicle_condition">Overall Vehicle Condition <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_vehicle_condition" name="riksha_vehicle_condition" required>
+                            <option value="Good">Good</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="sell-label" for="riksha_accident_history">Accident History? <span class="text-danger">*</span></label>
+                        <select class="sell-input form-select" id="riksha_accident_history" name="riksha_accident_history" required>
+                            <option value="No">No Accident</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="sell-label" for="riksha_original_price">Original Price (INR) <span class="text-danger">*</span></label>
+                        <input type="number" class="sell-input form-control" id="riksha_original_price" name="riksha_original_price" placeholder="Ex-Showroom Price" required>
+                    </div>
+                </div>
+
                 <!-- Row 6: Expected Price -->
                 <div class="mb-3">
                     <label class="sell-label" for="riksha_expected_price">Expected Price? <span class="text-danger">*</span></label>
@@ -298,37 +426,57 @@ $states = array(
                     By submitting this form, your details will be reviewed by the Rikshawale team for vehicle valuation and follow-up.
                 </p>
 
-                <!-- Form Footer: bullets + submit -->
+                <!-- Step 1 Footer -->
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top">
                     <div class="d-flex gap-4 flex-wrap">
-                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Quick callback</span>
-                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Verified team</span>
-                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Free inspection</span>
+                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Fast Review</span>
+                        <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Free Inspection</span>
                     </div>
-                    <div id="form-actions" class="d-flex gap-2">
-                        <button type="button" id="get-valuation-btn"
-                            class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm"
-                            style="font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
-                            GET ESTIMATED PRICE <i class="fa-solid fa-calculator ms-2"></i>
-                        </button>
-                        <button type="submit" id="sell-car-submit-btn"
-                            class="btn btn-dark rounded-3 px-5 py-3 fw-bold shadow-sm"
-                            style="font-size:0.95rem; letter-spacing:0.5px; background: #0f172a; border: none; display:none;">
-                            BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>
+                    <button type="button" id="get-valuation-btn" class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm" style="font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
+                        GET ESTIMATED PRICE <i class="fa-solid fa-calculator ms-2"></i>
+                    </button>
+                </div>
+                </div> <!-- End Step 1 Container -->
+
+                <!-- ===== STEP 2: PRICE ESTIMATE & CONFIRM ===== -->
+                <div id="step-2-container" style="display:none;">
+                    <div class="mb-4">
+                        <h4 class="fw-bold" style="color: #0f172a;">Your car details</h4>
+                        <div id="car-summary-pills" class="d-flex flex-wrap gap-2 mt-3 mb-3">
+                            <!-- Filled dynamically via JS -->
+                        </div>
+                        <button type="button" class="btn btn-sm" id="btn-edit-details" style="background: transparent; color: #d97706; border: 1px solid #fcd34d; font-weight:600; padding: 6px 16px;">
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Edit Details
                         </button>
                     </div>
+
+                    <!-- Valuation Output Container -->
+                    <div id="valuation-result-container" style="margin-top:16px;"></div>
+
+                    <!-- Step 2 Action Buttons -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-4 pt-3 border-top">
+                        <div class="d-flex gap-4 flex-wrap">
+                            <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Quick callback</span>
+                            <span style="font-size:0.8rem; color:#475569;"><span style="color:var(--primary-color, #db2d2e); font-size:10px;">●</span> Free inspection</span>
+                        </div>
+                        <button type="submit" id="sell-car-submit-btn" class="btn btn-dark rounded-3 px-5 py-3 fw-bold shadow-sm" style="font-size:0.95rem; letter-spacing:0.5px; background: #4f46e5; border: none;">
+                            CONFIRM & BOOK INSPECTION <i class="fa-solid fa-calendar-check ms-2"></i>
+                        </button>
+                    </div>
+                </div> <!-- End Step 2 Container -->
+
+                <!-- ===== STEP 3: SUCCESS ===== -->
+                <div id="step-3-container" style="display:none;">
+                    <!-- Success / Error Message -->
+                    <div id="sell-car-message" class="rounded-3 p-4 text-center mt-3" style="min-height: 200px; display:flex; flex-direction:column; justify-content:center;"></div>
                 </div>
 
-                <!-- Valuation Output Container (Appears before the success message) -->
-                <div id="valuation-result-container" style="display:none; margin-top:16px;"></div>
-
-                <!-- Success / Error Message -->
-                <div id="sell-car-message" style="display:none; margin-top:16px;" class="rounded-3 p-3"></div>
-
             </form>
-        </div>
-    </div>
-</div>
+        </div> <!-- End right col content box -->
+        </div> <!-- End right col -->
+    </div> <!-- End row -->
+    </div> <!-- End container -->
+</div> <!-- End sell-car-page -->
 
 <style>
 .sell-label {
@@ -475,6 +623,14 @@ function triggerVideoFileUpload() {
     }, 150);
 }
 
+document.getElementById('riksha_fuel').addEventListener('change', function() {
+    var evFields = document.getElementById('ev-fields-container');
+    if (this.value.toLowerCase() === 'electric') {
+        evFields.style.display = 'block';
+    } else {
+        evFields.style.display = 'none';
+    }
+});
 
 document.getElementById('get-valuation-btn').addEventListener('click', function() {
     var btn = this;
@@ -550,9 +706,31 @@ document.getElementById('get-valuation-btn').addEventListener('click', function(
                 valContainer.innerHTML = successHTML;
                 valContainer.style.display = 'block';
                 
-                // Swap buttons
-                document.getElementById('get-valuation-btn').style.display = 'none';
-                document.getElementById('sell-car-submit-btn').style.display = 'inline-block';
+                // Populate Car Summary Pills
+                var pillsHTML = '';
+                var pillData = [
+                    { label: 'Brand', value: form.querySelector('#riksha_brand_name').value },
+                    { label: 'Model', value: form.querySelector('#riksha_model_name').value },
+                    { label: 'Year', value: form.querySelector('#riksha_mfg_year').value },
+                    { label: 'Driven', value: form.querySelector('#riksha_driven_km').options[form.querySelector('#riksha_driven_km').selectedIndex].text },
+                    { label: 'Reg No.', value: form.querySelector('#seller_reg_no').value || 'N/A' }
+                ];
+                pillData.forEach(function(p) {
+                    pillsHTML += '<div class="summary-pill"><span class="summary-pill-label">' + p.label + '</span><span class="summary-pill-value">' + p.value + '</span></div>';
+                });
+                document.getElementById('car-summary-pills').innerHTML = pillsHTML;
+                
+                // Switch UI to Step 2
+                document.getElementById('step-1-container').style.display = 'none';
+                document.getElementById('step-2-container').style.display = 'block';
+                
+                // Update Stepper
+                document.getElementById('step-nav-1').classList.remove('active');
+                document.getElementById('step-nav-1').classList.add('completed');
+                document.getElementById('step-nav-2').classList.add('active');
+                var mobileIndicator = document.getElementById('mobile-step-indicator');
+                if (mobileIndicator) mobileIndicator.textContent = 'Step 2 of 3: Price Estimate';
+                
             } else {
                 msg.style.display = 'block';
                 msg.style.background = '#fef2f2';
@@ -580,6 +758,19 @@ document.getElementById('get-valuation-btn').addEventListener('click', function(
     };
     
     xhr.send(formData);
+});
+
+document.getElementById('btn-edit-details').addEventListener('click', function() {
+    // Switch UI to Step 1
+    document.getElementById('step-2-container').style.display = 'none';
+    document.getElementById('step-1-container').style.display = 'block';
+    
+    // Update Stepper
+    document.getElementById('step-nav-2').classList.remove('active');
+    document.getElementById('step-nav-1').classList.remove('completed');
+    document.getElementById('step-nav-1').classList.add('active');
+    var mobileIndicator = document.getElementById('mobile-step-indicator');
+    if (mobileIndicator) mobileIndicator.textContent = 'Step 1 of 3: Car Details';
 });
 
 document.getElementById('sell-car-form').addEventListener('submit', function(e) {
@@ -662,13 +853,20 @@ document.getElementById('sell-car-form').addEventListener('submit', function(e) 
                 if (progressBar) progressBar.style.width = '0%';
                 if (progressPercent) progressPercent.textContent = '0%';
                 
-                // Hide Valuation Result & Reset buttons
-                document.getElementById('valuation-result-container').style.display = 'none';
-                document.getElementById('sell-car-submit-btn').style.display = 'none';
-                document.getElementById('get-valuation-btn').style.display = 'inline-block';
+                // Update UI to Step 3
+                document.getElementById('step-2-container').style.display = 'none';
+                document.getElementById('step-3-container').style.display = 'block';
                 
-                btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';
-                btn.disabled = false;
+                // Update Stepper
+                document.getElementById('step-nav-2').classList.remove('active');
+                document.getElementById('step-nav-2').classList.add('completed');
+                document.getElementById('step-nav-3').classList.add('completed');
+                var mobileIndicator = document.getElementById('mobile-step-indicator');
+                if (mobileIndicator) mobileIndicator.textContent = 'Step 3 of 3: Success!';
+                
+                // We don't need to swap buttons back because we are on Step 3 now
+                // btn.innerHTML = 'BOOK INSPECTION <i class="fa-solid fa-arrow-right ms-2"></i>';
+                // btn.disabled = false;
             } else {
                 msg.style.background = '#fef2f2';
                 msg.style.color = '#dc2626';

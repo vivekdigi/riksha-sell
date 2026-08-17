@@ -2752,19 +2752,38 @@ function rikshawale_handle_sell_car_submission() {
     $seller_phone  = sanitize_text_field( $_POST['seller_phone']  ?? '' );
     $seller_wa     = sanitize_text_field( $_POST['seller_wa']     ?? '' );
     $seller_city   = sanitize_text_field( $_POST['seller_city']   ?? '' );
+    $seller_city   = ucwords(strtolower($seller_city));
+    
     $seller_reg_no = sanitize_text_field( $_POST['seller_reg_no'] ?? '' );
     $seller_state  = sanitize_text_field( $_POST['seller_state']  ?? '' );
 
     $mfg_year      = sanitize_text_field( $_POST['riksha_mfg_year']       ?? $_POST['car_mfg_year']       ?? '' );
     $reg_year      = sanitize_text_field( $_POST['riksha_reg_year']       ?? $_POST['car_reg_year']       ?? '' );
     $owner_type    = sanitize_text_field( $_POST['riksha_owner_type']     ?? $_POST['car_owner_type']     ?? '' );
+    
     $brand_name    = sanitize_text_field( $_POST['riksha_brand_name']    ?? $_POST['car_brand_name']     ?? '' );
+    $brand_name    = ucwords(strtolower($brand_name));
+    
     $model_name    = sanitize_text_field( $_POST['riksha_model_name']    ?? $_POST['car_model_name']     ?? '' );
+    $model_name    = ucwords(strtolower($model_name));
+    
     $variant       = sanitize_text_field( $_POST['riksha_variant']       ?? $_POST['car_variant']        ?? '' );
+    $variant       = ucwords(strtolower($variant));
+    
     $driven_km     = sanitize_text_field( $_POST['riksha_driven_km']     ?? $_POST['car_driven_km']      ?? '' );
     $fuel          = sanitize_text_field( $_POST['riksha_fuel']          ?? $_POST['car_fuel']           ?? '' );
     $transmission  = sanitize_text_field( $_POST['riksha_transmission']  ?? $_POST['car_transmission']   ?? '' );
     $exp_price     = sanitize_text_field( $_POST['riksha_expected_price']?? $_POST['car_expected_price'] ?? '' );
+    
+    // EV & Condition Fields
+    $battery_type        = sanitize_text_field( $_POST['riksha_battery_type'] ?? '' );
+    $battery_age_years   = floatval( $_POST['riksha_battery_age'] ?? 0 );
+    $battery_condition   = sanitize_text_field( $_POST['riksha_battery_condition'] ?? 'Good' );
+    $battery_replaced    = sanitize_text_field( $_POST['riksha_battery_replaced'] ?? 'No' );
+    $motor_condition     = sanitize_text_field( $_POST['riksha_motor_condition'] ?? 'Good' );
+    $vehicle_condition   = sanitize_text_field( $_POST['riksha_vehicle_condition'] ?? 'Good' );
+    $accident_history    = sanitize_text_field( $_POST['riksha_accident_history'] ?? 'No' );
+    $original_price      = floatval( $_POST['riksha_original_price'] ?? 0 );
 
     $video_url_input = sanitize_text_field( $_POST['riksha_video_url'] ?? '' );
     $has_video_file  = ! empty( $_FILES['riksha_video_file']['name'] );
@@ -2805,6 +2824,14 @@ function rikshawale_handle_sell_car_submission() {
         '_car_fuel'            => $fuel,
         '_car_transmission'    => $transmission,
         '_car_expected_price'  => $exp_price,
+        '_car_battery_type'    => $battery_type,
+        '_car_battery_age'     => $battery_age_years,
+        '_car_battery_condition'=> $battery_condition,
+        '_car_battery_replaced'=> $battery_replaced,
+        '_car_motor_condition' => $motor_condition,
+        '_car_vehicle_condition'=> $vehicle_condition,
+        '_car_accident_history'=> $accident_history,
+        '_car_original_price'  => $original_price,
     );
     foreach ( $meta as $key => $val ) {
         update_post_meta( $post_id, $key, $val );
@@ -2896,12 +2923,23 @@ function rikshawale_handle_sell_car_submission() {
         'kms_driven' => $parsed_kms_driven,
         'manufacturing_year' => (int) $mfg_year,
         'model' => $model_name,
-        'motor_condition' => 'Excellent',
         'number_of_owners' => $parsed_owners,
         'registration_year' => (int) $reg_year,
         'variant' => $variant ? $variant : 'Passenger',
-        'vehicle_condition' => 'Excellent'
+        'motor_condition' => $motor_condition,
+        'vehicle_condition' => $vehicle_condition,
     );
+    
+    // Add EV and other detailed fields if provided
+    if ( strtolower($fuel) === 'electric' ) {
+        if ( !empty($battery_type) ) $api_payload['battery_type'] = $battery_type;
+        if ( $battery_age_years > 0 ) $api_payload['battery_age_years'] = $battery_age_years;
+        if ( !empty($battery_condition) ) $api_payload['battery_condition'] = $battery_condition;
+        if ( !empty($battery_replaced) ) $api_payload['battery_replaced'] = $battery_replaced;
+    }
+    
+    if ( $original_price > 0 ) $api_payload['original_ex_showroom_price'] = $original_price;
+    if ( !empty($accident_history) ) $api_payload['accident_history'] = $accident_history;
 
     $api_response = wp_remote_post( 'https://ai-ev.questdigiflex.in/api/predict', array(
         'body'    => wp_json_encode( $api_payload ),
@@ -2988,13 +3026,33 @@ add_action( 'wp_ajax_nopriv_rikshawale_sell_car', 'rikshawale_handle_sell_car_su
 
 function rikshawale_handle_get_valuation() {
     $brand_name    = sanitize_text_field( $_POST['riksha_brand_name'] ?? $_POST['car_brand_name'] ?? '' );
+    $brand_name    = ucwords(strtolower($brand_name));
+    
     $model_name    = sanitize_text_field( $_POST['riksha_model_name'] ?? $_POST['car_model_name'] ?? '' );
+    $model_name    = ucwords(strtolower($model_name));
+    
     $mfg_year      = sanitize_text_field( $_POST['riksha_mfg_year']   ?? $_POST['car_mfg_year']   ?? '' );
     $reg_year      = sanitize_text_field( $_POST['riksha_reg_year']   ?? $_POST['car_reg_year']   ?? '' );
     $owner_type    = sanitize_text_field( $_POST['riksha_owner_type'] ?? $_POST['car_owner_type'] ?? '' );
     $variant       = sanitize_text_field( $_POST['riksha_variant']    ?? $_POST['car_variant']    ?? '' );
+    $variant       = ucwords(strtolower($variant));
+    
     $driven_km     = sanitize_text_field( $_POST['riksha_driven_km']  ?? $_POST['car_driven_km']  ?? '' );
+    
     $seller_city   = sanitize_text_field( $_POST['seller_city']       ?? '' );
+    $seller_city   = ucwords(strtolower($seller_city));
+    
+    $fuel          = sanitize_text_field( $_POST['riksha_fuel']       ?? '' );
+    
+    // EV Specific and Condition Fields
+    $battery_type        = sanitize_text_field( $_POST['riksha_battery_type'] ?? '' );
+    $battery_age_years   = floatval( $_POST['riksha_battery_age'] ?? 0 );
+    $battery_condition   = sanitize_text_field( $_POST['riksha_battery_condition'] ?? 'Good' );
+    $battery_replaced    = sanitize_text_field( $_POST['riksha_battery_replaced'] ?? 'No' );
+    $motor_condition     = sanitize_text_field( $_POST['riksha_motor_condition'] ?? 'Good' );
+    $vehicle_condition   = sanitize_text_field( $_POST['riksha_vehicle_condition'] ?? 'Good' );
+    $accident_history    = sanitize_text_field( $_POST['riksha_accident_history'] ?? 'No' );
+    $original_price      = floatval( $_POST['riksha_original_price'] ?? 0 );
     
     // Parse driven km to integer
     $parsed_kms_driven = 10000;
@@ -3026,12 +3084,23 @@ function rikshawale_handle_get_valuation() {
         'kms_driven' => $parsed_kms_driven,
         'manufacturing_year' => (int) $mfg_year,
         'model' => $model_name,
-        'motor_condition' => 'Excellent',
         'number_of_owners' => $parsed_owners,
         'registration_year' => (int) $reg_year,
         'variant' => $variant ? $variant : 'Passenger',
-        'vehicle_condition' => 'Excellent'
+        'motor_condition' => $motor_condition,
+        'vehicle_condition' => $vehicle_condition,
     );
+    
+    // Add EV and other detailed fields if provided
+    if ( strtolower($fuel) === 'electric' ) {
+        if ( !empty($battery_type) ) $api_payload['battery_type'] = $battery_type;
+        if ( $battery_age_years > 0 ) $api_payload['battery_age_years'] = $battery_age_years;
+        if ( !empty($battery_condition) ) $api_payload['battery_condition'] = $battery_condition;
+        if ( !empty($battery_replaced) ) $api_payload['battery_replaced'] = $battery_replaced;
+    }
+    
+    if ( $original_price > 0 ) $api_payload['original_ex_showroom_price'] = $original_price;
+    if ( !empty($accident_history) ) $api_payload['accident_history'] = $accident_history;
 
     $api_response = wp_remote_post( 'https://ai-ev.questdigiflex.in/api/predict', array(
         'body'    => wp_json_encode( $api_payload ),

@@ -20,6 +20,15 @@ while ( have_posts() ) : the_post();
     $rto          = get_post_meta( $post_id, '_car_exterior', true ) ?: 'UP';
     $insurance    = 'Comprehensive';
     $color        = get_post_meta( $post_id, '_car_color', true ) ?: 'White';
+    
+    // EV & Condition Fields
+    $battery_type      = get_post_meta( $post_id, '_car_battery_type', true );
+    $battery_age       = get_post_meta( $post_id, '_car_battery_age', true );
+    $battery_condition = get_post_meta( $post_id, '_car_battery_condition', true );
+    $motor_condition   = get_post_meta( $post_id, '_car_motor_condition', true );
+    $vehicle_condition = get_post_meta( $post_id, '_car_vehicle_condition', true );
+    $accident_history  = get_post_meta( $post_id, '_car_accident_history', true );
+    
     $short_desc = get_post_meta( $post_id, '_car_short_desc', true );
     if ( empty( $short_desc ) && has_excerpt( $post_id ) ) {
         $short_desc = get_the_excerpt( $post_id );
@@ -278,6 +287,34 @@ while ( have_posts() ) : the_post();
                             <span class="d-block text-muted small">Color</span>
                             <strong class="text-dark fs-6"><?php echo esc_html($color); ?></strong>
                         </div>
+                        
+                        <?php if ( strtolower($fuel) === 'electric' ) : ?>
+                            <?php if ( !empty($battery_type) ) : ?>
+                            <div class="col-4">
+                                <span class="d-block text-muted small">Battery</span>
+                                <strong class="text-dark fs-6"><?php echo esc_html($battery_type); ?></strong>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ( !empty($battery_age) ) : ?>
+                            <div class="col-4">
+                                <span class="d-block text-muted small">Battery Age</span>
+                                <strong class="text-dark fs-6"><?php echo esc_html($battery_age); ?> Years</strong>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ( !empty($motor_condition) ) : ?>
+                            <div class="col-4">
+                                <span class="d-block text-muted small">Motor Condition</span>
+                                <strong class="text-dark fs-6"><?php echo esc_html($motor_condition); ?></strong>
+                            </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        
+                        <?php if ( !empty($vehicle_condition) ) : ?>
+                        <div class="col-4">
+                            <span class="d-block text-muted small">Vehicle Condition</span>
+                            <strong class="text-dark fs-6"><?php echo esc_html($vehicle_condition); ?></strong>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
