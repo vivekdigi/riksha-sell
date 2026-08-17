@@ -18,7 +18,16 @@ $all_fuels   = ( ! empty( $fuel_terms ) && ! is_wp_error( $fuel_terms ) ) ? wp_l
 
 $all_transmissions = array( 'Automatic', 'Manual' );
 $all_owners        = array( '1st Owner', '2nd Owner', '3rd Owner', '4th+ Owner' );
-$all_years         = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018' );
+$mfg_terms = get_terms( array( 'taxonomy' => 'riksha_mfg_year', 'hide_empty' => false ) );
+$reg_terms = get_terms( array( 'taxonomy' => 'riksha_reg_year', 'hide_empty' => false ) );
+$all_years = array();
+if ( ! is_wp_error( $mfg_terms ) ) { foreach ( $mfg_terms as $t ) { $all_years[] = $t->name; } }
+if ( ! is_wp_error( $reg_terms ) ) { foreach ( $reg_terms as $t ) { $all_years[] = $t->name; } }
+$all_years = array_unique( $all_years );
+rsort( $all_years );
+if ( empty( $all_years ) ) {
+    $all_years = array( '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016' );
+}
 $all_colors        = array( 'White', 'Black', 'Red', 'Blue', 'Grey', 'Green', 'Yellow', 'Silver' );
 
 $selected_colors    = isset( $_GET['color'] ) ? array_map( 'sanitize_text_field', (array) $_GET['color'] ) : array();
@@ -149,6 +158,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 1.5 LOCATION / PLACE FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i> Location / Place</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search location..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
                                 <?php 
                                 if ( ! empty( $all_locations_terms ) && ! is_wp_error( $all_locations_terms ) ) :
@@ -173,6 +183,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 2. BRAND / MAKE FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Brand / Make</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search brand..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
                                 <?php foreach ( $all_brands as $brand ) : ?>
                                     <div class="form-check mb-2">
@@ -188,6 +199,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 2.5 VEHICLE MODEL FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Vehicle Model</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search model..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list max-h-180 overflow-auto pe-1">
                                 <?php foreach ( $all_models as $model ) : ?>
                                     <div class="form-check mb-2">
@@ -203,6 +215,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 3. FUEL TYPE FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Fuel Type</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search fuel..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_fuels as $fuel ) : ?>
                                     <div class="form-check mb-2">
@@ -219,6 +232,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 4. MANUFACTURING YEAR FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Registration / Mfg Year</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search year..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list max-h-160 overflow-auto pe-1">
                                 <?php foreach ( $all_years as $year ) : ?>
                                     <div class="form-check mb-2">
@@ -234,6 +248,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 5. TRANSMISSION FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Transmission</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search transmission..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_transmissions as $trans ) : ?>
                                     <div class="form-check mb-2">
@@ -249,6 +264,7 @@ $all_locations_terms = get_terms( array(
                         <!-- 6. OWNER TYPE FILTER -->
                         <div class="filter-group mb-4 pb-3 border-bottom">
                             <h6 class="fw-bold text-dark small mb-3">Owner Type</h6>
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search owner..." onkeyup="filterCheckboxes(this)">
                             <div class="filter-checkbox-list">
                                 <?php foreach ( $all_owners as $owner ) : ?>
                                     <div class="form-check mb-2">
@@ -645,5 +661,21 @@ jQuery(document).ready(function($) {
     }
 });
 </script>
-
-<?php get_footer(); ?>
+<script>
+function filterCheckboxes(inputElement) {
+    let filterValue = inputElement.value.toLowerCase();
+    let filterGroup = inputElement.closest('.filter-group');
+    let checkboxes = filterGroup.querySelectorAll('.form-check');
+    
+    checkboxes.forEach(function(item) {
+        let label = item.querySelector('label').textContent.toLowerCase();
+        if (label.indexOf(filterValue) > -1) {
+            item.style.display = "";
+        } else {
+            item.style.display = "none";
+        }
+    });
+}
+</script>
+<?php
+get_footer(); ?>
