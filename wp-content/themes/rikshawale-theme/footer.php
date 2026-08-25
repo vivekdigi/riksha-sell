@@ -517,6 +517,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                     btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Booking Confirmed!';
                                     notice.className = 'alert py-2 small mb-3 alert-success';
                                     notice.innerHTML = 'Payment successful! Payment ID: ' + response.razorpay_payment_id;
+                                    
+                                    var payFd = new FormData();
+                                    payFd.append('action', 'rikshawale_update_booking_payment');
+                                    payFd.append('booking_id', data.data.booking_id);
+                                    payFd.append('payment_id', response.razorpay_payment_id);
+                                    payFd.append('amount', rzData.data.amount / 100); // Convert from paise back to rupees
+                                    fetch(rikshawale_ajax.url, { method: 'POST', body: payFd });
+
                                     setTimeout(() => {
                                         var modalEl = document.getElementById('bookingModal');
                                         var modal = bootstrap.Modal.getInstance(modalEl);

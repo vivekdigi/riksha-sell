@@ -4546,10 +4546,66 @@ function rikshawale_ajax_submit_booking() {
 		'account_created' => $account_created,
 		'logged_in'       => true,
 		'user_name'       => $name,
+		'booking_id'      => $post_id,
 	) );
 }
 add_action( 'wp_ajax_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
 add_action( 'wp_ajax_nopriv_rikshawale_submit_booking', 'rikshawale_ajax_submit_booking' );
+
+function rikshawale_update_booking_payment() {
+    $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;
+    $payment_id = isset($_POST['payment_id']) ? sanitize_text_field($_POST['payment_id']) : '';
+    $amount = isset($_POST['amount']) ? sanitize_text_field($_POST['amount']) : '';
+    if ($booking_id && $payment_id) {
+        update_post_meta($booking_id, '_booking_status', 'Paid via Razorpay');
+        update_post_meta($booking_id, '_booking_payment_id', $payment_id);
+        update_post_meta($booking_id, '_booking_amount_paid', $amount);
+        wp_send_json_success(array('message' => 'Payment updated.'));
+    }
+    wp_send_json_error(array('message' => 'Invalid data.'));
+}
+add_action( 'wp_ajax_rikshawale_update_booking_payment', 'rikshawale_update_booking_payment' );
+add_action( 'wp_ajax_nopriv_rikshawale_update_booking_payment', 'rikshawale_update_booking_payment' );
+
+// Add custom columns to Bookings Admin List
+add_filter('manage_riksha_booking_posts_columns', 'rikshawale_booking_columns');
+function rikshawale_booking_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['title'] = 'Booking Details';
+    $new_columns['customer'] = 'Customer Name';
+    $new_columns['phone'] = 'Mobile Number';
+    $new_columns['payment_status'] = 'Payment Status';
+    $new_columns['amount'] = 'Amount Paid';
+    $new_columns['payment_id'] = 'Payment ID';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+
+add_action('manage_riksha_booking_posts_custom_column', 'rikshawale_booking_column_data', 10, 2);
+function rikshawale_booking_column_data($column, $post_id) {
+    switch ($column) {
+        case 'customer':
+            echo esc_html(get_post_meta($post_id, '_booking_name', true));
+            break;
+        case 'phone':
+            echo esc_html(get_post_meta($post_id, '_booking_phone', true));
+            break;
+        case 'payment_status':
+            $status = get_post_meta($post_id, '_booking_status', true) ?: 'Pending';
+            $color = ($status === 'Paid via Razorpay') ? 'green' : 'orange';
+            echo '<span style="color:' . $color . '; font-weight:bold;">' . esc_html($status) . '</span>';
+            break;
+        case 'amount':
+            $amount = get_post_meta($post_id, '_booking_amount_paid', true);
+            echo $amount ? '₹' . esc_html($amount) : '-';
+            break;
+        case 'payment_id':
+            $pay_id = get_post_meta($post_id, '_booking_payment_id', true);
+            echo $pay_id ? esc_html($pay_id) : '-';
+            break;
+    }
+}
 
 // 4. AJAX Get Logged-in User Bookings
 function rikshawale_ajax_get_user_bookings() {
