@@ -5453,7 +5453,9 @@ function rikshawale_verify_rc() {
     } elseif (!empty($data['message'])) {
         wp_send_json_error(array('message' => $data['message']));
     } else {
-        wp_send_json_error(array('message' => 'Failed to retrieve RC details. Please fill manually.'));
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_msg = wp_remote_retrieve_response_message($response);
+        wp_send_json_error(array('message' => "Failed to retrieve RC details. HTTP $response_code $response_msg. Body: " . $body));
     }
 }
 add_action('wp_ajax_rikshawale_verify_rc', 'rikshawale_verify_rc');
