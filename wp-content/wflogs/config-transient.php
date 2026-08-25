@@ -3,4 +3,4 @@
 This file is used by the Wordfence Web Application Firewall. Read 
 more at https://docs.wordfence.com/en/Web_Application_Firewall_FAQ
 ******************************************************************
-a:2:{s:23:"createInitialRulesDelay";i:1787580658;s:32:"cookieRedactionLastUpdateFailure";i:1787288038;}
+a:2:{s:23:"createInitialRulesDelay";i:1787649981;s:32:"cookieRedactionLastUpdateFailure";i:1787288038;}

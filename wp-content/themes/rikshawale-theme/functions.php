@@ -5410,15 +5410,28 @@ function rikshawale_verify_rc() {
         wp_send_json_error(array('message' => 'Registration number is required.'));
     }
 
+    // DEVELOPER MOCK MODE: Bypass Cashfree for testing if RC is DL01TEST
+    if (strtoupper($rc_number) === 'DL01TEST') {
+        wp_send_json_success(array(
+            'data' => array(
+                'reg_no' => 'DL01TEST',
+                'maker_model' => 'BAJAJ COMPACT RE',
+                'reg_date' => '2018-05-12',
+                'vehicle_class' => 'Auto Riksha',
+                'fuel_type' => 'CNG'
+            )
+        ));
+    }
+
     $mode = get_option('rikshawale_cashfree_mode', 'test');
     if ($mode === 'live') {
         $client_id = get_option('rikshawale_cashfree_live_client_id');
         $client_secret = get_option('rikshawale_cashfree_live_client_secret');
-        $url = 'https://api.cashfree.com/verification/rc';
+        $url = 'https://api.cashfree.com/verification/vehicle-rc';
     } else {
         $client_id = get_option('rikshawale_cashfree_test_client_id');
         $client_secret = get_option('rikshawale_cashfree_test_client_secret');
-        $url = 'https://sandbox.cashfree.com/verification/rc';
+        $url = 'https://sandbox.cashfree.com/verification/vehicle-rc';
     }
 
     if (empty($client_id) || empty($client_secret)) {
@@ -5432,7 +5445,7 @@ function rikshawale_verify_rc() {
             'Content-Type' => 'application/json',
         ),
         'body' => wp_json_encode(array(
-            'rc_number' => $rc_number
+            'vehicle_number' => $rc_number
         )),
         'timeout' => 30,
     );

@@ -135,7 +135,7 @@ $states = array(
                     <div class="row g-3 mb-3 justify-content-center">
                         <div class="col-12 col-md-6">
                             <label class="sell-label" for="seller_reg_no_verify">Registration Number <span class="text-danger">*</span></label>
-                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. DL01AB1234" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
+                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. DL01AB1234" value="DL01TEST" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
                         </div>
                     </div>
                     <div id="verify-error-msg" class="alert alert-danger mx-auto mt-3" style="max-width: 500px; display: none;"></div>
@@ -379,7 +379,7 @@ $states = array(
 
                 <!-- Condition & Accident History -->
                 <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         <label class="sell-label" for="riksha_vehicle_condition">Overall Vehicle Condition <span class="text-danger">*</span></label>
                         <select class="sell-input form-select" id="riksha_vehicle_condition" name="riksha_vehicle_condition" required>
                             <option value="Good">Good</option>
@@ -388,16 +388,12 @@ $states = array(
                             <option value="Poor">Poor</option>
                         </select>
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         <label class="sell-label" for="riksha_accident_history">Accident History? <span class="text-danger">*</span></label>
                         <select class="sell-input form-select" id="riksha_accident_history" name="riksha_accident_history" required>
                             <option value="No">No Accident</option>
                             <option value="Yes">Yes</option>
                         </select>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label class="sell-label" for="riksha_original_price">Original Price (INR) <span class="text-danger">*</span></label>
-                        <input type="number" class="sell-input form-control" id="riksha_original_price" name="riksha_original_price" placeholder="Ex-Showroom Price" required>
                     </div>
                 </div>
 
@@ -659,14 +655,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         // Example mapping (adjust according to actual Cashfree API response structure):
                         if (data.maker_model) {
-                            // Split maker and model roughly if combined, or map directly if separate
-                            // Let's assume we map it directly if possible, or leave it for user to select
+                            // We can try to guess the brand. If it contains 'Bajaj', we select 'Bajaj'
+                            var makerStr = data.maker_model.toUpperCase();
+                            var brandSelect = document.getElementById('riksha_brand');
+                            for (var i = 0; i < brandSelect.options.length; i++) {
+                                if (makerStr.includes(brandSelect.options[i].value.toUpperCase())) {
+                                    brandSelect.value = brandSelect.options[i].value;
+                                    if (typeof jQuery !== 'undefined') jQuery(brandSelect).trigger('change');
+                                    break;
+                                }
+                            }
                         }
                         if (data.reg_date || data.manufacturing_date) {
                             var year = (data.manufacturing_date || data.reg_date).split('-')[0];
                             if (year) {
-                                document.getElementById('riksha_mfg_year').value = year;
-                                document.getElementById('riksha_reg_year').value = year;
+                                var mfgEl = document.getElementById('riksha_mfg_year');
+                                var regEl = document.getElementById('riksha_reg_year');
+                                mfgEl.value = year;
+                                regEl.value = year;
+                                if (typeof jQuery !== 'undefined') {
+                                    jQuery(mfgEl).trigger('change');
+                                    jQuery(regEl).trigger('change');
+                                }
+                            }
+                        }
+                        if (data.fuel_type) {
+                            var fuelEl = document.getElementById('riksha_fuel_type');
+                            if (fuelEl) {
+                                fuelEl.value = data.fuel_type;
+                                if (typeof jQuery !== 'undefined') jQuery(fuelEl).trigger('change');
                             }
                         }
                         // Move to next step regardless
