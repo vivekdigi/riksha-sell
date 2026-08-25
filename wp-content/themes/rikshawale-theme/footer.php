@@ -496,16 +496,63 @@ document.addEventListener('DOMContentLoaded', function() {
                 notice.className = 'alert py-2 small mb-3 alert-' + (data.success ? 'success' : 'danger');
                 notice.innerHTML = data.data.message;
                 if (data.success) {
-                    bookingForm.reset();
-                    btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Submitted!';
-                    setTimeout(() => {
-                        var modalEl = document.getElementById('bookingModal');
-                        var modal = bootstrap.Modal.getInstance(modalEl);
-                        if (modal) modal.hide();
-                        if (data.data && data.data.logged_in) {
-                            window.location.reload();
+                    btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Inquiry Saved! Initiating Payment...';
+                    var rzFd = new FormData();
+                    rzFd.append('action', 'rikshawale_create_razorpay_order');
+                    rzFd.append('car_id', document.getElementById('bookingCarId').value);
+                    
+                    fetch(rikshawale_ajax.url, { method: 'POST', body: rzFd })
+                    .then(r => r.json())
+                    .then(rzData => {
+                        if (rzData.success) {
+                            var options = {
+                                "key": rzData.data.key_id,
+                                "amount": rzData.data.amount,
+                                "currency": "INR",
+                                "name": "Rikshawale",
+                                "description": "Vehicle Booking: " + document.getElementById('bookingCarTitleInput').value,
+                                "order_id": rzData.data.order_id,
+                                "handler": function (response){
+                                    bookingForm.reset();
+                                    btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Booking Confirmed!';
+                                    notice.className = 'alert py-2 small mb-3 alert-success';
+                                    notice.innerHTML = 'Payment successful! Payment ID: ' + response.razorpay_payment_id;
+                                    setTimeout(() => {
+                                        var modalEl = document.getElementById('bookingModal');
+                                        var modal = bootstrap.Modal.getInstance(modalEl);
+                                        if (modal) modal.hide();
+                                        window.location.reload();
+                                    }, 2000);
+                                },
+                                "prefill": {
+                                    "name": document.getElementById('bookingNameInput').value,
+                                    "email": document.getElementById('bookingEmailInput').value,
+                                    "contact": document.getElementById('bookingPhoneInput').value
+                                },
+                                "theme": {
+                                    "color": "#db2d2e"
+                                }
+                            };
+                            // Ensure Razorpay script is loaded
+                            if (typeof Razorpay === 'undefined') {
+                                var script = document.createElement('script');
+                                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                                script.onload = function() {
+                                    var rzp1 = new Razorpay(options);
+                                    rzp1.open();
+                                };
+                                document.head.appendChild(script);
+                            } else {
+                                var rzp1 = new Razorpay(options);
+                                rzp1.open();
+                            }
+                        } else {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Retry Payment';
+                            notice.className = 'alert py-2 small mb-3 alert-danger';
+                            notice.innerHTML = 'Payment Error: ' + rzData.data.message;
                         }
-                    }, 2000);
+                    });
                 } else {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';

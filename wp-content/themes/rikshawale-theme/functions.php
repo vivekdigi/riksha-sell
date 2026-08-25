@@ -5343,8 +5343,8 @@ add_action( 'wp_ajax_nopriv_rikshawale_sell_car', 'rikshawale_handle_sell_car_aj
  */
 function rikshawale_cashfree_settings_menu() {
     add_options_page(
-        'Cashfree API Settings',
-        'Cashfree API',
+        'API Settings',
+        'API Settings',
         'manage_options',
         'rikshawale-cashfree',
         'rikshawale_cashfree_settings_page'
@@ -5358,16 +5358,22 @@ function rikshawale_cashfree_settings_init() {
     register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_test_client_secret');
     register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_live_client_id');
     register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_live_client_secret');
+    // Razorpay Settings
+    register_setting('rikshawale_cashfree_options', 'rikshawale_razorpay_key_id');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_razorpay_key_secret');
 }
 add_action('admin_init', 'rikshawale_cashfree_settings_init');
 
 function rikshawale_cashfree_settings_page() {
     ?>
     <div class="wrap">
-        <h1>Cashfree API Settings</h1>
+        <h1>API Settings</h1>
         <form method="post" action="options.php">
             <?php settings_fields('rikshawale_cashfree_options'); ?>
             <?php do_settings_sections('rikshawale_cashfree_options'); ?>
+            
+            <hr>
+            <h2>Cashfree RC Verification</h2>
             <table class="form-table">
                 <tr valign="top">
                     <th scope="row">API Mode</th>
@@ -5395,6 +5401,20 @@ function rikshawale_cashfree_settings_page() {
                     <td><input type="password" name="rikshawale_cashfree_live_client_secret" value="<?php echo esc_attr(get_option('rikshawale_cashfree_live_client_secret')); ?>" class="regular-text" /></td>
                 </tr>
             </table>
+
+            <hr>
+            <h2>Razorpay Payment Gateway</h2>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">Razorpay Key ID</th>
+                    <td><input type="text" name="rikshawale_razorpay_key_id" value="<?php echo esc_attr(get_option('rikshawale_razorpay_key_id')); ?>" class="regular-text" placeholder="rzp_test_..." /></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Razorpay Key Secret</th>
+                    <td><input type="password" name="rikshawale_razorpay_key_secret" value="<?php echo esc_attr(get_option('rikshawale_razorpay_key_secret')); ?>" class="regular-text" /></td>
+                </tr>
+            </table>
+            
             <?php submit_button(); ?>
         </form>
     </div>
@@ -5473,6 +5493,77 @@ function rikshawale_verify_rc() {
 }
 add_action('wp_ajax_rikshawale_verify_rc', 'rikshawale_verify_rc');
 add_action('wp_ajax_nopriv_rikshawale_verify_rc', 'rikshawale_verify_rc');
+
+/**
+ * AJAX Handler for creating Razorpay Order
+ */
+function rikshawale_create_razorpay_order() {
+    $car_id = isset($_POST['car_id']) ? intval($_POST['car_id']) : 0;
+    
+    if (!$car_id) {
+        wp_send_json_error(array('message' => 'Invalid vehicle ID.'));
+        wp_die();
+    }
+
+    $key_id = get_option('rikshawale_razorpay_key_id');
+    $key_secret = get_option('rikshawale_razorpay_key_secret');
+
+    if (empty($key_id) || empty($key_secret)) {
+        wp_send_json_error(array('message' => 'Razorpay API credentials are not configured.'));
+        wp_die();
+    }
+
+    // Get vehicle price
+    $raw_price_str = get_post_meta( $car_id, '_car_price', true ) ?: get_post_meta( $car_id, '_riksha_price', true );
+    $numeric_price = preg_replace( '/[^0-9]/', '', $raw_price_str );
+    $amount = (!empty($numeric_price) && floatval($numeric_price) > 0) ? floatval($numeric_price) : 0;
+    
+    if ($amount <= 0) {
+        wp_send_json_error(array('message' => 'Vehicle price is not valid.'));
+        wp_die();
+    }
+
+    $amount_in_paise = round($amount * 100);
+
+    $url = 'https://api.razorpay.com/v1/orders';
+    
+    $args = array(
+        'headers' => array(
+            'Authorization' => 'Basic ' . base64_encode($key_id . ':' . $key_secret),
+            'Content-Type'  => 'application/json',
+        ),
+        'body' => wp_json_encode(array(
+            'amount'   => $amount_in_paise,
+            'currency' => 'INR',
+            'receipt'  => 'rcpt_' . time() . '_' . $car_id,
+        )),
+    );
+
+    $response = wp_remote_post($url, $args);
+
+    if (is_wp_error($response)) {
+        wp_send_json_error(array('message' => 'Error communicating with Razorpay API.'));
+        wp_die();
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    if (isset($data['id'])) {
+        wp_send_json_success(array(
+            'order_id' => $data['id'],
+            'key_id'   => $key_id,
+            'amount'   => $amount_in_paise,
+        ));
+    } else {
+        $error_msg = isset($data['error']['description']) ? $data['error']['description'] : 'Unknown Razorpay error.';
+        wp_send_json_error(array('message' => $error_msg));
+    }
+
+    wp_die();
+}
+add_action('wp_ajax_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
+add_action('wp_ajax_nopriv_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
 
 // Hide Plugins Menu from admin
 add_action( 'admin_menu', 'hide_plugins_menu_from_admin', 999 );
