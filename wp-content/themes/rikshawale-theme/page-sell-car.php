@@ -126,8 +126,31 @@ $states = array(
             <form id="sell-car-form" method="post" enctype="multipart/form-data" novalidate>
                 <?php wp_nonce_field( 'rikshawale_sell_car_action', 'rikshawale_sell_car_nonce' ); ?>
 
+                <!-- ===== STEP 0: RC VERIFICATION ===== -->
+                <div id="step-0-container">
+                    <div class="mb-4 text-center">
+                        <h4 class="fw-bold" style="color: #0f172a;">Verify Your Riksha</h4>
+                        <p class="text-muted small">Enter your registration number to auto-fill details and get a quick valuation.</p>
+                    </div>
+                    <div class="row g-3 mb-3 justify-content-center">
+                        <div class="col-12 col-md-6">
+                            <label class="sell-label" for="seller_reg_no_verify">Registration Number <span class="text-danger">*</span></label>
+                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. DL01AB1234" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
+                        </div>
+                    </div>
+                    <div id="verify-error-msg" class="alert alert-danger mx-auto mt-3" style="max-width: 500px; display: none;"></div>
+                    <div class="d-flex align-items-center justify-content-center flex-column gap-3 pt-3 mt-4">
+                        <button type="button" id="verify-rc-btn" class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm w-100" style="max-width: 300px; font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
+                            VERIFY & CONTINUE <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </button>
+                        <button type="button" id="skip-verify-btn" class="btn btn-link text-muted" style="text-decoration:none; font-size: 0.9rem;">
+                            Skip & fill details manually
+                        </button>
+                    </div>
+                </div>
+
                 <!-- ===== STEP 1: CAR DETAILS ===== -->
-                <div id="step-1-container">
+                <div id="step-1-container" style="display:none;">
                     <!-- Row 1: Name / Mobile / WhatsApp -->
                     <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6 col-lg-4">
@@ -584,6 +607,93 @@ $states = array(
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var verifyBtn = document.getElementById('verify-rc-btn');
+    var skipBtn = document.getElementById('skip-verify-btn');
+    var step0 = document.getElementById('step-0-container');
+    var step1 = document.getElementById('step-1-container');
+    var errorMsg = document.getElementById('verify-error-msg');
+    var regInputVerify = document.getElementById('seller_reg_no_verify');
+    var regInputMain = document.getElementById('seller_reg_no');
+    var ajaxurl = '<?php echo esc_url( admin_url("admin-ajax.php") ); ?>';
+
+    function proceedToStep1() {
+        step0.style.display = 'none';
+        step1.style.display = 'block';
+    }
+
+    skipBtn.addEventListener('click', function() {
+        proceedToStep1();
+    });
+
+    verifyBtn.addEventListener('click', function() {
+        var regNo = regInputVerify.value.trim();
+        errorMsg.style.display = 'none';
+
+        if (!regNo) {
+            errorMsg.textContent = 'Please enter a registration number.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = 'VERIFYING... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
+        var formData = new FormData();
+        formData.append('action', 'rikshawale_verify_rc');
+        formData.append('rc_number', regNo);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', ajaxurl, true);
+        xhr.onload = function() {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = 'VERIFY & CONTINUE <i class="fa-solid fa-arrow-right ms-2"></i>';
+
+            if (xhr.status === 200) {
+                try {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.success) {
+                        // Map data
+                        regInputMain.value = regNo;
+                        var data = res.data;
+                        
+                        // Example mapping (adjust according to actual Cashfree API response structure):
+                        if (data.maker_model) {
+                            // Split maker and model roughly if combined, or map directly if separate
+                            // Let's assume we map it directly if possible, or leave it for user to select
+                        }
+                        if (data.reg_date || data.manufacturing_date) {
+                            var year = (data.manufacturing_date || data.reg_date).split('-')[0];
+                            if (year) {
+                                document.getElementById('riksha_mfg_year').value = year;
+                                document.getElementById('riksha_reg_year').value = year;
+                            }
+                        }
+                        // Move to next step regardless
+                        proceedToStep1();
+                    } else {
+                        errorMsg.textContent = res.data.message || 'Verification failed. Please skip or try again.';
+                        errorMsg.style.display = 'block';
+                    }
+                } catch(e) {
+                    errorMsg.textContent = 'Error parsing response. Please skip and fill manually.';
+                    errorMsg.style.display = 'block';
+                }
+            } else {
+                errorMsg.textContent = 'Server error. Please skip and fill manually.';
+                errorMsg.style.display = 'block';
+            }
+        };
+        xhr.onerror = function() {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = 'VERIFY & CONTINUE <i class="fa-solid fa-arrow-right ms-2"></i>';
+            errorMsg.textContent = 'Network error. Please skip and fill manually.';
+            errorMsg.style.display = 'block';
+        };
+        xhr.send(formData);
+    });
+});
+
 function previewSellImage(input, idx) {
     var preview = document.getElementById('img-preview-' + idx);
     var placeholder = document.getElementById('img-placeholder-' + idx);

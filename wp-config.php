@@ -88,8 +88,10 @@ $table_prefix = 'wp_';
 define( 'WP_DEBUG', false );
 
 /* Add any custom values between this line and the "stop editing" line. */
+set_time_limit(300);
 
-
+// Disable Plugin and Theme Update and Installation
+define( 'DISALLOW_FILE_MODS', true );
 
 /* That's all, stop editing! Happy publishing. */
 

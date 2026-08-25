@@ -2832,6 +2832,7 @@ function rikshawale_handle_sell_car_submission() {
         '_car_vehicle_condition'=> $vehicle_condition,
         '_car_accident_history'=> $accident_history,
         '_car_original_price'  => $original_price,
+        '_car_engine_cc'       => $engine_cc,
     );
     foreach ( $meta as $key => $val ) {
         update_post_meta( $post_id, $key, $val );
@@ -2926,16 +2927,21 @@ function rikshawale_handle_sell_car_submission() {
         'number_of_owners' => $parsed_owners,
         'registration_year' => (int) $reg_year,
         'variant' => $variant ? $variant : 'Passenger',
-        'motor_condition' => $motor_condition,
         'vehicle_condition' => $vehicle_condition,
+        'fuel_type' => ucwords(strtolower($fuel))
     );
     
-    // Add EV and other detailed fields if provided
+    // Add EV or ICE specific fields
     if ( strtolower($fuel) === 'electric' ) {
+        $api_payload['motor_condition'] = $motor_condition;
         if ( !empty($battery_type) ) $api_payload['battery_type'] = $battery_type;
         if ( $battery_age_years > 0 ) $api_payload['battery_age_years'] = $battery_age_years;
         if ( !empty($battery_condition) ) $api_payload['battery_condition'] = $battery_condition;
         if ( !empty($battery_replaced) ) $api_payload['battery_replaced'] = $battery_replaced;
+    } else {
+        $api_payload['engine_condition'] = $motor_condition ? $motor_condition : 'Good';
+        $api_payload['engine_cc'] = $engine_cc > 0 ? $engine_cc : 230; 
+        $api_payload['engine_reconditioned'] = 'No';
     }
     
     if ( $original_price > 0 ) $api_payload['original_ex_showroom_price'] = $original_price;
@@ -3482,6 +3488,7 @@ function rikshawale_render_car_submission_metabox( $post ) {
         <div class="car-sub-field"><label>Owner Type</label><strong><?php echo $m('_car_owner_type') ?: $m('_riksha_owner_type'); ?></strong></div>
         <div class="car-sub-field"><label>Driven (KM)</label><strong><?php echo $m('_car_driven_km') ?: $m('_riksha_driven_km'); ?></strong></div>
         <div class="car-sub-field"><label>Fuel Type</label><strong><?php echo $m('_car_fuel') ?: $m('_riksha_fuel'); ?></strong></div>
+        <div class="car-sub-field"><label>Engine CC</label><strong><?php echo $m('_car_engine_cc') ?: 'N/A'; ?></strong></div>
         <div class="car-sub-field"><label>Transmission</label><strong><?php echo $m('_car_transmission') ?: $m('_riksha_transmission'); ?></strong></div>
         <div class="car-sub-field" style="grid-column: span 3;"><label>Expected Price</label><strong><?php echo $m('_car_expected_price') ?: $m('_riksha_expected_price'); ?></strong></div>
     </div>
@@ -3716,7 +3723,7 @@ function rikshawale_approve_car_submission_handler() {
         '_car_gallery_image_1', '_car_gallery_image_2', '_car_gallery_image_3',
         '_car_gallery_image_4', '_car_gallery_image_5',
         '_car_ai_valuation_min', '_car_ai_valuation_max',
-        '_car_ai_condition_score', '_car_ai_summary'
+        '_car_ai_condition_score', '_car_ai_summary', '_car_engine_cc'
     );
     foreach ( $meta_keys as $key ) {
         $val = $m( $key );
@@ -3729,6 +3736,9 @@ function rikshawale_approve_car_submission_handler() {
             // Also set _car_price from expected price
             if ( $key === '_car_expected_price' ) {
                 update_post_meta( $inventory_id, '_car_price', $val );
+            }
+            if ( $key === '_car_engine_cc' ) {
+                update_post_meta( $inventory_id, 'riksha_power', $val . ' cc' );
             }
         }
     }
@@ -5322,3 +5332,135 @@ function rikshawale_handle_sell_car_ajax() {
 add_action( 'wp_ajax_rikshawale_sell_car', 'rikshawale_handle_sell_car_ajax' );
 add_action( 'wp_ajax_nopriv_rikshawale_sell_car', 'rikshawale_handle_sell_car_ajax' );
 
+/**
+ * ==============================================================================
+ * Cashfree API Integration
+ * ==============================================================================
+ */
+
+/**
+ * Register Cashfree Settings Page
+ */
+function rikshawale_cashfree_settings_menu() {
+    add_options_page(
+        'Cashfree API Settings',
+        'Cashfree API',
+        'manage_options',
+        'rikshawale-cashfree',
+        'rikshawale_cashfree_settings_page'
+    );
+}
+add_action('admin_menu', 'rikshawale_cashfree_settings_menu');
+
+function rikshawale_cashfree_settings_init() {
+    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_mode');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_test_client_id');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_test_client_secret');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_live_client_id');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_live_client_secret');
+}
+add_action('admin_init', 'rikshawale_cashfree_settings_init');
+
+function rikshawale_cashfree_settings_page() {
+    ?>
+    <div class="wrap">
+        <h1>Cashfree API Settings</h1>
+        <form method="post" action="options.php">
+            <?php settings_fields('rikshawale_cashfree_options'); ?>
+            <?php do_settings_sections('rikshawale_cashfree_options'); ?>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">API Mode</th>
+                    <td>
+                        <select name="rikshawale_cashfree_mode">
+                            <option value="test" <?php selected(get_option('rikshawale_cashfree_mode'), 'test'); ?>>Test Mode</option>
+                            <option value="live" <?php selected(get_option('rikshawale_cashfree_mode'), 'live'); ?>>Live Mode</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Test Client ID</th>
+                    <td><input type="text" name="rikshawale_cashfree_test_client_id" value="<?php echo esc_attr(get_option('rikshawale_cashfree_test_client_id')); ?>" class="regular-text" /></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Test Client Secret</th>
+                    <td><input type="password" name="rikshawale_cashfree_test_client_secret" value="<?php echo esc_attr(get_option('rikshawale_cashfree_test_client_secret')); ?>" class="regular-text" /></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Live Client ID</th>
+                    <td><input type="text" name="rikshawale_cashfree_live_client_id" value="<?php echo esc_attr(get_option('rikshawale_cashfree_live_client_id')); ?>" class="regular-text" /></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Live Client Secret</th>
+                    <td><input type="password" name="rikshawale_cashfree_live_client_secret" value="<?php echo esc_attr(get_option('rikshawale_cashfree_live_client_secret')); ?>" class="regular-text" /></td>
+                </tr>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+}
+
+/**
+ * AJAX Handler for RC Verification
+ */
+function rikshawale_verify_rc() {
+    $rc_number = sanitize_text_field($_POST['rc_number'] ?? '');
+    if (empty($rc_number)) {
+        wp_send_json_error(array('message' => 'Registration number is required.'));
+    }
+
+    $mode = get_option('rikshawale_cashfree_mode', 'test');
+    if ($mode === 'live') {
+        $client_id = get_option('rikshawale_cashfree_live_client_id');
+        $client_secret = get_option('rikshawale_cashfree_live_client_secret');
+        $url = 'https://api.cashfree.com/verification/rc';
+    } else {
+        $client_id = get_option('rikshawale_cashfree_test_client_id');
+        $client_secret = get_option('rikshawale_cashfree_test_client_secret');
+        $url = 'https://sandbox.cashfree.com/verification/rc';
+    }
+
+    if (empty($client_id) || empty($client_secret)) {
+        wp_send_json_error(array('message' => 'Cashfree API credentials are not configured.'));
+    }
+
+    $args = array(
+        'headers' => array(
+            'x-client-id' => $client_id,
+            'x-client-secret' => $client_secret,
+            'Content-Type' => 'application/json',
+        ),
+        'body' => wp_json_encode(array(
+            'rc_number' => $rc_number
+        )),
+        'timeout' => 30,
+    );
+
+    $response = wp_remote_post($url, $args);
+
+    if (is_wp_error($response)) {
+        wp_send_json_error(array('message' => 'Failed to connect to verification server.'));
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    
+    // Check if the response from Cashfree is successful. The actual response structure 
+    // may vary, so this is a generic check based on common Cashfree patterns.
+    if (!empty($data['status']) && $data['status'] === 'SUCCESS' && !empty($data['data'])) {
+        wp_send_json_success(array('data' => $data['data']));
+    } elseif (!empty($data['message'])) {
+        wp_send_json_error(array('message' => $data['message']));
+    } else {
+        wp_send_json_error(array('message' => 'Failed to retrieve RC details. Please fill manually.'));
+    }
+}
+add_action('wp_ajax_rikshawale_verify_rc', 'rikshawale_verify_rc');
+add_action('wp_ajax_nopriv_rikshawale_verify_rc', 'rikshawale_verify_rc');
+
+// Hide Plugins Menu from admin
+add_action( 'admin_menu', 'hide_plugins_menu_from_admin', 999 );
+function hide_plugins_menu_from_admin() {
+    remove_menu_page( 'plugins.php' );
+}
