@@ -4568,8 +4568,8 @@ add_action( 'wp_ajax_rikshawale_update_booking_payment', 'rikshawale_update_book
 add_action( 'wp_ajax_nopriv_rikshawale_update_booking_payment', 'rikshawale_update_booking_payment' );
 
 // Add custom columns to Bookings Admin List
-add_filter('manage_riksha_booking_posts_columns', 'rikshawale_booking_columns');
-function rikshawale_booking_columns($columns) {
+add_filter('manage_riksha_booking_posts_columns', 'rikshawale_booking_columns2  ');
+function rikshawale_booking_columns2($columns) {
     $new_columns = array();
     $new_columns['cb'] = $columns['cb'];
     $new_columns['title'] = 'Booking Details';
