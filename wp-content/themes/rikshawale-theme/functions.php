@@ -5486,18 +5486,6 @@ function rikshawale_verify_rc() {
         wp_send_json_error(array('message' => 'Registration number is required.'));
     }
 
-    // DEVELOPER MOCK MODE: Bypass Cashfree for testing if RC is DL01TEST
-    if (strtoupper($rc_number) === 'DL01TEST') {
-        wp_send_json_success(array(
-            'data' => array(
-                'reg_no' => 'DL01TEST',
-                'maker_model' => 'BAJAJ COMPACT RE',
-                'reg_date' => '2018-05-12',
-                'vehicle_class' => 'Auto Riksha',
-                'fuel_type' => 'CNG'
-            )
-        ));
-    }
 
     $mode = get_option('rikshawale_cashfree_mode', 'test');
     if ($mode === 'live') {
@@ -5514,6 +5502,8 @@ function rikshawale_verify_rc() {
         wp_send_json_error(array('message' => 'Cashfree API credentials are not configured.'));
     }
 
+    $verification_id = 'rc_verify_' . time() . '_' . wp_rand(1000, 9999);
+
     $args = array(
         'headers' => array(
             'x-client-id' => $client_id,
@@ -5521,6 +5511,7 @@ function rikshawale_verify_rc() {
             'Content-Type' => 'application/json',
         ),
         'body' => wp_json_encode(array(
+            'verification_id' => $verification_id,
             'vehicle_number' => $rc_number
         )),
         'timeout' => 30,
@@ -5535,10 +5526,10 @@ function rikshawale_verify_rc() {
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
     
-    // Check if the response from Cashfree is successful. The actual response structure 
-    // may vary, so this is a generic check based on common Cashfree patterns.
-    if (!empty($data['status']) && $data['status'] === 'SUCCESS' && !empty($data['data'])) {
-        wp_send_json_success(array('data' => $data['data']));
+    // Check if the response from Cashfree is successful.
+    // The Cashfree RC API returns "status": "VALID" on success and the data is flat at the root level.
+    if (!empty($data['status']) && $data['status'] === 'VALID') {
+        wp_send_json_success($data);
     } elseif (!empty($data['message'])) {
         wp_send_json_error(array('message' => $data['message']));
     } else {

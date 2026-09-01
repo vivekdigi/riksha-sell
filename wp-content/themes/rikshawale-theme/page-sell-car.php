@@ -135,7 +135,7 @@ $states = array(
                     <div class="row g-3 mb-3 justify-content-center">
                         <div class="col-12 col-md-6">
                             <label class="sell-label" for="seller_reg_no_verify">Registration Number <span class="text-danger">*</span></label>
-                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. DL01AB1234" value="DL01TEST" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
+                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. DL01AB1234" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
                         </div>
                     </div>
                     <div id="verify-error-msg" class="alert alert-danger mx-auto mt-3" style="max-width: 500px; display: none;"></div>
@@ -654,15 +654,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         var data = res.data;
                         
                         // Example mapping (adjust according to actual Cashfree API response structure):
-                        if (data.maker_model) {
-                            // We can try to guess the brand. If it contains 'Bajaj', we select 'Bajaj'
-                            var makerStr = data.maker_model.toUpperCase();
-                            var brandSelect = document.getElementById('riksha_brand');
-                            for (var i = 0; i < brandSelect.options.length; i++) {
-                                if (makerStr.includes(brandSelect.options[i].value.toUpperCase())) {
-                                    brandSelect.value = brandSelect.options[i].value;
-                                    if (typeof jQuery !== 'undefined') jQuery(brandSelect).trigger('change');
-                                    break;
+                        var maker = data.maker_model || data.vehicle_manufacturer_name;
+                        if (maker) {
+                            var makerStr = maker.toUpperCase();
+                            var brandSelect = document.getElementById('riksha_brand_name');
+                            if (brandSelect) {
+                                for (var i = 0; i < brandSelect.options.length; i++) {
+                                    var optVal = brandSelect.options[i].value.toUpperCase();
+                                    if (optVal && makerStr.includes(optVal)) {
+                                        brandSelect.value = brandSelect.options[i].value;
+                                        if (typeof jQuery !== 'undefined') jQuery(brandSelect).trigger('change');
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -671,19 +674,44 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (year) {
                                 var mfgEl = document.getElementById('riksha_mfg_year');
                                 var regEl = document.getElementById('riksha_reg_year');
-                                mfgEl.value = year;
-                                regEl.value = year;
+                                if (mfgEl) mfgEl.value = year;
+                                if (regEl) regEl.value = year;
                                 if (typeof jQuery !== 'undefined') {
-                                    jQuery(mfgEl).trigger('change');
-                                    jQuery(regEl).trigger('change');
+                                    if (mfgEl) jQuery(mfgEl).trigger('change');
+                                    if (regEl) jQuery(regEl).trigger('change');
                                 }
                             }
                         }
-                        if (data.fuel_type) {
-                            var fuelEl = document.getElementById('riksha_fuel_type');
+                        var fuel = data.fuel_type || data.type;
+                        if (fuel) {
+                            var fuelEl = document.getElementById('riksha_fuel');
                             if (fuelEl) {
-                                fuelEl.value = data.fuel_type;
-                                if (typeof jQuery !== 'undefined') jQuery(fuelEl).trigger('change');
+                                for (var j = 0; j < fuelEl.options.length; j++) {
+                                    var fuelOptVal = fuelEl.options[j].value.toUpperCase();
+                                    if (fuelOptVal && fuel.toUpperCase().includes(fuelOptVal)) {
+                                        fuelEl.value = fuelEl.options[j].value;
+                                        if (typeof jQuery !== 'undefined') jQuery(fuelEl).trigger('change');
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (data.model) {
+                            var modelStr = data.model.toUpperCase();
+                            var modelSelect = document.getElementById('riksha_model_name');
+                            var variantInput = document.getElementById('riksha_variant');
+                            if (modelSelect) {
+                                for (var k = 0; k < modelSelect.options.length; k++) {
+                                    var modOptVal = modelSelect.options[k].value.toUpperCase();
+                                    if (modOptVal && modelStr.includes(modOptVal)) {
+                                        modelSelect.value = modelSelect.options[k].value;
+                                        if (typeof jQuery !== 'undefined') jQuery(modelSelect).trigger('change');
+                                        break;
+                                    }
+                                }
+                            }
+                            if (variantInput && !variantInput.value) {
+                                variantInput.value = data.model;
                             }
                         }
                         // Move to next step regardless
