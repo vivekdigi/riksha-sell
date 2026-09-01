@@ -282,56 +282,73 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <!-- Vehicle Card Header preview -->
-                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3 border" id="bookingCarPreview">
-                    <img id="bookingCarImg" src="" alt="Car" class="rounded-2 object-fit-cover" style="width: 70px; height: 50px; background:#ddd;">
-                    <div>
-                        <h6 class="fw-bold text-dark mb-0" id="bookingCarTitle">Vehicle Title</h6>
-                        <span class="small text-danger fw-bold" id="bookingCarPrice">₹0.00</span>
-                    </div>
+                <!-- Step Indicator -->
+                <div class="d-flex justify-content-center mb-4" id="bookingSteps">
+                    <span class="badge bg-primary rounded-pill px-3 py-2 me-2 shadow-sm" id="step1Badge">1. Booking Details</span>
+                    <span class="badge bg-secondary rounded-pill px-3 py-2 shadow-sm" id="step2Badge">2. Payment</span>
                 </div>
-                <div id="bookingNotice" class="alert d-none py-2 small mb-3"></div>
-                <form id="rikshawaleBookingForm">
-                    <input type="hidden" name="car_id" id="bookingCarId" value="">
-                    <input type="hidden" name="car_title" id="bookingCarTitleInput" value="">
-                    <div class="row g-2 mb-2">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Your Name *</label>
-                            <input type="text" class="form-control rounded-3" name="booking_name" id="bookingNameInput" required placeholder="Full Name">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Mobile Number *</label>
-                            <input type="tel" class="form-control rounded-3" name="booking_phone" id="bookingPhoneInput" required placeholder="Mobile No.">
+
+                <div id="bookingStep1">
+                    <!-- Vehicle Card Header preview -->
+                    <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3 border" id="bookingCarPreview">
+                        <img id="bookingCarImg" src="" alt="Car" class="rounded-2 object-fit-cover" style="width: 70px; height: 50px; background:#ddd;">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0" id="bookingCarTitle">Vehicle Title</h6>
+                            <span class="small text-danger fw-bold" id="bookingCarPrice">₹0.00</span>
                         </div>
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Alternate Number</label>
-                            <input type="tel" class="form-control rounded-3" name="booking_alt_phone" id="bookingAltPhoneInput" placeholder="Alternate Mobile">
+                    <div id="bookingNotice" class="alert d-none py-2 small mb-3"></div>
+                    <form id="rikshawaleBookingForm">
+                        <input type="hidden" name="car_id" id="bookingCarId" value="">
+                        <input type="hidden" name="car_title" id="bookingCarTitleInput" value="">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Your Name *</label>
+                                <input type="text" class="form-control rounded-3" name="booking_name" id="bookingNameInput" required placeholder="Full Name">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Mobile Number *</label>
+                                <input type="tel" class="form-control rounded-3" name="booking_phone" id="bookingPhoneInput" required placeholder="Mobile No.">
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Email Address *</label>
-                            <input type="email" class="form-control rounded-3" name="booking_email" id="bookingEmailInput" required placeholder="email@domain.com">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Alternate Number</label>
+                                <input type="tel" class="form-control rounded-3" name="booking_alt_phone" id="bookingAltPhoneInput" placeholder="Alternate Mobile">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Email Address *</label>
+                                <input type="email" class="form-control rounded-3" name="booking_email" id="bookingEmailInput" required placeholder="email@domain.com">
+                            </div>
                         </div>
-                    </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">City / State</label>
-                            <input type="text" class="form-control rounded-3" name="booking_city" placeholder="e.g. Delhi">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">City / State</label>
+                                <input type="text" class="form-control rounded-3" name="booking_city" placeholder="e.g. Delhi">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Preferred Visit Date</label>
+                                <input type="date" class="form-control rounded-3" name="booking_date">
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">Preferred Visit Date</label>
-                            <input type="date" class="form-control rounded-3" name="booking_date">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Additional Message or Inquiry</label>
+                            <textarea class="form-control rounded-3" name="booking_message" rows="2" placeholder="e.g. Interested in commercial finance options..."></textarea>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Additional Message or Inquiry</label>
-                        <textarea class="form-control rounded-3" name="booking_message" rows="2" placeholder="e.g. Interested in commercial finance options..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border: none;">
-                        <i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm" style="background: linear-gradient(135deg, #0ea5e9 0%, #1e3a8a 100%); border: none;">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking
+                        </button>
+                    </form>
+                </div>
+
+                <div id="bookingStep2" class="d-none text-center py-4">
+                    <i class="fa-solid fa-circle-check text-success" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h5 class="fw-bold text-dark mb-2">Inquiry Submitted Successfully!</h5>
+                    <p class="text-muted small mb-4">Please complete your payment to confirm the booking.</p>
+                    <button type="button" id="btnPayRazorpay" class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%); border: none;">
+                        <i class="fa-solid fa-credit-card me-2"></i> Pay with Razorpay
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -374,6 +391,20 @@ function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
 
     var bookingNotice = document.getElementById('bookingNotice');
     if (bookingNotice) bookingNotice.className = 'alert d-none py-2 small mb-3';
+
+    // Reset steps UI
+    if (document.getElementById('bookingStep1')) {
+        document.getElementById('bookingStep1').classList.remove('d-none');
+        document.getElementById('bookingStep2').classList.add('d-none');
+        document.getElementById('step1Badge').className = 'badge bg-primary rounded-pill px-3 py-2 me-2 shadow-sm';
+        document.getElementById('step1Badge').innerHTML = '1. Booking Details';
+        document.getElementById('step2Badge').className = 'badge bg-secondary rounded-pill px-3 py-2 shadow-sm';
+        var btn = document.querySelector('#rikshawaleBookingForm [type="submit"]');
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';
+        }
+    }
 
     var bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
     bookingModal.show();
@@ -496,7 +527,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 notice.className = 'alert py-2 small mb-3 alert-' + (data.success ? 'success' : 'danger');
                 notice.innerHTML = data.data.message;
                 if (data.success) {
-                    btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Inquiry Saved! Initiating Payment...';
+                    // Transition to Step 2
+                    document.getElementById('bookingStep1').classList.add('d-none');
+                    document.getElementById('bookingStep2').classList.remove('d-none');
+                    document.getElementById('step1Badge').className = 'badge bg-success rounded-pill px-3 py-2 me-2 shadow-sm';
+                    document.getElementById('step1Badge').innerHTML = '<i class="fa-solid fa-check me-1"></i> Details Saved';
+                    document.getElementById('step2Badge').className = 'badge bg-primary rounded-pill px-3 py-2 shadow-sm';
+
+                    var payBtn = document.getElementById('btnPayRazorpay');
+                    payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Preparing Payment...';
+                    payBtn.disabled = true;
+
                     var rzFd = new FormData();
                     rzFd.append('action', 'rikshawale_create_razorpay_order');
                     rzFd.append('car_id', document.getElementById('bookingCarId').value);
@@ -505,60 +546,67 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(r => r.json())
                     .then(rzData => {
                         if (rzData.success) {
-                            var options = {
-                                "key": rzData.data.key_id,
-                                "amount": rzData.data.amount,
-                                "currency": "INR",
-                                "name": "Rikshawale",
-                                "description": "Vehicle Booking: " + document.getElementById('bookingCarTitleInput').value,
-                                "order_id": rzData.data.order_id,
-                                "handler": function (response){
-                                    bookingForm.reset();
-                                    btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Booking Confirmed!';
-                                    notice.className = 'alert py-2 small mb-3 alert-success';
-                                    notice.innerHTML = 'Payment successful! Payment ID: ' + response.razorpay_payment_id;
-                                    
-                                    var payFd = new FormData();
-                                    payFd.append('action', 'rikshawale_update_booking_payment');
-                                    payFd.append('booking_id', data.data.booking_id);
-                                    payFd.append('payment_id', response.razorpay_payment_id);
-                                    payFd.append('amount', rzData.data.amount / 100); // Convert from paise back to rupees
-                                    fetch(rikshawale_ajax.url, { method: 'POST', body: payFd });
+                            payBtn.disabled = false;
+                            payBtn.innerHTML = '<i class="fa-solid fa-credit-card me-2"></i> Pay with Razorpay';
+                            
+                            payBtn.onclick = function() {
+                                var options = {
+                                    "key": rzData.data.key_id,
+                                    "amount": rzData.data.amount,
+                                    "currency": "INR",
+                                    "name": "Rikshawale",
+                                    "description": "Vehicle Booking: " + document.getElementById('bookingCarTitleInput').value,
+                                    "order_id": rzData.data.order_id,
+                                    "handler": function (response){
+                                        payBtn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Payment Successful!';
+                                        payBtn.disabled = true;
+                                        
+                                        var payFd = new FormData();
+                                        payFd.append('action', 'rikshawale_update_booking_payment');
+                                        payFd.append('booking_id', data.data.booking_id);
+                                        payFd.append('payment_id', response.razorpay_payment_id);
+                                        payFd.append('amount', rzData.data.amount / 100);
+                                        fetch(rikshawale_ajax.url, { method: 'POST', body: payFd });
 
-                                    setTimeout(() => {
-                                        var modalEl = document.getElementById('bookingModal');
-                                        var modal = bootstrap.Modal.getInstance(modalEl);
-                                        if (modal) modal.hide();
-                                        window.location.reload();
-                                    }, 2000);
-                                },
-                                "prefill": {
-                                    "name": document.getElementById('bookingNameInput').value,
-                                    "email": document.getElementById('bookingEmailInput').value,
-                                    "contact": document.getElementById('bookingPhoneInput').value
-                                },
-                                "theme": {
-                                    "color": "#db2d2e"
-                                }
-                            };
-                            // Ensure Razorpay script is loaded
-                            if (typeof Razorpay === 'undefined') {
-                                var script = document.createElement('script');
-                                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                                script.onload = function() {
+                                        setTimeout(() => {
+                                            var modalEl = document.getElementById('bookingModal');
+                                            var modal = bootstrap.Modal.getInstance(modalEl);
+                                            if (modal) modal.hide();
+                                            window.location.reload();
+                                        }, 2000);
+                                    },
+                                    "prefill": {
+                                        "name": document.getElementById('bookingNameInput').value,
+                                        "email": document.getElementById('bookingEmailInput').value,
+                                        "contact": document.getElementById('bookingPhoneInput').value
+                                    },
+                                    "theme": {
+                                        "color": "#db2d2e"
+                                    }
+                                };
+                                
+                                if (typeof Razorpay === 'undefined') {
+                                    var script = document.createElement('script');
+                                    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                                    script.onload = function() {
+                                        var rzp1 = new Razorpay(options);
+                                        rzp1.open();
+                                    };
+                                    document.head.appendChild(script);
+                                } else {
                                     var rzp1 = new Razorpay(options);
                                     rzp1.open();
-                                };
-                                document.head.appendChild(script);
-                            } else {
-                                var rzp1 = new Razorpay(options);
-                                rzp1.open();
-                            }
+                                }
+                            };
                         } else {
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Retry Payment';
+                            payBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Payment Setup Failed';
                             notice.className = 'alert py-2 small mb-3 alert-danger';
                             notice.innerHTML = 'Payment Error: ' + rzData.data.message;
+                            notice.classList.remove('d-none');
+                            
+                            // Re-insert notice in step 2 so user can see error
+                            var step2 = document.getElementById('bookingStep2');
+                            step2.insertBefore(notice, payBtn);
                         }
                     });
                 } else {
