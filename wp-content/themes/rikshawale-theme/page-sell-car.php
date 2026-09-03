@@ -135,7 +135,7 @@ $states = array(
                     <div class="row g-3 mb-3 justify-content-center">
                         <div class="col-12 col-md-6">
                             <label class="sell-label" for="seller_reg_no_verify">Registration Number <span class="text-danger">*</span></label>
-                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. DL01AB1234" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
+                            <input type="text" class="sell-input form-control form-control-lg text-center fw-bold" id="seller_reg_no_verify" placeholder="e.g. RJ14CV0002" style="text-transform:uppercase; font-size: 1.2rem; letter-spacing: 2px;" required>
                         </div>
                     </div>
                     <div id="verify-error-msg" class="alert alert-danger mx-auto mt-3" style="max-width: 500px; display: none;"></div>
@@ -143,7 +143,7 @@ $states = array(
                         <button type="button" id="verify-rc-btn" class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm w-100" style="max-width: 300px; font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
                             VERIFY & CONTINUE <i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
-                        <button type="button" id="skip-verify-btn" class="btn btn-link text-muted" style="text-decoration:none; font-size: 0.9rem;">
+                        <button type="button" id="skip-verify-btn" class="btn btn-outline-secondary rounded-3 px-4 py-2 shadow-sm w-100 mt-2" style="max-width: 300px; font-size: 0.9rem; font-weight: 500;">
                             Skip & fill details manually
                         </button>
                     </div>
@@ -175,7 +175,7 @@ $states = array(
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="sell-label" for="seller_reg_no">Registration Number <span class="text-danger">*</span></label>
-                        <input type="text" class="sell-input form-control" id="seller_reg_no" name="seller_reg_no" placeholder="DL01AB1234" style="text-transform:uppercase;">
+                        <input type="text" class="sell-input form-control" id="seller_reg_no" name="seller_reg_no" placeholder="RJ14CV0002" style="text-transform:uppercase;">
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="sell-label" for="seller_state">State <span class="text-danger">*</span></label>
@@ -623,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     verifyBtn.addEventListener('click', function() {
-        var regNo = regInputVerify.value.trim();
+        var regNo = regInputVerify.value.replace(/\s+/g, '');
         errorMsg.style.display = 'none';
 
         if (!regNo) {
@@ -651,7 +651,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (res.success) {
                         // Map data
                         regInputMain.value = regNo;
-                        var data = res.data;
+                        
+                        var rData = res.data;
+                        if (rData && rData.data) {
+                            rData = rData.data; // Unpack if API wrapped in 'data'
+                        }
+                        
+                        var vInfo = rData.vehicle_info || {};
+                        var makerModel = rData.maker_model || rData.makerDescription || rData.makerModel || '';
+                        
+                        var data = {
+                            maker_model: vInfo.brand_name || makerModel,
+                            reg_date: rData.registration_date || rData.registered || '',
+                            fuel_type: rData.fuel_type || rData.fuelType || '',
+                            model: vInfo.model_name || makerModel,
+                            owner: rData.owner_name || rData.owner || '',
+                            owner_count: rData.ownership || rData.ownerNumber || ''
+                        };
                         
                         // Example mapping (adjust according to actual Cashfree API response structure):
                         var maker = data.maker_model || data.vehicle_manufacturer_name;
@@ -659,14 +675,21 @@ document.addEventListener('DOMContentLoaded', function() {
                             var makerStr = maker.toUpperCase();
                             var brandSelect = document.getElementById('riksha_brand_name');
                             if (brandSelect) {
+                                var found = false;
                                 for (var i = 0; i < brandSelect.options.length; i++) {
                                     var optVal = brandSelect.options[i].value.toUpperCase();
                                     if (optVal && makerStr.includes(optVal)) {
                                         brandSelect.value = brandSelect.options[i].value;
-                                        if (typeof jQuery !== 'undefined') jQuery(brandSelect).trigger('change');
+                                        found = true;
                                         break;
                                     }
                                 }
+                                if (!found) {
+                                    var newOption = new Option(maker, maker, true, true);
+                                    brandSelect.add(newOption);
+                                    brandSelect.value = maker;
+                                }
+                                if (typeof jQuery !== 'undefined') jQuery(brandSelect).trigger('change');
                             }
                         }
                         if (data.reg_date || data.manufacturing_date) {
@@ -701,17 +724,54 @@ document.addEventListener('DOMContentLoaded', function() {
                             var modelSelect = document.getElementById('riksha_model_name');
                             var variantInput = document.getElementById('riksha_variant');
                             if (modelSelect) {
+                                var foundModel = false;
                                 for (var k = 0; k < modelSelect.options.length; k++) {
                                     var modOptVal = modelSelect.options[k].value.toUpperCase();
                                     if (modOptVal && modelStr.includes(modOptVal)) {
                                         modelSelect.value = modelSelect.options[k].value;
-                                        if (typeof jQuery !== 'undefined') jQuery(modelSelect).trigger('change');
+                                        foundModel = true;
                                         break;
                                     }
                                 }
+                                if (!foundModel) {
+                                    var newModelOption = new Option(data.model, data.model, true, true);
+                                    modelSelect.add(newModelOption);
+                                    modelSelect.value = data.model;
+                                }
+                                if (typeof jQuery !== 'undefined') jQuery(modelSelect).trigger('change');
                             }
                             if (variantInput && !variantInput.value) {
                                 variantInput.value = data.model;
+                            }
+                        }
+
+                        // Map Owner Name
+                        if (data.owner) {
+                            var nameEl = document.getElementById('seller_name');
+                            if (nameEl && !nameEl.value) {
+                                nameEl.value = data.owner;
+                            }
+                        }
+
+                        // Map Owner Type / Count
+                        if (data.owner_count) {
+                            var oc = parseInt(data.owner_count);
+                            var ownerStr = "";
+                            if (oc === 1) ownerStr = "1ST OWNER";
+                            else if (oc === 2) ownerStr = "2ND OWNER";
+                            else if (oc === 3) ownerStr = "3RD OWNER";
+                            else if (oc >= 4) ownerStr = "4TH+ OWNER";
+                            
+                            var ownerEl = document.getElementById('riksha_owner_type');
+                            if (ownerEl && ownerStr) {
+                                for (var m = 0; m < ownerEl.options.length; m++) {
+                                    var optVal = ownerEl.options[m].value.toUpperCase();
+                                    if (optVal && (optVal.includes(ownerStr) || optVal.includes(oc.toString()))) {
+                                        ownerEl.value = ownerEl.options[m].value;
+                                        if (typeof jQuery !== 'undefined') jQuery(ownerEl).trigger('change');
+                                        break;
+                                    }
+                                }
                             }
                         }
                         // Move to next step regardless

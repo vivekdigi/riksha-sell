@@ -67,7 +67,7 @@ foreach ( $section_order as $sec_key ) {
                         while ( $slider_query->have_posts() ) : $slider_query->the_post(); 
                             $thumbnail_url = wp_get_attachment_image_url( get_post_thumbnail_id( get_the_ID() ), 'full' );
                             if ( ! $thumbnail_url ) {
-                                $thumbnail_url = 'https://images.unsplash.com/photo-1566838234674-d4508496bf28?auto=format&fit=crop&w=1920&q=95';
+                                $thumbnail_url = 'https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png'; // Local fallback
                             }
                         ?>
                             <div class="carousel-item <?php echo $slide_index === 0 ? 'active' : ''; ?>">
@@ -93,7 +93,7 @@ foreach ( $section_order as $sec_key ) {
                 <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <img src="https://images.unsplash.com/photo-1566838234674-d4508496bf28?auto=format&fit=crop&w=1920&q=95" class="d-block w-100" alt="Rikshawale Welcome">
+                            <img src="https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png" class="d-block w-100" alt="Rikshawale Welcome">
                         </div>
                     </div>
                 </div>

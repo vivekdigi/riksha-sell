@@ -215,7 +215,8 @@ while ( have_posts() ) : the_post();
                     <!-- Call Now & Book Now CTA Buttons -->
                     <div class="row g-2">
                         <div class="col-6">
-                            <a href="tel:<?php echo esc_attr( get_theme_mod('contact_phone', '') ); ?>" class="btn text-white w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center" style="background-color: var(--primary-color, #db2d2e); border: none;">
+                            <?php $contact_phone = get_theme_mod('contact_phone') ? get_theme_mod('contact_phone') : get_theme_mod('topbar_phone', '+919999999999'); ?>
+                            <a href="tel:<?php echo esc_attr( preg_replace('/[^0-9+]/', '', $contact_phone) ); ?>" class="btn text-white w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center" style="background-color: var(--primary-color, #db2d2e); border: none;">
                                 <span>Call Now</span>
                                 <span class="extra-small opacity-75 fw-normal">Need more info</span>
                             </a>

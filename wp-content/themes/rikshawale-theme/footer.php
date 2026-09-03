@@ -283,9 +283,30 @@
             </div>
             <div class="modal-body p-4">
                 <!-- Step Indicator -->
-                <div class="d-flex justify-content-center mb-4" id="bookingSteps">
-                    <span class="badge bg-primary rounded-pill px-3 py-2 me-2 shadow-sm" id="step1Badge">1. Booking Details</span>
-                    <span class="badge bg-secondary rounded-pill px-3 py-2 shadow-sm" id="step2Badge">2. Payment</span>
+                <style>
+                .booking-stepper { display: flex; align-items: center; justify-content: space-between; position: relative; max-width: 280px; margin: 0 auto; margin-bottom: 1.5rem; }
+                .booking-step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; width: 80px; }
+                .booking-step-circle { width: 36px; height: 36px; border-radius: 50%; background-color: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+                .booking-step.active .booking-step-circle { background-color: var(--primary-color, #db2d2e); color: #fff; box-shadow: 0 0 0 4px rgba(219, 45, 46, 0.15); }
+                .booking-step-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.3s ease; }
+                .booking-step.active .booking-step-label { color: var(--primary-color, #db2d2e); }
+                .booking-stepper-line { position: absolute; top: 18px; left: 40px; right: 40px; height: 2px; background-color: #e2e8f0; z-index: 1; transform: translateY(-50%); }
+                .booking-stepper-line-progress { height: 100%; background-color: var(--primary-color, #db2d2e); width: 0%; transition: width 0.4s ease; }
+                .booking-stepper[data-step="2"] .booking-stepper-line-progress { width: 100%; }
+                .booking-stepper[data-step="2"] .booking-step:nth-child(3) .booking-step-circle { background-color: var(--primary-color, #db2d2e); color: #fff; box-shadow: 0 0 0 4px rgba(219, 45, 46, 0.15); }
+                .booking-stepper[data-step="2"] .booking-step:nth-child(3) .booking-step-label { color: var(--primary-color, #db2d2e); }
+                .booking-stepper[data-step="2"] .booking-step:nth-child(2) .booking-step-circle { background-color: #10b981; box-shadow: none; }
+                </style>
+                <div class="booking-stepper" id="bookingSteps" data-step="1">
+                    <div class="booking-stepper-line"><div class="booking-stepper-line-progress"></div></div>
+                    <div class="booking-step active" id="step1Indicator">
+                        <div class="booking-step-circle" id="step1Circle">1</div>
+                        <div class="booking-step-label">Booking</div>
+                    </div>
+                    <div class="booking-step" id="step2Indicator">
+                        <div class="booking-step-circle" id="step2Circle">2</div>
+                        <div class="booking-step-label">Payment</div>
+                    </div>
                 </div>
 
                 <div id="bookingStep1">
@@ -308,13 +329,13 @@
                             </div>
                             <div class="col-6">
                                 <label class="form-label small fw-bold">Mobile Number *</label>
-                                <input type="tel" class="form-control rounded-3" name="booking_phone" id="bookingPhoneInput" required placeholder="Mobile No.">
+                                <input type="tel" class="form-control rounded-3" name="booking_phone" id="bookingPhoneInput" required placeholder="Mobile No." pattern="[0-9]{10}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
                             </div>
                         </div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
                                 <label class="form-label small fw-bold">Alternate Number</label>
-                                <input type="tel" class="form-control rounded-3" name="booking_alt_phone" id="bookingAltPhoneInput" placeholder="Alternate Mobile">
+                                <input type="tel" class="form-control rounded-3" name="booking_alt_phone" id="bookingAltPhoneInput" placeholder="Alternate Mobile" pattern="[0-9]{10}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
                             </div>
                             <div class="col-6">
                                 <label class="form-label small fw-bold">Email Address *</label>
@@ -396,9 +417,9 @@ function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
     if (document.getElementById('bookingStep1')) {
         document.getElementById('bookingStep1').classList.remove('d-none');
         document.getElementById('bookingStep2').classList.add('d-none');
-        document.getElementById('step1Badge').className = 'badge bg-primary rounded-pill px-3 py-2 me-2 shadow-sm';
-        document.getElementById('step1Badge').innerHTML = '1. Booking Details';
-        document.getElementById('step2Badge').className = 'badge bg-secondary rounded-pill px-3 py-2 shadow-sm';
+        document.getElementById('bookingSteps').setAttribute('data-step', '1');
+        document.getElementById('step1Circle').innerHTML = '1';
+        
         var btn = document.querySelector('#rikshawaleBookingForm [type="submit"]');
         if(btn) {
             btn.disabled = false;
@@ -530,9 +551,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Transition to Step 2
                     document.getElementById('bookingStep1').classList.add('d-none');
                     document.getElementById('bookingStep2').classList.remove('d-none');
-                    document.getElementById('step1Badge').className = 'badge bg-success rounded-pill px-3 py-2 me-2 shadow-sm';
-                    document.getElementById('step1Badge').innerHTML = '<i class="fa-solid fa-check me-1"></i> Details Saved';
-                    document.getElementById('step2Badge').className = 'badge bg-primary rounded-pill px-3 py-2 shadow-sm';
+                    document.getElementById('bookingSteps').setAttribute('data-step', '2');
+                    document.getElementById('step1Circle').innerHTML = '<i class="fa-solid fa-check"></i>';
 
                     var payBtn = document.getElementById('btnPayRazorpay');
                     payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Preparing Payment...';

@@ -250,6 +250,10 @@ function rikshawale_register_contact_enquiry_cpt() {
 		'menu_icon'         => 'dashicons-email-alt',
 		'menu_position'     => 10,
 		'capability_type'   => 'post',
+		'capabilities'      => array(
+			'create_posts' => 'do_not_allow', // Removes "Add Post" button
+		),
+		'map_meta_cap'      => true,
 		'has_archive'       => false,
 		'hierarchical'      => false,
 		'supports'          => array( 'title' ),
@@ -257,6 +261,18 @@ function rikshawale_register_contact_enquiry_cpt() {
 	) );
 }
 add_action( 'init', 'rikshawale_register_contact_enquiry_cpt' );
+
+// Remove Edit and Quick Edit links from the table rows for Contact Enquiries
+add_filter( 'post_row_actions', 'rikshawale_remove_enquiry_row_actions', 10, 2 );
+function rikshawale_remove_enquiry_row_actions( $actions, $post ) {
+    if ( $post->post_type === 'contact_enquiry' ) {
+        if ( isset( $actions['edit'] ) ) {
+            $actions['edit'] = str_replace( '>Edit<', '>View<', $actions['edit'] );
+        }
+        unset( $actions['inline hide-if-no-js'] ); // Removes "Quick Edit" link
+    }
+    return $actions;
+}
 
 /**
  * Admin Metabox for Contact Enquiry
@@ -2634,6 +2650,47 @@ function rikshawale_customize_register( $wp_customize ) {
 }
 add_action( 'customize_register', 'rikshawale_customize_register' );
 
+/**
+ * Register API Settings in Theme Customizer
+ */
+function rikshawale_api_customize_register( $wp_customize ) {
+    $wp_customize->add_section( 'rikshawale_api_settings', array(
+        'title'      => __( 'API Settings', 'rikshawale' ),
+        'priority'   => 100,
+    ) );
+
+    // API Provider
+    $wp_customize->add_setting( 'rikshawale_rc_api_provider', array(
+        'default'           => 'rapidapi',
+        'type'              => 'option',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+
+    $wp_customize->add_control( 'rikshawale_rc_api_provider', array(
+        'label'    => __( 'RC API Provider', 'rikshawale' ),
+        'section'  => 'rikshawale_api_settings',
+        'type'     => 'select',
+        'choices'  => array(
+            'rapidapi' => __( 'Rapid API', 'rikshawale' ),
+            'apisathi' => __( 'API Sathi', 'rikshawale' ),
+        ),
+    ) );
+
+    // API Sathi Key
+    $wp_customize->add_setting( 'rikshawale_apisathi_key', array(
+        'default'           => '',
+        'type'              => 'option',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+
+    $wp_customize->add_control( 'rikshawale_apisathi_key', array(
+        'label'    => __( 'API Sathi Key', 'rikshawale' ),
+        'section'  => 'rikshawale_api_settings',
+        'type'     => 'text',
+    ) );
+}
+add_action( 'customize_register', 'rikshawale_api_customize_register' );
+
 // Sanitize helper for Checkboxes
 function rikshawale_sanitize_checkbox( $checked ) {
 	return ( ( isset( $checked ) && true === $checked ) ? true : false );
@@ -2728,6 +2785,10 @@ function rikshawale_register_car_submission_cpt() {
         'menu_icon'         => 'dashicons-car',
         'menu_position'     => 9,
         'capability_type'   => 'post',
+        'capabilities'      => array(
+            'create_posts' => 'do_not_allow', // Removes "Add New Submission" button
+        ),
+        'map_meta_cap'      => true,
         'has_archive'       => false,
         'hierarchical'      => false,
         'supports'          => array( 'title', 'custom-fields' ),
@@ -4568,7 +4629,7 @@ add_action( 'wp_ajax_rikshawale_update_booking_payment', 'rikshawale_update_book
 add_action( 'wp_ajax_nopriv_rikshawale_update_booking_payment', 'rikshawale_update_booking_payment' );
 
 // Add custom columns to Bookings Admin List
-add_filter('manage_riksha_booking_posts_columns', 'rikshawale_booking_columns2  ');
+add_filter('manage_riksha_booking_posts_columns', 'rikshawale_booking_columns2');
 function rikshawale_booking_columns2($columns) {
     $new_columns = array();
     $new_columns['cb'] = $columns['cb'];
@@ -5409,11 +5470,12 @@ function rikshawale_cashfree_settings_menu() {
 add_action('admin_menu', 'rikshawale_cashfree_settings_menu');
 
 function rikshawale_cashfree_settings_init() {
-    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_mode');
-    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_test_client_id');
-    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_test_client_secret');
-    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_live_client_id');
-    register_setting('rikshawale_cashfree_options', 'rikshawale_cashfree_live_client_secret');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_rc_api_provider');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_apisathi_key');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_rapidapi_url');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_rapidapi_host');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_rapidapi_key');
+    register_setting('rikshawale_cashfree_options', 'rikshawale_rapidapi_email');
     // Razorpay Settings
     register_setting('rikshawale_cashfree_options', 'rikshawale_razorpay_key_id');
     register_setting('rikshawale_cashfree_options', 'rikshawale_razorpay_key_secret');
@@ -5429,32 +5491,45 @@ function rikshawale_cashfree_settings_page() {
             <?php do_settings_sections('rikshawale_cashfree_options'); ?>
             
             <hr>
-            <h2>Cashfree RC Verification</h2>
+            <h2>RC Verification Settings</h2>
             <table class="form-table">
                 <tr valign="top">
-                    <th scope="row">API Mode</th>
+                    <th scope="row">API Provider</th>
                     <td>
-                        <select name="rikshawale_cashfree_mode">
-                            <option value="test" <?php selected(get_option('rikshawale_cashfree_mode'), 'test'); ?>>Test Mode</option>
-                            <option value="live" <?php selected(get_option('rikshawale_cashfree_mode'), 'live'); ?>>Live Mode</option>
+                        <?php $provider = get_option('rikshawale_rc_api_provider', 'rapidapi'); ?>
+                        <select name="rikshawale_rc_api_provider">
+                            <option value="rapidapi" <?php selected($provider, 'rapidapi'); ?>>Rapid API</option>
+                            <option value="apisathi" <?php selected($provider, 'apisathi'); ?>>API Sathi</option>
                         </select>
                     </td>
                 </tr>
+            </table>
+
+            <h3>API Sathi Configuration</h3>
+            <table class="form-table">
                 <tr valign="top">
-                    <th scope="row">Test Client ID</th>
-                    <td><input type="text" name="rikshawale_cashfree_test_client_id" value="<?php echo esc_attr(get_option('rikshawale_cashfree_test_client_id')); ?>" class="regular-text" /></td>
+                    <th scope="row">API Sathi Key</th>
+                    <td><input type="password" name="rikshawale_apisathi_key" value="<?php echo esc_attr(get_option('rikshawale_apisathi_key')); ?>" class="regular-text" style="width:100%; max-width:500px;" /></td>
+                </tr>
+            </table>
+
+            <h3>RapidAPI Configuration</h3>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">API URL</th>
+                    <td><input type="text" name="rikshawale_rapidapi_url" value="<?php echo esc_attr(get_option('rikshawale_rapidapi_url', 'https://rto-vehicle-details-pro.p.rapidapi.com/api')); ?>" class="regular-text" style="width:100%; max-width:500px;" /></td>
                 </tr>
                 <tr valign="top">
-                    <th scope="row">Test Client Secret</th>
-                    <td><input type="password" name="rikshawale_cashfree_test_client_secret" value="<?php echo esc_attr(get_option('rikshawale_cashfree_test_client_secret')); ?>" class="regular-text" /></td>
+                    <th scope="row">RapidAPI Host (x-rapidapi-host)</th>
+                    <td><input type="text" name="rikshawale_rapidapi_host" value="<?php echo esc_attr(get_option('rikshawale_rapidapi_host', 'rto-vehicle-details-pro.p.rapidapi.com')); ?>" class="regular-text" style="width:100%; max-width:500px;" /></td>
                 </tr>
                 <tr valign="top">
-                    <th scope="row">Live Client ID</th>
-                    <td><input type="text" name="rikshawale_cashfree_live_client_id" value="<?php echo esc_attr(get_option('rikshawale_cashfree_live_client_id')); ?>" class="regular-text" /></td>
+                    <th scope="row">RapidAPI Key (x-rapidapi-key)</th>
+                    <td><input type="password" name="rikshawale_rapidapi_key" value="<?php echo esc_attr(get_option('rikshawale_rapidapi_key')); ?>" class="regular-text" style="width:100%; max-width:500px;" /></td>
                 </tr>
                 <tr valign="top">
-                    <th scope="row">Live Client Secret</th>
-                    <td><input type="password" name="rikshawale_cashfree_live_client_secret" value="<?php echo esc_attr(get_option('rikshawale_cashfree_live_client_secret')); ?>" class="regular-text" /></td>
+                    <th scope="row">User Email (X-User-Email)</th>
+                    <td><input type="email" name="rikshawale_rapidapi_email" value="<?php echo esc_attr(get_option('rikshawale_rapidapi_email', 'user@gmail.com')); ?>" class="regular-text" style="width:100%; max-width:500px;" /></td>
                 </tr>
             </table>
 
@@ -5482,138 +5557,115 @@ function rikshawale_cashfree_settings_page() {
  */
 function rikshawale_verify_rc() {
     $rc_number = sanitize_text_field($_POST['rc_number'] ?? '');
+    $rc_number = strtoupper(str_replace(array(' ', '-'), '', $rc_number)); // Uppercase and remove spaces/dashes
+
     if (empty($rc_number)) {
         wp_send_json_error(array('message' => 'Registration number is required.'));
     }
 
+    $provider = get_option('rikshawale_rc_api_provider', 'rapidapi');
 
-    $mode = get_option('rikshawale_cashfree_mode', 'test');
-    if ($mode === 'live') {
-        $client_id = get_option('rikshawale_cashfree_live_client_id');
-        $client_secret = get_option('rikshawale_cashfree_live_client_secret');
-        $url = 'https://api.cashfree.com/verification/vehicle-rc';
+    if ($provider === 'apisathi') {
+        $api_key = get_option('rikshawale_apisathi_key', '');
+        if (empty($api_key)) {
+            wp_send_json_error(array('message' => 'API Sathi Key is not configured. Please add it in API Settings.'));
+        }
+
+        $args = array(
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'X-API-Key' => $api_key,
+                'Idempotency-Key' => uniqid()
+            ),
+            'body' => wp_json_encode(array(
+                'rc_number' => $rc_number
+            )),
+            'timeout' => 30,
+        );
+
+        $response = wp_remote_post('https://apisathi.in/gw/v1/vehicle-rc-v1/', $args);
+
+        if (is_wp_error($response)) {
+            wp_send_json_error(array('message' => 'Failed to connect to API Sathi verification server.'));
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        // API Sathi sets message to null on success, and gives result_code (e.g. 101).
+        $http_code = wp_remote_retrieve_response_code($response);
+
+        if ($http_code === 200 && !empty($data) && !isset($data['error'])) {
+            // Map apisathi response keys to match frontend expectations
+            $mapped_data = $data;
+            
+            // Map brand and model exactly as JS expects in vehicle_info
+            $maker = isset($data['maker']) ? $data['maker'] : (isset($data['raw']['vehicle_manufacturer_name']) ? $data['raw']['vehicle_manufacturer_name'] : '');
+            $model = isset($data['model']) ? $data['model'] : (isset($data['raw']['model']) ? $data['raw']['model'] : '');
+            
+            $mapped_data['vehicle_info'] = array(
+                'brand_name' => $maker,
+                'model_name' => $model
+            );
+            
+            if (isset($data['reg_date'])) {
+                $mapped_data['registration_date'] = $data['reg_date'];
+            }
+            if (isset($data['raw']) && isset($data['raw']['owner_count'])) {
+                $mapped_data['ownership'] = $data['raw']['owner_count'];
+            }
+            
+            wp_send_json_success($mapped_data);
+        } else {
+            $error_msg = isset($data['message']) && $data['message'] ? $data['message'] : 'Failed to retrieve RC details from API Sathi.';
+            wp_send_json_error(array('message' => $error_msg));
+        }
+
     } else {
-        $client_id = get_option('rikshawale_cashfree_test_client_id');
-        $client_secret = get_option('rikshawale_cashfree_test_client_secret');
-        $url = 'https://sandbox.cashfree.com/verification/vehicle-rc';
-    }
+        $url = get_option('rikshawale_rapidapi_url', 'https://rto-vehicle-information-india.p.rapidapi.com/getVehicleInfo');
+        $api_host = get_option('rikshawale_rapidapi_host', 'rto-vehicle-information-india.p.rapidapi.com');
+        $api_key = get_option('rikshawale_rapidapi_key', '');
+        $api_email = get_option('rikshawale_rapidapi_email', 'user@gmail.com');
 
-    if (empty($client_id) || empty($client_secret)) {
-        wp_send_json_error(array('message' => 'Cashfree API credentials are not configured.'));
-    }
+        if (empty($api_key)) {
+            wp_send_json_error(array('message' => 'API Key is not configured. Please add it in Theme Options.'));
+        }
 
-    $verification_id = 'rc_verify_' . time() . '_' . wp_rand(1000, 9999);
+        $args = array(
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'X-User-Email' => $api_email,
+                'x-rapidapi-host' => $api_host,
+                'x-rapidapi-key' => $api_key
+            ),
+            'body' => wp_json_encode(array(
+                'vehicle_no' => $rc_number,
+                'consent' => 'Y',
+                'consent_text' => 'I hereby give my consent for Eccentric Labs API to fetch my information'
+            )),
+            'timeout' => 30,
+        );
 
-    $args = array(
-        'headers' => array(
-            'x-client-id' => $client_id,
-            'x-client-secret' => $client_secret,
-            'Content-Type' => 'application/json',
-        ),
-        'body' => wp_json_encode(array(
-            'verification_id' => $verification_id,
-            'vehicle_number' => $rc_number
-        )),
-        'timeout' => 30,
-    );
+        $response = wp_remote_post($url, $args);
 
-    $response = wp_remote_post($url, $args);
+        if (is_wp_error($response)) {
+            wp_send_json_error(array('message' => 'Failed to connect to verification server.'));
+        }
 
-    if (is_wp_error($response)) {
-        wp_send_json_error(array('message' => 'Failed to connect to verification server.'));
-    }
-
-    $body = wp_remote_retrieve_body($response);
-    $data = json_decode($body, true);
-    
-    // Check if the response from Cashfree is successful.
-    // The Cashfree RC API returns "status": "VALID" on success and the data is flat at the root level.
-    if (!empty($data['status']) && $data['status'] === 'VALID') {
-        wp_send_json_success($data);
-    } elseif (!empty($data['message'])) {
-        wp_send_json_error(array('message' => $data['message']));
-    } else {
-        $response_code = wp_remote_retrieve_response_code($response);
-        $response_msg = wp_remote_retrieve_response_message($response);
-        wp_send_json_error(array('message' => "Failed to retrieve RC details. HTTP $response_code $response_msg. Body: " . $body));
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        // Check if the response has data and is valid
+        if (!empty($data) && (isset($data['status']) && $data['status'] === true)) {
+            wp_send_json_success($data);
+        } elseif (!empty($data) && !isset($data['message']) && !isset($data['error'])) {
+            wp_send_json_success($data);
+        } else {
+            $error_msg = isset($data['message']) ? $data['message'] : 'Failed to retrieve RC details or API Error.';
+            wp_send_json_error(array('message' => $error_msg));
+        }
     }
 }
 add_action('wp_ajax_rikshawale_verify_rc', 'rikshawale_verify_rc');
 add_action('wp_ajax_nopriv_rikshawale_verify_rc', 'rikshawale_verify_rc');
-
-/**
- * AJAX Handler for creating Razorpay Order
- */
-function rikshawale_create_razorpay_order() {
-    $car_id = isset($_POST['car_id']) ? intval($_POST['car_id']) : 0;
-    
-    if (!$car_id) {
-        wp_send_json_error(array('message' => 'Invalid vehicle ID.'));
-        wp_die();
-    }
-
-    $key_id = get_option('rikshawale_razorpay_key_id');
-    $key_secret = get_option('rikshawale_razorpay_key_secret');
-
-    if (empty($key_id) || empty($key_secret)) {
-        wp_send_json_error(array('message' => 'Razorpay API credentials are not configured.'));
-        wp_die();
-    }
-
-    // Get vehicle price
-    $raw_price_str = get_post_meta( $car_id, '_car_price', true ) ?: get_post_meta( $car_id, '_riksha_price', true );
-    $numeric_price = preg_replace( '/[^0-9]/', '', $raw_price_str );
-    $amount = (!empty($numeric_price) && floatval($numeric_price) > 0) ? floatval($numeric_price) : 0;
-    
-    if ($amount <= 0) {
-        wp_send_json_error(array('message' => 'Vehicle price is not valid.'));
-        wp_die();
-    }
-
-    $amount_in_paise = round($amount * 100);
-
-    $url = 'https://api.razorpay.com/v1/orders';
-    
-    $args = array(
-        'headers' => array(
-            'Authorization' => 'Basic ' . base64_encode($key_id . ':' . $key_secret),
-            'Content-Type'  => 'application/json',
-        ),
-        'body' => wp_json_encode(array(
-            'amount'   => $amount_in_paise,
-            'currency' => 'INR',
-            'receipt'  => 'rcpt_' . time() . '_' . $car_id,
-        )),
-    );
-
-    $response = wp_remote_post($url, $args);
-
-    if (is_wp_error($response)) {
-        wp_send_json_error(array('message' => 'Error communicating with Razorpay API.'));
-        wp_die();
-    }
-
-    $body = wp_remote_retrieve_body($response);
-    $data = json_decode($body, true);
-
-    if (isset($data['id'])) {
-        wp_send_json_success(array(
-            'order_id' => $data['id'],
-            'key_id'   => $key_id,
-            'amount'   => $amount_in_paise,
-        ));
-    } else {
-        $error_msg = isset($data['error']['description']) ? $data['error']['description'] : 'Unknown Razorpay error.';
-        wp_send_json_error(array('message' => $error_msg));
-    }
-
-    wp_die();
-}
-add_action('wp_ajax_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
-add_action('wp_ajax_nopriv_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
-
-// Hide Plugins Menu from admin
-add_action( 'admin_menu', 'hide_plugins_menu_from_admin', 999 );
-function hide_plugins_menu_from_admin() {
-    remove_menu_page( 'plugins.php' );
-}
+add_action( 'customize_register', 'rikshawale_customize_register' );
