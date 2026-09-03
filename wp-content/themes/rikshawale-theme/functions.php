@@ -876,6 +876,13 @@ function rikshawale_render_inventory_metabox( $post ) {
     $transmission    = get_post_meta( $post->ID, '_car_transmission', true );
     $badge           = get_post_meta( $post->ID, '_car_badge', true );
     $video_url       = get_post_meta( $post->ID, '_car_video_url', true );
+    
+    $chassis_no      = get_post_meta( $post->ID, '_car_chassis_no', true );
+    $engine_no       = get_post_meta( $post->ID, '_car_engine_no', true );
+    $unload_weight   = get_post_meta( $post->ID, '_car_unload_weight', true );
+    $body_type       = get_post_meta( $post->ID, '_car_body_type', true );
+    $vehicle_class   = get_post_meta( $post->ID, '_car_vehicle_class', true );
+    $vehicle_color   = get_post_meta( $post->ID, '_car_vehicle_color', true );
 
     // 5 Gallery Images
     $img1           = get_post_meta( $post->ID, '_car_gallery_image_1', true );
@@ -1044,6 +1051,30 @@ function rikshawale_render_inventory_metabox( $post ) {
             </td>
         </tr>
         <tr>
+            <th><label for="car_chassis_no"><?php _e( 'Chassis No', 'rikshawale-theme' ); ?></label></th>
+            <td><input type="text" id="car_chassis_no" name="car_chassis_no" value="<?php echo esc_attr( $chassis_no ); ?>" class="regular-text"></td>
+        </tr>
+        <tr>
+            <th><label for="car_engine_no"><?php _e( 'Engine No', 'rikshawale-theme' ); ?></label></th>
+            <td><input type="text" id="car_engine_no" name="car_engine_no" value="<?php echo esc_attr( $engine_no ); ?>" class="regular-text"></td>
+        </tr>
+        <tr>
+            <th><label for="car_vehicle_class"><?php _e( 'Vehicle Class', 'rikshawale-theme' ); ?></label></th>
+            <td><input type="text" id="car_vehicle_class" name="car_vehicle_class" value="<?php echo esc_attr( $vehicle_class ); ?>" class="regular-text"></td>
+        </tr>
+        <tr>
+            <th><label for="car_body_type"><?php _e( 'Body Type', 'rikshawale-theme' ); ?></label></th>
+            <td><input type="text" id="car_body_type" name="car_body_type" value="<?php echo esc_attr( $body_type ); ?>" class="regular-text"></td>
+        </tr>
+        <tr>
+            <th><label for="car_vehicle_color"><?php _e( 'RC Color', 'rikshawale-theme' ); ?></label></th>
+            <td><input type="text" id="car_vehicle_color" name="car_vehicle_color" value="<?php echo esc_attr( $vehicle_color ); ?>" class="regular-text"></td>
+        </tr>
+        <tr>
+            <th><label for="car_unload_weight"><?php _e( 'Unload Weight', 'rikshawale-theme' ); ?></label></th>
+            <td><input type="text" id="car_unload_weight" name="car_unload_weight" value="<?php echo esc_attr( $unload_weight ); ?>" class="regular-text"></td>
+        </tr>
+        <tr>
             <th colspan="2"><hr><h3 style="margin:0;"><?php _e( '5 Detail Page Slider Images', 'rikshawale-theme' ); ?></h3></th>
         </tr>
         <?php for ( $i = 1; $i <= 5; $i++ ) : 
@@ -1156,6 +1187,12 @@ function rikshawale_save_inventory_meta( $post_id ) {
         'car_gallery_image_3',
         'car_gallery_image_4',
         'car_gallery_image_5',
+        'car_chassis_no',
+        'car_engine_no',
+        'car_unload_weight',
+        'car_body_type',
+        'car_vehicle_class',
+        'car_vehicle_color',
     );
 
     foreach ( $fields as $field ) {
@@ -2846,6 +2883,13 @@ function rikshawale_handle_sell_car_submission() {
     $accident_history    = sanitize_text_field( $_POST['riksha_accident_history'] ?? 'No' );
     $original_price      = floatval( $_POST['riksha_original_price'] ?? 0 );
 
+    $chassis_no          = sanitize_text_field( $_POST['riksha_chassis_no'] ?? '' );
+    $engine_no           = sanitize_text_field( $_POST['riksha_engine_no'] ?? '' );
+    $unload_weight       = sanitize_text_field( $_POST['riksha_unload_weight'] ?? '' );
+    $body_type           = sanitize_text_field( $_POST['riksha_body_type'] ?? '' );
+    $vehicle_class       = sanitize_text_field( $_POST['riksha_vehicle_class'] ?? '' );
+    $vehicle_color       = sanitize_text_field( $_POST['riksha_vehicle_color'] ?? '' );
+
     $video_url_input = sanitize_text_field( $_POST['riksha_video_url'] ?? '' );
     $has_video_file  = ! empty( $_FILES['riksha_video_file']['name'] );
 
@@ -2894,6 +2938,12 @@ function rikshawale_handle_sell_car_submission() {
         '_car_accident_history'=> $accident_history,
         '_car_original_price'  => $original_price,
         '_car_engine_cc'       => $engine_cc,
+        '_car_chassis_no'      => $chassis_no,
+        '_car_engine_no'       => $engine_no,
+        '_car_unload_weight'   => $unload_weight,
+        '_car_body_type'       => $body_type,
+        '_car_vehicle_class'   => $vehicle_class,
+        '_car_vehicle_color'   => $vehicle_color,
     );
     foreach ( $meta as $key => $val ) {
         update_post_meta( $post_id, $key, $val );
@@ -3088,7 +3138,8 @@ function rikshawale_handle_sell_car_submission() {
 
     wp_send_json_success( array(
         'message' => 'Thank you! Your request has been submitted. Our team will contact you shortly.',
-        'ai_data' => $api_data_for_frontend
+        'ai_data' => $api_data_for_frontend,
+        'debug_payload_sent_to_api' => $api_payload
     ) );
 }
 add_action( 'wp_ajax_rikshawale_sell_car',        'rikshawale_handle_sell_car_submission' );
@@ -3195,7 +3246,7 @@ function rikshawale_handle_get_valuation() {
             $api_data_for_frontend = $api_data;
             // API doesn't return a condition score, but frontend expects it
             $api_data_for_frontend['condition_score'] = 8.5;
-            wp_send_json_success( array( 'ai_data' => $api_data_for_frontend ) );
+            wp_send_json_success( array( 'ai_data' => $api_data_for_frontend, 'debug_payload_sent_to_api' => $api_payload ) );
         }
     }
     
@@ -3212,7 +3263,7 @@ function rikshawale_handle_get_valuation() {
             'key_factors' => array($ai_res['summary']),
             'condition_score' => $ai_res['condition_score']
         );
-        wp_send_json_success( array( 'ai_data' => $api_data_for_frontend ) );
+        wp_send_json_success( array( 'ai_data' => $api_data_for_frontend, 'debug_payload_sent_to_api' => $api_payload ) );
     }
 
     wp_send_json_error( array( 'message' => 'Could not calculate valuation.' ) );
@@ -3551,6 +3602,14 @@ function rikshawale_render_car_submission_metabox( $post ) {
         <div class="car-sub-field"><label>Fuel Type</label><strong><?php echo $m('_car_fuel') ?: $m('_riksha_fuel'); ?></strong></div>
         <div class="car-sub-field"><label>Engine CC</label><strong><?php echo $m('_car_engine_cc') ?: 'N/A'; ?></strong></div>
         <div class="car-sub-field"><label>Transmission</label><strong><?php echo $m('_car_transmission') ?: $m('_riksha_transmission'); ?></strong></div>
+        
+        <div class="car-sub-field"><label>Chassis No</label><strong><?php echo $m('_car_chassis_no') ?: 'N/A'; ?></strong></div>
+        <div class="car-sub-field"><label>Engine No</label><strong><?php echo $m('_car_engine_no') ?: 'N/A'; ?></strong></div>
+        <div class="car-sub-field"><label>Vehicle Class</label><strong><?php echo $m('_car_vehicle_class') ?: 'N/A'; ?></strong></div>
+        <div class="car-sub-field"><label>Body Type</label><strong><?php echo $m('_car_body_type') ?: 'N/A'; ?></strong></div>
+        <div class="car-sub-field"><label>Vehicle Color</label><strong><?php echo $m('_car_vehicle_color') ?: 'N/A'; ?></strong></div>
+        <div class="car-sub-field"><label>Unload Weight</label><strong><?php echo $m('_car_unload_weight') ?: 'N/A'; ?></strong></div>
+
         <div class="car-sub-field" style="grid-column: span 3;"><label>Expected Price</label><strong><?php echo $m('_car_expected_price') ?: $m('_riksha_expected_price'); ?></strong></div>
     </div>
 
@@ -3784,7 +3843,9 @@ function rikshawale_approve_car_submission_handler() {
         '_car_gallery_image_1', '_car_gallery_image_2', '_car_gallery_image_3',
         '_car_gallery_image_4', '_car_gallery_image_5',
         '_car_ai_valuation_min', '_car_ai_valuation_max',
-        '_car_ai_condition_score', '_car_ai_summary', '_car_engine_cc'
+        '_car_ai_condition_score', '_car_ai_summary', '_car_engine_cc',
+        '_car_chassis_no', '_car_engine_no', '_car_unload_weight',
+        '_car_body_type', '_car_vehicle_class', '_car_vehicle_color'
     );
     foreach ( $meta_keys as $key ) {
         $val = $m( $key );
@@ -5596,23 +5657,25 @@ function rikshawale_verify_rc() {
         $http_code = wp_remote_retrieve_response_code($response);
 
         if ($http_code === 200 && !empty($data) && !isset($data['error'])) {
-            // Map apisathi response keys to match frontend expectations
-            $mapped_data = $data;
+            // API Sathi wraps the response in a 'data' array
+            $inner_data = (isset($data['data']) && is_array($data['data'])) ? $data['data'] : $data;
+
+            $mapped_data = $inner_data;
             
             // Map brand and model exactly as JS expects in vehicle_info
-            $maker = isset($data['maker']) ? $data['maker'] : (isset($data['raw']['vehicle_manufacturer_name']) ? $data['raw']['vehicle_manufacturer_name'] : '');
-            $model = isset($data['model']) ? $data['model'] : (isset($data['raw']['model']) ? $data['raw']['model'] : '');
+            $brand = isset($inner_data['vehicle_info']['brand_name']) ? $inner_data['vehicle_info']['brand_name'] : (isset($inner_data['maker']) ? $inner_data['maker'] : '');
+            $model = isset($inner_data['vehicle_info']['model_name']) ? $inner_data['vehicle_info']['model_name'] : (isset($inner_data['model']) ? $inner_data['model'] : '');
             
             $mapped_data['vehicle_info'] = array(
-                'brand_name' => $maker,
+                'brand_name' => $brand,
                 'model_name' => $model
             );
             
-            if (isset($data['reg_date'])) {
-                $mapped_data['registration_date'] = $data['reg_date'];
+            if (isset($inner_data['reg_date'])) {
+                $mapped_data['registration_date'] = $inner_data['reg_date'];
             }
-            if (isset($data['raw']) && isset($data['raw']['owner_count'])) {
-                $mapped_data['ownership'] = $data['raw']['owner_count'];
+            if (isset($inner_data['raw']) && isset($inner_data['raw']['owner_count'])) {
+                $mapped_data['ownership'] = $inner_data['raw']['owner_count'];
             }
             
             wp_send_json_success($mapped_data);

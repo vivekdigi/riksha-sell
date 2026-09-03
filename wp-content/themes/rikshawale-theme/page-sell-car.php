@@ -188,6 +188,26 @@ $states = array(
                     </div>
                 </div>
 
+                <!-- Row 2b: RC Additional Details -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-3">
+                        <label class="sell-label" for="riksha_chassis_no">Chassis Number</label>
+                        <input type="text" class="sell-input form-control" id="riksha_chassis_no" name="riksha_chassis_no" placeholder="Auto-filled">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="sell-label" for="riksha_engine_no">Engine Number</label>
+                        <input type="text" class="sell-input form-control" id="riksha_engine_no" name="riksha_engine_no" placeholder="Auto-filled">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="sell-label" for="riksha_vehicle_class">Vehicle Class</label>
+                        <input type="text" class="sell-input form-control" id="riksha_vehicle_class" name="riksha_vehicle_class" placeholder="Auto-filled">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="sell-label" for="riksha_vehicle_color">Vehicle Color</label>
+                        <input type="text" class="sell-input form-control" id="riksha_vehicle_color" name="riksha_vehicle_color" placeholder="Auto-filled">
+                    </div>
+                </div>
+
                 <!-- Row 3: Mfg Year / Reg Year / Owner Type -->
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-4">
@@ -774,6 +794,30 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                             }
                         }
+                        // Append new fields as hidden inputs to the form
+                        var formEl = document.getElementById('sell-car-form');
+                        if (formEl) {
+                            var appendHidden = function(name, value) {
+                                if (value) {
+                                    var existing = formEl.querySelector('input[name="'+name+'"]');
+                                    if (!existing) {
+                                        var inp = document.createElement('input');
+                                        inp.type = 'hidden';
+                                        inp.name = name;
+                                        formEl.appendChild(inp);
+                                        existing = inp;
+                                    }
+                                    existing.value = value;
+                                }
+                            };
+                            appendHidden('riksha_chassis_no', rData.chassis_no || rData.chassis || '');
+                            appendHidden('riksha_engine_no', rData.engine_no || rData.engine || '');
+                            appendHidden('riksha_unload_weight', rData.unload_weight || '');
+                            appendHidden('riksha_body_type', rData.body_type_desc || rData.type || '');
+                            appendHidden('riksha_vehicle_class', rData.vehicle_class || rData.class || '');
+                            appendHidden('riksha_vehicle_color', rData.vehicle_color || rData.vehicle_colour || rData.color || '');
+                        }
+
                         // Move to next step regardless
                         proceedToStep1();
                     } else {
