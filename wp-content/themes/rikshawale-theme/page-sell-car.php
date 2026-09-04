@@ -208,6 +208,30 @@ $states = array(
                     </div>
                 </div>
 
+                <!-- Row 2c: More RC Details -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-4">
+                        <label class="sell-label" for="riksha_body_type">Body Type</label>
+                        <input type="text" class="sell-input form-control" id="riksha_body_type" name="riksha_body_type" placeholder="Auto-filled">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="sell-label" for="riksha_rc_expiry_date">RC Expiry Date</label>
+                        <input type="text" class="sell-input form-control" id="riksha_rc_expiry_date" name="riksha_rc_expiry_date" placeholder="Auto-filled">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="sell-label" for="riksha_insurance_upto">Insurance Upto</label>
+                        <input type="text" class="sell-input form-control" id="riksha_insurance_upto" name="riksha_insurance_upto" placeholder="Auto-filled">
+                    </div>
+                </div>
+
+                <!-- Row 2d: Address -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label class="sell-label" for="riksha_address">Permanent Address</label>
+                        <textarea class="sell-input form-control" id="riksha_address" name="riksha_address" placeholder="Auto-filled" rows="2"></textarea>
+                    </div>
+                </div>
+
                 <!-- Row 3: Mfg Year / Reg Year / Owner Type -->
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-4">
@@ -669,6 +693,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     var res = JSON.parse(xhr.responseText);
                     if (res.success) {
+                        console.log("=== SATHI API RESPONSE ===");
+                        if (res.data && res.data.debug_payload_sent_to_api) console.log("PAYLOAD:", res.data.debug_payload_sent_to_api);
+                        if (res.data && res.data.debug_raw_api_response) console.log("RESPONSE:", res.data.debug_raw_api_response);
+                        
                         // Map data
                         regInputMain.value = regNo;
                         
@@ -712,18 +740,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if (typeof jQuery !== 'undefined') jQuery(brandSelect).trigger('change');
                             }
                         }
-                        if (data.reg_date || data.manufacturing_date) {
-                            var year = (data.manufacturing_date || data.reg_date).split('-')[0];
-                            if (year) {
-                                var mfgEl = document.getElementById('riksha_mfg_year');
-                                var regEl = document.getElementById('riksha_reg_year');
-                                if (mfgEl) mfgEl.value = year;
-                                if (regEl) regEl.value = year;
-                                if (typeof jQuery !== 'undefined') {
-                                    if (mfgEl) jQuery(mfgEl).trigger('change');
-                                    if (regEl) jQuery(regEl).trigger('change');
-                                }
+                        var mfgYear = rData.manufacturing_year || '';
+                        var regYear = rData.registration_year || '';
+
+                        if (!mfgYear && !regYear && data.reg_date) {
+                            var splitDate = data.reg_date.split('-');
+                            if (splitDate.length === 3) {
+                                var yearStr = splitDate[0].length === 4 ? splitDate[0] : (splitDate[2] && splitDate[2].length === 4 ? splitDate[2] : splitDate[0]);
+                                regYear = yearStr;
+                                mfgYear = yearStr;
                             }
+                        }
+
+                        var mfgEl = document.getElementById('riksha_mfg_year');
+                        var regEl = document.getElementById('riksha_reg_year');
+
+                        if (mfgYear && mfgEl) mfgEl.value = mfgYear;
+                        if (regYear && regEl) regEl.value = regYear;
+                        if (typeof jQuery !== 'undefined') {
+                            if (mfgEl && mfgYear) jQuery(mfgEl).trigger('change');
+                            if (regEl && regYear) jQuery(regEl).trigger('change');
                         }
                         var fuel = data.fuel_type || data.type;
                         if (fuel) {
@@ -799,7 +835,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (formEl) {
                             var appendHidden = function(name, value) {
                                 if (value) {
-                                    var existing = formEl.querySelector('input[name="'+name+'"]');
+                                    var existing = formEl.querySelector('[name="'+name+'"]');
                                     if (!existing) {
                                         var inp = document.createElement('input');
                                         inp.type = 'hidden';
@@ -810,17 +846,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                     existing.value = value;
                                 }
                             };
-                            appendHidden('riksha_chassis_no', rData.chassis_no || rData.chassis || '');
-                            appendHidden('riksha_engine_no', rData.engine_no || rData.engine || '');
-                            appendHidden('riksha_unload_weight', rData.unload_weight || '');
-                            appendHidden('riksha_body_type', rData.body_type_desc || rData.type || '');
-                            appendHidden('riksha_vehicle_class', rData.vehicle_class || rData.class || '');
-                            appendHidden('riksha_vehicle_color', rData.vehicle_color || rData.vehicle_colour || rData.color || '');
+                            var rRaw = rData.raw || {};
+                            appendHidden('riksha_chassis_no', rRaw.chassis || rData.chassis_no || rData.chassis || '');
+                            appendHidden('riksha_engine_no', rRaw.engine || rData.engine_no || rData.engine || '');
+                            appendHidden('riksha_engine_cc', rRaw.vehicle_cubic_capacity || rData.engine_cc || '');
+                            appendHidden('riksha_unload_weight', rRaw.unladen_weight || rData.unload_weight || '');
+                            appendHidden('riksha_body_type', rRaw.body_type || rData.body_type_desc || rData.body_type || rData.type || '');
+                            appendHidden('riksha_vehicle_class', rRaw.class || rData.vehicle_class || rData.class || '');
+                            appendHidden('riksha_vehicle_color', rRaw.vehicle_colour || rData.vehicle_color || rData.vehicle_colour || rData.color || '');
+                            appendHidden('riksha_rc_expiry_date', rRaw.rc_expiry_date || rData.rc_expiry_date || '');
+                            appendHidden('riksha_insurance_upto', rRaw.vehicle_insurance_upto || rData.insurance_upto || '');
+                            appendHidden('riksha_address', rRaw.permanent_address || rData.permanent_address || rRaw.present_address || rData.present_address || '');
                         }
 
                         // Move to next step regardless
                         proceedToStep1();
                     } else {
+                        console.log("=== SATHI API FAILED ===");
+                        if (res.data && res.data.debug_payload_sent_to_api) console.log("PAYLOAD:", res.data.debug_payload_sent_to_api);
+                        if (res.data && res.data.debug_raw_api_response) console.log("RESPONSE:", res.data.debug_raw_api_response);
                         errorMsg.textContent = res.data.message || 'Verification failed. Please skip or try again.';
                         errorMsg.style.display = 'block';
                     }
@@ -1022,6 +1066,11 @@ document.getElementById('get-valuation-btn').addEventListener('click', function(
         
         if (xhr.status === 200) {
             var res = JSON.parse(xhr.responseText);
+            
+            console.log("=== PREDICT API RESPONSE ===");
+            if (res.data && res.data.debug_payload_sent_to_api) console.log("PAYLOAD:", res.data.debug_payload_sent_to_api);
+            if (res.data && res.data.debug_raw_api_response) console.log("RESPONSE:", res.data.debug_raw_api_response);
+
             if (res.success && res.data && res.data.ai_data) {
                 var ai = res.data.ai_data;
                 var aiScore = ai.condition_score ? ai.condition_score : '8.5';

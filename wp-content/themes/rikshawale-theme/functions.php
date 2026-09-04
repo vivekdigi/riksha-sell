@@ -320,11 +320,14 @@ function rikshawale_handle_contact_form() {
 	$phone   = sanitize_text_field( $_POST['contact_phone'] ?? $_POST['phone'] ?? '' );
 	$message = sanitize_textarea_field( $_POST['contact_message'] ?? $_POST['message'] ?? '' );
 
-	if ( empty( $name ) || empty( $email ) || empty( $message ) ) {
+	if ( empty( $name ) || empty( $email ) || empty( $phone ) || empty( $message ) ) {
 		wp_send_json_error( array( 'message' => 'Please fill all required fields.' ) );
 	}
 	if ( ! is_email( $email ) ) {
 		wp_send_json_error( array( 'message' => 'Please enter a valid email address.' ) );
+	}
+	if ( ! preg_match('/^[0-9]{10,15}$/', $phone) ) {
+		wp_send_json_error( array( 'message' => 'Please enter a valid 10-digit mobile number.' ) );
 	}
 
 	// Create CPT entry in DB
@@ -2889,6 +2892,9 @@ function rikshawale_handle_sell_car_submission() {
     $body_type           = sanitize_text_field( $_POST['riksha_body_type'] ?? '' );
     $vehicle_class       = sanitize_text_field( $_POST['riksha_vehicle_class'] ?? '' );
     $vehicle_color       = sanitize_text_field( $_POST['riksha_vehicle_color'] ?? '' );
+    $rc_expiry_date      = sanitize_text_field( $_POST['riksha_rc_expiry_date'] ?? '' );
+    $insurance_upto      = sanitize_text_field( $_POST['riksha_insurance_upto'] ?? '' );
+    $address             = sanitize_textarea_field( $_POST['riksha_address'] ?? '' );
 
     $video_url_input = sanitize_text_field( $_POST['riksha_video_url'] ?? '' );
     $has_video_file  = ! empty( $_FILES['riksha_video_file']['name'] );
@@ -2944,6 +2950,9 @@ function rikshawale_handle_sell_car_submission() {
         '_car_body_type'       => $body_type,
         '_car_vehicle_class'   => $vehicle_class,
         '_car_vehicle_color'   => $vehicle_color,
+        '_car_rc_expiry_date'  => $rc_expiry_date,
+        '_car_insurance_upto'  => $insurance_upto,
+        '_car_address'         => $address,
     );
     foreach ( $meta as $key => $val ) {
         update_post_meta( $post_id, $key, $val );
@@ -3139,7 +3148,8 @@ function rikshawale_handle_sell_car_submission() {
     wp_send_json_success( array(
         'message' => 'Thank you! Your request has been submitted. Our team will contact you shortly.',
         'ai_data' => $api_data_for_frontend,
-        'debug_payload_sent_to_api' => $api_payload
+        'debug_payload_sent_to_api' => $api_payload,
+        'debug_raw_api_response' => isset($api_data) ? $api_data : (isset($api_response) && !is_wp_error($api_response) ? wp_remote_retrieve_body($api_response) : 'Error')
     ) );
 }
 add_action( 'wp_ajax_rikshawale_sell_car',        'rikshawale_handle_sell_car_submission' );
@@ -3246,7 +3256,7 @@ function rikshawale_handle_get_valuation() {
             $api_data_for_frontend = $api_data;
             // API doesn't return a condition score, but frontend expects it
             $api_data_for_frontend['condition_score'] = 8.5;
-            wp_send_json_success( array( 'ai_data' => $api_data_for_frontend, 'debug_payload_sent_to_api' => $api_payload ) );
+            wp_send_json_success( array( 'ai_data' => $api_data_for_frontend, 'debug_payload_sent_to_api' => $api_payload, 'debug_raw_api_response' => isset($api_data) ? $api_data : 'Error' ) );
         }
     }
     
@@ -3263,7 +3273,7 @@ function rikshawale_handle_get_valuation() {
             'key_factors' => array($ai_res['summary']),
             'condition_score' => $ai_res['condition_score']
         );
-        wp_send_json_success( array( 'ai_data' => $api_data_for_frontend, 'debug_payload_sent_to_api' => $api_payload ) );
+        wp_send_json_success( array( 'ai_data' => $api_data_for_frontend, 'debug_payload_sent_to_api' => $api_payload, 'debug_raw_api_response' => isset($api_data) ? $api_data : (isset($body) ? $body : 'No response or failed to connect') ) );
     }
 
     wp_send_json_error( array( 'message' => 'Could not calculate valuation.' ) );
@@ -3845,7 +3855,8 @@ function rikshawale_approve_car_submission_handler() {
         '_car_ai_valuation_min', '_car_ai_valuation_max',
         '_car_ai_condition_score', '_car_ai_summary', '_car_engine_cc',
         '_car_chassis_no', '_car_engine_no', '_car_unload_weight',
-        '_car_body_type', '_car_vehicle_class', '_car_vehicle_color'
+        '_car_body_type', '_car_vehicle_class', '_car_vehicle_color',
+        '_car_rc_expiry_date', '_car_insurance_upto', '_car_address'
     );
     foreach ( $meta_keys as $key ) {
         $val = $m( $key );
@@ -5673,15 +5684,29 @@ function rikshawale_verify_rc() {
             
             if (isset($inner_data['reg_date'])) {
                 $mapped_data['registration_date'] = $inner_data['reg_date'];
+                if (preg_match('/(\d{4})/', $inner_data['reg_date'], $matches)) {
+                    $mapped_data['registration_year'] = $matches[1];
+                }
+            }
+            if (isset($inner_data['raw']) && isset($inner_data['raw']['vehicle_manufacturing_month_year'])) {
+                if (preg_match('/(\d{4})/', $inner_data['raw']['vehicle_manufacturing_month_year'], $matches)) {
+                    $mapped_data['manufacturing_year'] = $matches[1];
+                }
             }
             if (isset($inner_data['raw']) && isset($inner_data['raw']['owner_count'])) {
                 $mapped_data['ownership'] = $inner_data['raw']['owner_count'];
             }
+            if (isset($inner_data['raw']) && isset($inner_data['raw']['vehicle_cubic_capacity'])) {
+                $mapped_data['engine_cc'] = $inner_data['raw']['vehicle_cubic_capacity'];
+            }
+            
+            $mapped_data['debug_payload_sent_to_api'] = array('rc_number' => $rc_number);
+            $mapped_data['debug_raw_api_response'] = $data;
             
             wp_send_json_success($mapped_data);
         } else {
             $error_msg = isset($data['message']) && $data['message'] ? $data['message'] : 'Failed to retrieve RC details from API Sathi.';
-            wp_send_json_error(array('message' => $error_msg));
+            wp_send_json_error(array('message' => $error_msg, 'debug_payload_sent_to_api' => array('rc_number' => $rc_number), 'debug_raw_api_response' => $data));
         }
 
     } else {
@@ -5732,3 +5757,80 @@ function rikshawale_verify_rc() {
 add_action('wp_ajax_rikshawale_verify_rc', 'rikshawale_verify_rc');
 add_action('wp_ajax_nopriv_rikshawale_verify_rc', 'rikshawale_verify_rc');
 add_action( 'customize_register', 'rikshawale_customize_register' );
+
+/**
+ * AJAX Handler for creating Razorpay Order
+ */
+function rikshawale_create_razorpay_order() {
+    $car_id = isset($_POST['car_id']) ? intval($_POST['car_id']) : 0;
+    
+    if (!$car_id) {
+        wp_send_json_error(array('message' => 'Invalid vehicle ID.'));
+        wp_die();
+    }
+
+    $key_id = get_option('rikshawale_razorpay_key_id');
+    $key_secret = get_option('rikshawale_razorpay_key_secret');
+
+    if (empty($key_id) || empty($key_secret)) {
+        wp_send_json_error(array('message' => 'Razorpay API credentials are not configured.'));
+        wp_die();
+    }
+
+    // Get vehicle price
+    $raw_price_str = get_post_meta( $car_id, '_car_price', true ) ?: get_post_meta( $car_id, '_riksha_price', true );
+    $numeric_price = preg_replace( '/[^0-9]/', '', $raw_price_str );
+    $amount = (!empty($numeric_price) && floatval($numeric_price) > 0) ? floatval($numeric_price) : 0;
+    
+    if ($amount <= 0) {
+        wp_send_json_error(array('message' => 'Vehicle price is not valid.'));
+        wp_die();
+    }
+
+    $amount_in_paise = round($amount * 100);
+
+    $url = 'https://api.razorpay.com/v1/orders';
+    
+    $args = array(
+        'headers' => array(
+            'Authorization' => 'Basic ' . base64_encode($key_id . ':' . $key_secret),
+            'Content-Type'  => 'application/json',
+        ),
+        'body' => wp_json_encode(array(
+            'amount'   => $amount_in_paise,
+            'currency' => 'INR',
+            'receipt'  => 'rcpt_' . time() . '_' . $car_id,
+        )),
+    );
+
+    $response = wp_remote_post($url, $args);
+
+    if (is_wp_error($response)) {
+        wp_send_json_error(array('message' => 'Error communicating with Razorpay API.'));
+        wp_die();
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    if (isset($data['id'])) {
+        wp_send_json_success(array(
+            'order_id' => $data['id'],
+            'key_id'   => $key_id,
+            'amount'   => $amount_in_paise,
+        ));
+    } else {
+        $error_msg = isset($data['error']['description']) ? $data['error']['description'] : 'Unknown Razorpay error.';
+        wp_send_json_error(array('message' => $error_msg));
+    }
+
+    wp_die();
+}
+add_action('wp_ajax_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
+add_action('wp_ajax_nopriv_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
+
+// Hide Plugins Menu from admin
+add_action( 'admin_menu', 'hide_plugins_menu_from_admin', 999 );
+function hide_plugins_menu_from_admin() {
+    remove_menu_page( 'plugins.php' );
+}

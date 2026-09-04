@@ -182,6 +182,7 @@
                             </a>
                         </div>
                     </li>
+                    <?php if ( get_theme_mod( 'footer_address' ) ) : ?>
                     <li class="d-flex align-items-start gap-2 mb-2">
                         <div class="contact-icon-box mt-1">
                             <i class="fa-solid fa-location-dot"></i>
@@ -190,6 +191,7 @@
                             <?php echo nl2br( esc_html( get_theme_mod( 'footer_address', '' ) ) ); ?>
                         </div>
                     </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>

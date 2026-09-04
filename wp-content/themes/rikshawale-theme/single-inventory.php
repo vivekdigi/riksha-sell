@@ -215,11 +215,16 @@ while ( have_posts() ) : the_post();
                     <!-- Call Now & Book Now CTA Buttons -->
                     <div class="row g-2">
                         <div class="col-6">
-                            <?php $contact_phone = get_theme_mod('contact_phone') ? get_theme_mod('contact_phone') : get_theme_mod('topbar_phone', '+919999999999'); ?>
-                            <a href="tel:<?php echo esc_attr( preg_replace('/[^0-9+]/', '', $contact_phone) ); ?>" class="btn text-white w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center" style="background-color: var(--primary-color, #db2d2e); border: none;">
+                            <?php 
+                            $contact_phone = get_theme_mod('contact_phone');
+                            if (empty($contact_phone)) $contact_phone = get_theme_mod('topbar_phone');
+                            if (empty($contact_phone)) $contact_phone = '+919999999999';
+                            $clean_phone = preg_replace('/[^0-9+]/', '', $contact_phone);
+                            ?>
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#callNowModal" class="btn text-white w-100 py-3 rounded-3 fw-bold shadow-sm d-flex flex-column align-items-center justify-content-center" style="background-color: var(--primary-color, #db2d2e); border: none;">
                                 <span>Call Now</span>
-                                <span class="extra-small opacity-75 fw-normal">Need more info</span>
-                            </a>
+                                <span class="extra-small opacity-75 fw-normal"><?php echo esc_html($contact_phone); ?></span>
+                            </button>
                         </div>
                         <div class="col-6">
                             <?php if ( $is_coming_soon ) : ?>
@@ -339,12 +344,13 @@ while ( have_posts() ) : the_post();
                     <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-calculator me-2 text-danger"></i> EMI calculator</h5>
                     <div class="row g-4 align-items-center">
                         <div class="col-md-7">
+                            <?php $emi_step = ($numeric_price < 10000) ? 1 : 1000; ?>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small text-muted mb-1">
                                     <span>Loan Amount (Max 80%)</span>
                                     <strong class="text-dark" id="loanAmountLabel">₹<?php echo number_format( $init_loan ); ?></strong>
                                 </div>
-                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_loan; ?>" id="loanAmountRange" oninput="onLoanAmountChange()" onchange="onLoanAmountChange()">
+                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="<?php echo $emi_step; ?>" value="<?php echo $init_loan; ?>" id="loanAmountRange" oninput="onLoanAmountChange()" onchange="onLoanAmountChange()">
                             </div>
 
                             <div class="mb-3">
@@ -352,7 +358,7 @@ while ( have_posts() ) : the_post();
                                     <span>Down Payment (Min 20%)</span>
                                     <strong class="text-dark" id="downPaymentLabel">₹<?php echo number_format( $init_dp ); ?></strong>
                                 </div>
-                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="1000" value="<?php echo $init_dp; ?>" id="downPaymentRange" oninput="onDownPaymentChange()" onchange="onDownPaymentChange()">
+                                <input type="range" class="form-range" min="<?php echo round( $numeric_price * 0.05 ); ?>" max="<?php echo round( $numeric_price * 0.95 ); ?>" step="<?php echo $emi_step; ?>" value="<?php echo $init_dp; ?>" id="downPaymentRange" oninput="onDownPaymentChange()" onchange="onDownPaymentChange()">
                             </div>
 
                             <div class="mb-3">
@@ -1034,16 +1040,35 @@ function scrollThumbCarousel(direction) {
     var scrollAmount = track.clientWidth * 0.75;
     track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
 }
-
-function calculateEMI() {
-    var P = parseFloat(document.getElementById('loanAmountRange').value) || 624000;
-    var N = (parseInt(document.getElementById('tenureRange').value) || 5) * 12;
-    var R = 9.5 / 12 / 100;
-    var emi = Math.round((P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1));
-    document.getElementById('calculatedEMI').innerText = '₹' + emi.toLocaleString('en-IN');
-    document.getElementById('tenureVal').innerText = (N / 12) + ' years';
-}
 </script>
+
+<!-- Call Now Modal -->
+<div class="modal fade" id="callNowModal" tabindex="-1" aria-labelledby="callNowModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+      <div class="modal-header bg-white border-bottom py-3">
+        <h5 class="modal-title fw-bold text-dark" id="callNowModalLabel"><i class="fa-solid fa-phone me-2 text-danger"></i> Contact Us</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-5">
+        <h6 class="text-muted text-uppercase fw-semibold mb-3">Speak to our experts</h6>
+        <a href="tel:<?php echo esc_attr($clean_phone); ?>" class="d-inline-block text-dark fw-black text-decoration-none" style="font-size: 2.5rem; letter-spacing: -1px;">
+            <?php echo esc_html($contact_phone); ?>
+        </a>
+        <p class="text-secondary small mt-3 mb-4">Click the number above to dial, or connect with us instantly on WhatsApp.</p>
+        
+        <div class="d-flex justify-content-center gap-2">
+            <a href="https://wa.me/<?php echo esc_attr($clean_phone); ?>?text=<?php echo rawurlencode('Hello, I am interested in: ' . get_the_title()); ?>" target="_blank" class="btn btn-success rounded-pill px-4 py-2 fw-bold d-flex align-items-center">
+                <i class="fa-brands fa-whatsapp fs-5 me-2"></i> Chat on WhatsApp
+            </a>
+            <a href="tel:<?php echo esc_attr($clean_phone); ?>" class="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center d-md-none">
+                <i class="fa-solid fa-phone fs-5 me-2"></i> Call Now
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <?php endwhile;
 

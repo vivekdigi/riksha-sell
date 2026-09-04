@@ -161,9 +161,25 @@ document.addEventListener('DOMContentLoaded', function() {
         var phone = document.getElementById('contact_phone').value.trim();
         var message = document.getElementById('contact_message').value.trim();
 
-        if (!name || !email || !message) {
+        if (!name || !email || !message || !phone) {
             res.className = 'mt-3 p-3 rounded-3 bg-danger-subtle text-danger border border-danger-subtle';
-            res.innerHTML = '<strong>Validation Error:</strong> Please fill in all required fields (Name, Email, Message).';
+            res.innerHTML = '<strong>Validation Error:</strong> Please fill in all required fields (Name, Email, Phone, Message).';
+            res.style.display = 'block';
+            return;
+        }
+
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            res.className = 'mt-3 p-3 rounded-3 bg-danger-subtle text-danger border border-danger-subtle';
+            res.innerHTML = '<strong>Validation Error:</strong> Please enter a valid email address.';
+            res.style.display = 'block';
+            return;
+        }
+
+        var phoneRegex = /^[0-9]{10,15}$/;
+        if (!phoneRegex.test(phone)) {
+            res.className = 'mt-3 p-3 rounded-3 bg-danger-subtle text-danger border border-danger-subtle';
+            res.innerHTML = '<strong>Validation Error:</strong> Please enter a valid 10-digit mobile number.';
             res.style.display = 'block';
             return;
         }
