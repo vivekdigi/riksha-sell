@@ -233,8 +233,8 @@
                     <div class="tab-pane fade show active" id="loginTabContent" role="tabpanel">
                         <form id="rikshawaleLoginForm">
                             <div class="mb-3">
-                                <label class="form-label small fw-bold">Username or Email Address</label>
-                                <input type="text" class="form-control rounded-3" name="username" required placeholder="Enter your email or username">
+                                <label class="form-label small fw-bold">Email Address or Mobile Number</label>
+                                <input type="text" class="form-control rounded-3" name="username" required placeholder="Enter your email or 10-digit mobile number">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Password</label>
@@ -391,6 +391,36 @@
         </div>
     </div>
 </div>
+
+<style>
+#myBookingsModal .pagination .page-item .page-link {
+    color: #1e293b;
+    border-radius: 8px;
+    margin: 0 3px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+#myBookingsModal .pagination .page-item.active .page-link {
+    background-color: var(--primary-color, #db2d2e) !important;
+    border-color: var(--primary-color, #db2d2e) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(219, 45, 46, 0.3);
+}
+#myBookingsModal .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+    background-color: #fee2e2;
+    color: var(--primary-color, #db2d2e);
+    border-color: #fca5a5;
+}
+#myBookingsModal .pagination .page-item.disabled .page-link {
+    color: #94a3b8;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+}
+</style>
 
 <script>
 // Step 2: Initialize Payment Step
@@ -584,13 +614,15 @@ function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
     bookingModal.show();
 }
 
-// Fetch User Bookings
-function fetchUserBookings() {
+// Fetch User Bookings (Paginated after 10 vehicles)
+function fetchUserBookings(page) {
+    page = page || 1;
     var container = document.getElementById('myBookingsContent');
     container.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Loading your bookings...</div>';
 
     var formData = new FormData();
     formData.append('action', 'rikshawale_get_user_bookings');
+    formData.append('paged', page);
 
     fetch(rikshawale_ajax.url, { method: 'POST', body: formData })
     .then(res => res.json())
@@ -599,18 +631,58 @@ function fetchUserBookings() {
             var html = '<div class="table-responsive"><table class="table align-middle mb-0"><thead class="table-light"><tr><th>Vehicle</th><th>Preferred Date</th><th>Status</th><th>Submitted</th></tr></thead><tbody>';
             data.data.bookings.forEach(b => {
                 var badgeClass = 'bg-warning text-dark';
-                if (b.status === 'Confirmed') badgeClass = 'bg-success';
-                if (b.status === 'Completed') badgeClass = 'bg-primary';
-                if (b.status === 'Cancelled') badgeClass = 'bg-danger';
+                var statusLower = (b.status || '').toLowerCase();
+                if (statusLower === 'confirmed') badgeClass = 'bg-success text-white';
+                else if (statusLower === 'completed') badgeClass = 'bg-primary text-white';
+                else if (statusLower === 'cancelled') badgeClass = 'bg-danger text-white';
+                else if (statusLower.indexOf('paid') !== -1) badgeClass = 'bg-success text-white';
 
                 html += '<tr>' +
-                    '<td><div class="d-flex align-items-center gap-2">' + (b.car_img ? '<img src="' + b.car_img + '" width="45" height="35" class="rounded object-fit-cover">' : '') + '<strong><a href="' + b.car_link + '" class="text-dark text-decoration-none" target="_blank">' + b.car_title + '</a></strong></div></td>' +
+                    '<td><div class="d-flex align-items-center gap-2">' + (b.car_img ? '<img src="' + b.car_img + '" width="45" height="35" class="rounded object-fit-cover shadow-sm">' : '') + '<strong><a href="' + b.car_link + '" class="text-dark text-decoration-none" target="_blank">' + b.car_title + '</a></strong></div></td>' +
                     '<td>' + (b.date || 'N/A') + '</td>' +
-                    '<td><span class="badge ' + badgeClass + '">' + b.status + '</span></td>' +
+                    '<td><span class="badge ' + badgeClass + ' px-2.5 py-1 rounded-pill">' + b.status + '</span></td>' +
                     '<td class="small text-muted">' + b.created + '</td>' +
                     '</tr>';
             });
             html += '</tbody></table></div>';
+
+            var totalPages  = data.data.total_pages || 1;
+            var totalItems  = data.data.total_items || data.data.bookings.length;
+            var currentPage = data.data.current_page || page;
+            var perPage     = data.data.per_page || 10;
+
+            if (totalPages > 1) {
+                var startItem = (currentPage - 1) * perPage + 1;
+                var endItem   = Math.min(currentPage * perPage, totalItems);
+
+                html += '<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-3 mt-3 border-top">';
+                html += '<div class="small text-muted">Showing <strong>' + startItem + ' - ' + endItem + '</strong> of <strong>' + totalItems + '</strong> vehicles</div>';
+                html += '<nav aria-label="Bookings Pagination"><ul class="pagination pagination-sm mb-0">';
+                
+                // Previous button
+                html += '<li class="page-item ' + (currentPage <= 1 ? 'disabled' : '') + '">';
+                html += '<button type="button" class="page-link" onclick="fetchUserBookings(' + (currentPage - 1) + ')" ' + (currentPage <= 1 ? 'disabled' : '') + '>&laquo; Prev</button>';
+                html += '</li>';
+
+                // Numbered pages
+                for (var p = 1; p <= totalPages; p++) {
+                    if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+                        html += '<li class="page-item ' + (p === currentPage ? 'active' : '') + '">';
+                        html += '<button type="button" class="page-link" onclick="fetchUserBookings(' + p + ')">' + p + '</button>';
+                        html += '</li>';
+                    } else if (p === currentPage - 2 || p === currentPage + 2) {
+                        html += '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
+                    }
+                }
+
+                // Next button
+                html += '<li class="page-item ' + (currentPage >= totalPages ? 'disabled' : '') + '">';
+                html += '<button type="button" class="page-link" onclick="fetchUserBookings(' + (currentPage + 1) + ')" ' + (currentPage >= totalPages ? 'disabled' : '') + '>Next &raquo;</button>';
+                html += '</li>';
+
+                html += '</ul></nav></div>';
+            }
+
             container.innerHTML = html;
         } else {
             container.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-box-open fs-2 text-muted mb-2"></i><p class="mb-0 text-muted">You have not submitted any vehicle booking inquiries yet.</p></div>';

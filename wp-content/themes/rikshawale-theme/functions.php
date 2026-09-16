@@ -4124,226 +4124,52 @@ function rikshawale_register_booking_cpt() {
 add_action( 'init', 'rikshawale_register_booking_cpt' );
 
 /**
- * Grant Subscribers access to view Vehicle Bookings in WP Admin
+ * Completely Block /wp-admin/ Access for Non-Administrators (Subscribers/Customers)
  */
-function rikshawale_grant_subscriber_booking_caps( $allcaps, $caps, $args, $user ) {
-	if ( is_admin() && in_array( 'subscriber', (array) $user->roles ) ) {
-		$allcaps['edit_posts'] = true;
-		$allcaps['read'] = true;
-	}
-	return $allcaps;
-}
-add_filter( 'user_has_cap', 'rikshawale_grant_subscriber_booking_caps', 10, 4 );
-
-/**
- * Filter Bookings in WP Admin for Subscribers (Only show their own bookings)
- */
-function rikshawale_filter_subscriber_bookings( $query ) {
-	if ( is_admin() && $query->is_main_query() && $query->get( 'post_type' ) === 'riksha_booking' ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			$user = wp_get_current_user();
-			$query->set( 'meta_query', array(
-				'relation' => 'OR',
-				array(
-					'key'     => '_booking_user_id',
-					'value'   => $user->ID,
-					'compare' => '=',
-				),
-				array(
-					'key'     => '_booking_email',
-					'value'   => $user->user_email,
-					'compare' => '=',
-				),
-				array(
-					'key'     => '_customer_email',
-					'value'   => $user->user_email,
-					'compare' => '=',
-				),
-			) );
-		}
-	}
-}
-add_action( 'pre_get_posts', 'rikshawale_filter_subscriber_bookings' );
-
-/**
- * Filter Bookings List Table Views for Subscribers (Hide "All", "Publish", "Trash")
- */
-function rikshawale_filter_subscriber_booking_views( $views ) {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		unset( $views['all'] );
-		unset( $views['publish'] );
-		unset( $views['trash'] );
-		unset( $views['mine'] );
-	}
-	return $views;
-}
-add_filter( 'views_edit-riksha_booking', 'rikshawale_filter_subscriber_booking_views' );
-
-/**
- * Hide "Add New", WordPress update banners, Personal Options, Elementor AI, and core clutter for Subscribers
- */
-function rikshawale_hide_subscriber_booking_actions() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		global $pagenow;
-		echo '<style>
-			.update-nag, .notice-warning, #wpadminbar .ab-icon, #footer-thankyou, #footer-upgrade, #screen-meta-links, #contextual-help-link-wrap, #wpfooter { display: none !important; }
-		</style>';
-
-		if ( $pagenow === 'edit.php' && isset( $_GET['post_type'] ) && $_GET['post_type'] === 'riksha_booking' ) {
-			echo '<style>.page-title-action, .row-actions .inline, .row-actions .edit, .tablenav .actions, .bulkactions, ul.subsubsub { display: none !important; }</style>';
-		}
-
-		if ( $pagenow === 'profile.php' ) {
-			echo '<style>
-				body.profile-php h2,
-				body.profile-php h3,
-				body.profile-php .user-rich-editing-wrap,
-				body.profile-php .user-syntax-highlighting-wrap,
-				body.profile-php .user-admin-color-wrap,
-				body.profile-php .user-comment-shortcuts-wrap,
-				body.profile-php .show-admin-bar,
-				body.profile-php .user-language-wrap,
-				body.profile-php .user-nickname-wrap,
-				body.profile-php .user-url-wrap,
-				body.profile-php .user-description-wrap,
-				body.profile-php .user-profile-picture,
-				body.profile-php .user-sessions-wrap,
-				body.profile-php .application-passwords,
-				body.profile-php #elementor-ai-user-profile,
-				body.profile-php .elementor-ai-user-profile,
-				body.profile-php tr:has(input[name*="elementor"]),
-				body.profile-php tr:has(label[for*="elementor"]),
-				body.profile-php .user-admin-bar-front-wrap {
-					display: none !important;
-				}
-				body.profile-php #your-profile {
-					max-width: 650px;
-					background: #ffffff;
-					padding: 24px;
-					border-radius: 12px;
-					box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-					margin-top: 15px;
-				}
-				body.profile-php h1 {
-					font-weight: 700;
-					color: #0f172a;
-				}
-				body.profile-php table.form-table th {
-					font-weight: 600;
-					color: #334155;
-					width: 160px;
-				}
-				body.profile-php input.regular-text {
-					border-radius: 6px;
-					padding: 6px 12px;
-				}
-			</style>
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-					document.querySelectorAll("h2, h3, tr, table").forEach(function(el) {
-						if (el.innerText && el.innerText.indexOf("Elementor") !== -1) {
-							el.style.display = "none";
-						}
-					});
-				});
-			</script>';
-		}
-	}
-}
-add_action( 'admin_head', 'rikshawale_hide_subscriber_booking_actions' );
-
-/**
- * Strictly Hide ALL Menus for Subscribers Except "Vehicle Bookings" and "Profile"
- */
-function rikshawale_customize_subscriber_admin_menu() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		global $menu, $submenu;
-
-		// Remove "Add Post" / "Add New" submenu under Vehicle Bookings
-		if ( isset( $submenu['edit.php?post_type=riksha_booking'] ) ) {
-			foreach ( $submenu['edit.php?post_type=riksha_booking'] as $sub_key => $sub_item ) {
-				if ( isset( $sub_item[2] ) && strpos( $sub_item[2], 'post-new.php' ) !== false ) {
-					unset( $submenu['edit.php?post_type=riksha_booking'][$sub_key] );
-				}
-			}
-		}
-
-		// Allowed top-level menu slugs: ONLY Vehicle Bookings and Profile!
-		$allowed_menu_slugs = array(
-			'edit.php?post_type=riksha_booking',
-			'profile.php',
-		);
-
-		if ( ! empty( $menu ) && is_array( $menu ) ) {
-			foreach ( $menu as $key => $item ) {
-				$menu_slug = $item[2] ?? '';
-				if ( ! in_array( $menu_slug, $allowed_menu_slugs, true ) ) {
-					unset( $menu[$key] );
-				}
-			}
-		}
-	}
-}
-add_action( 'admin_menu', 'rikshawale_customize_subscriber_admin_menu', 9999 );
-
-/**
- * Redirect Subscriber from Any Unauthorized Admin Page to Vehicle Bookings
- */
-function rikshawale_subscriber_admin_redirect() {
+function rikshawale_block_wp_admin_for_non_admins() {
 	if ( is_admin() && ! current_user_can( 'manage_options' ) && ! wp_doing_ajax() ) {
-		global $pagenow;
-		$post_type = $_GET['post_type'] ?? '';
-
-		// Allowed pages: profile.php or edit.php?post_type=riksha_booking
-		if ( $pagenow === 'profile.php' || ( $pagenow === 'edit.php' && $post_type === 'riksha_booking' ) ) {
-			return;
-		}
-
-		// Allow viewing individual booking post if owned by subscriber
-		if ( $pagenow === 'post.php' && isset( $_GET['post'] ) ) {
-			$post_id = intval( $_GET['post'] );
-			if ( get_post_type( $post_id ) === 'riksha_booking' ) {
-				$user      = wp_get_current_user();
-				$b_user_id = get_post_meta( $post_id, '_booking_user_id', true );
-				$b_email   = get_post_meta( $post_id, '_booking_email', true ) ?: get_post_meta( $post_id, '_customer_email', true );
-				if ( intval( $b_user_id ) === $user->ID || strtolower( trim( $b_email ) ) === strtolower( trim( $user->user_email ) ) || intval( get_post_field( 'post_author', $post_id ) ) === $user->ID ) {
-					return; // Authorized
-				}
-			}
-		}
-
-		// Redirect to Vehicle Bookings
-		wp_redirect( admin_url( 'edit.php?post_type=riksha_booking' ) );
+		wp_safe_redirect( home_url( '/' ) );
 		exit;
 	}
 }
-add_action( 'admin_init', 'rikshawale_subscriber_admin_redirect' );
+add_action( 'admin_init', 'rikshawale_block_wp_admin_for_non_admins' );
 
 /**
- * Remove WordPress Logo and Links from Admin Bar
+ * Redirect Non-Administrators away from wp-login.php / wp-admin to Homepage on Login
  */
-function rikshawale_remove_wp_logo_admin_bar( $wp_admin_bar ) {
-	$wp_admin_bar->remove_node( 'wp-logo' ); // Removes WP Logo (WordPress.org, Documentation, Support, Feedback)
-	if ( ! current_user_can( 'manage_options' ) ) {
-		$wp_admin_bar->remove_node( 'site-name' );
-		$wp_admin_bar->remove_node( 'view-site' );
-		$wp_admin_bar->remove_node( 'updates' );
-		$wp_admin_bar->remove_node( 'comments' );
-		$wp_admin_bar->remove_node( 'new-content' );
+function rikshawale_login_redirect_non_admins( $redirect_to, $request, $user ) {
+	if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+		if ( ! in_array( 'administrator', $user->roles, true ) ) {
+			return home_url( '/' );
+		}
 	}
+	return $redirect_to;
 }
-add_action( 'admin_bar_menu', 'rikshawale_remove_wp_logo_admin_bar', 999 );
+add_filter( 'login_redirect', 'rikshawale_login_redirect_non_admins', 10, 3 );
 
 /**
- * Hide Admin Bar on Frontend for Non-Administrators
+ * Completely Hide WordPress Admin Bar on Frontend for Non-Administrators
  */
-function rikshawale_hide_admin_bar_for_subscribers( $show ) {
+add_action( 'init', function() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		show_admin_bar( false );
+		// Reset any previously granted edit capabilities to subscriber role
+		$sub = get_role( 'subscriber' );
+		if ( $sub && $sub->has_cap( 'edit_posts' ) ) {
+			$sub->remove_cap( 'edit_posts' );
+			$sub->remove_cap( 'edit_published_posts' );
+			$sub->remove_cap( 'publish_posts' );
+		}
+	}
+} );
+
+add_filter( 'show_admin_bar', function( $show ) {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return false;
 	}
 	return $show;
-}
-add_filter( 'show_admin_bar', 'rikshawale_hide_admin_bar_for_subscribers' );
+} );
+
 
 /**
  * Custom Admin Columns for Vehicle Bookings
@@ -4487,18 +4313,84 @@ add_action( 'save_post_riksha_booking', 'rikshawale_save_booking_meta' );
 
 /* --- AJAX AUTHENTICATION & BOOKING HANDLERS --- */
 
-// 1. AJAX Customer Login
+// 1. AJAX Customer Login (Supports Email, Mobile Number, or Username)
 function rikshawale_ajax_login() {
 	check_ajax_referer( 'rikshawale_auth_nonce', 'nonce' );
-	$username = sanitize_text_field( $_POST['username'] ?? '' );
-	$password = $_POST['password'] ?? '';
+	$login_input = sanitize_text_field( $_POST['username'] ?? '' );
+	$password    = $_POST['password'] ?? '';
 
-	if ( empty( $username ) || empty( $password ) ) {
-		wp_send_json_error( array( 'message' => 'Please enter both username/email and password.' ) );
+	if ( empty( $login_input ) || empty( $password ) ) {
+		wp_send_json_error( array( 'message' => 'Please enter both Email/Mobile number and password.' ) );
+	}
+
+	$user_login = $login_input;
+
+	// Check if input is a phone/mobile number (10 digits or digits with optional country prefix)
+	$clean_phone = preg_replace( '/[^0-9]/', '', $login_input );
+	if ( strlen( $clean_phone ) >= 10 ) {
+		$last_10 = substr( $clean_phone, -10 );
+
+		// 1. Find user by phone_number meta
+		$phone_users = get_users( array(
+			'meta_query' => array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'phone_number',
+					'value'   => $last_10,
+					'compare' => '=',
+				),
+				array(
+					'key'     => 'phone_number',
+					'value'   => $clean_phone,
+					'compare' => '=',
+				),
+				array(
+					'key'     => 'alternate_phone',
+					'value'   => $last_10,
+					'compare' => '=',
+				),
+			),
+			'number'     => 1,
+		) );
+
+		if ( ! empty( $phone_users ) ) {
+			$user_login = $phone_users[0]->user_login;
+		} else {
+			// 2. Check riksha_booking posts for this phone number to find linked customer account
+			$bookings_with_phone = get_posts( array(
+				'post_type'      => 'riksha_booking',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'meta_query'     => array(
+					'relation' => 'OR',
+					array(
+						'key'     => '_booking_phone',
+						'value'   => $last_10,
+						'compare' => 'LIKE',
+					),
+					array(
+						'key'     => '_booking_alt_phone',
+						'value'   => $last_10,
+						'compare' => 'LIKE',
+					),
+				),
+			) );
+
+			if ( ! empty( $bookings_with_phone ) ) {
+				$b_uid = get_post_meta( $bookings_with_phone[0]->ID, '_booking_user_id', true );
+				if ( $b_uid ) {
+					$u_obj = get_user_by( 'id', $b_uid );
+					if ( $u_obj ) {
+						$user_login = $u_obj->user_login;
+						update_user_meta( $b_uid, 'phone_number', $last_10 );
+					}
+				}
+			}
+		}
 	}
 
 	$creds = array(
-		'user_login'    => $username,
+		'user_login'    => $user_login,
 		'user_password' => $password,
 		'remember'      => true,
 	);
@@ -4506,7 +4398,7 @@ function rikshawale_ajax_login() {
 	$user = wp_signon( $creds, is_ssl() );
 
 	if ( is_wp_error( $user ) ) {
-		wp_send_json_error( array( 'message' => 'Invalid username/email or password.' ) );
+		wp_send_json_error( array( 'message' => 'Invalid Email/Mobile number or password.' ) );
 	}
 
 	wp_send_json_success( array(
@@ -4835,26 +4727,31 @@ function rikshawale_booking_column_data($column, $post_id) {
     }
 }
 
-// 4. AJAX Get Logged-in User Bookings
+// 4. AJAX Get Logged-in User Bookings (Paginated: 10 per page)
 function rikshawale_ajax_get_user_bookings() {
 	if ( ! is_user_logged_in() ) {
 		wp_send_json_error( array( 'message' => 'Unauthorized' ) );
 	}
-	$user_id = get_current_user_id();
+	$user_id  = get_current_user_id();
+	$paged    = isset( $_POST['paged'] ) ? max( 1, intval( $_POST['paged'] ) ) : 1;
+	$per_page = 10;
 
 	$query = new WP_Query( array(
 		'post_type'      => 'riksha_booking',
-		'posts_per_page' => 20,
-		'post_status'    => 'publish',
+		'posts_per_page' => $per_page,
+		'paged'          => $paged,
+		'post_status'    => 'any',
 		'meta_key'       => '_booking_user_id',
 		'meta_value'     => $user_id,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
 	) );
 
 	$list = array();
 	if ( $query->have_posts() ) {
 		while ( $query->have_posts() ) {
 			$query->the_post();
-			$p_id = get_the_ID();
+			$p_id      = get_the_ID();
 			$car_title = get_post_meta( $p_id, '_booking_car_title', true );
 			$car_id    = get_post_meta( $p_id, '_booking_car_id', true );
 			$status    = get_post_meta( $p_id, '_booking_status', true ) ?: 'Pending';
@@ -4874,7 +4771,13 @@ function rikshawale_ajax_get_user_bookings() {
 		wp_reset_postdata();
 	}
 
-	wp_send_json_success( array( 'bookings' => $list ) );
+	wp_send_json_success( array(
+		'bookings'     => $list,
+		'total_items'  => intval( $query->found_posts ),
+		'total_pages'  => intval( $query->max_num_pages ),
+		'current_page' => $paged,
+		'per_page'     => $per_page,
+	) );
 }
 add_action( 'wp_ajax_rikshawale_get_user_bookings', 'rikshawale_ajax_get_user_bookings' );
 
