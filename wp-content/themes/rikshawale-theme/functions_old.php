@@ -4495,6 +4495,92 @@ function rikshawale_ajax_submit_booking() {
 		}
 	}
 
+	// Enforce Unique Vehicle Booking per user/customer
+	if ( $car_id > 0 ) {
+		$existing_query_args = array(
+			'post_type'      => 'riksha_booking',
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'meta_query'     => array(
+				'relation' => 'AND',
+				array(
+					'key'     => '_booking_car_id',
+					'value'   => $car_id,
+					'compare' => '=',
+				),
+			),
+		);
+
+		$user_identifiers = array();
+		if ( $user_id ) {
+			$user_identifiers[] = array(
+				'key'     => '_booking_user_id',
+				'value'   => $user_id,
+				'compare' => '=',
+			);
+		}
+		if ( ! empty( $email ) ) {
+			$user_identifiers[] = array(
+				'key'     => '_booking_email',
+				'value'   => $email,
+				'compare' => '=',
+			);
+		}
+		if ( ! empty( $phone ) ) {
+			$user_identifiers[] = array(
+				'key'     => '_booking_phone',
+				'value'   => $phone,
+				'compare' => '=',
+			);
+		}
+
+		if ( ! empty( $user_identifiers ) ) {
+			if ( count( $user_identifiers ) > 1 ) {
+				$existing_query_args['meta_query'][] = array_merge( array( 'relation' => 'OR' ), $user_identifiers );
+			} else {
+				$existing_query_args['meta_query'][] = $user_identifiers[0];
+			}
+		}
+
+		$existing_bookings = get_posts( $existing_query_args );
+
+		if ( ! empty( $existing_bookings ) ) {
+			$existing_id     = $existing_bookings[0]->ID;
+			$existing_status = get_post_meta( $existing_id, '_booking_status', true );
+			$is_paid         = ( stripos( (string)$existing_status, 'paid' ) !== false );
+
+			if ( ! empty( $alt_phone ) ) update_post_meta( $existing_id, '_booking_alt_phone', $alt_phone );
+			if ( ! empty( $city ) ) update_post_meta( $existing_id, '_booking_city', $city );
+			if ( ! empty( $date ) ) update_post_meta( $existing_id, '_booking_date', $date );
+
+			if ( $user_id ) {
+				update_user_meta( $user_id, 'phone_number', $phone );
+				if ( ! empty( $alt_phone ) ) update_user_meta( $user_id, 'alternate_phone', $alt_phone );
+				if ( ! empty( $city ) ) {
+					update_user_meta( $user_id, 'city', $city );
+					update_user_meta( $user_id, 'user_place', $city );
+				}
+			}
+
+			if ( $is_paid ) {
+				wp_send_json_success( array(
+					'already_booked' => true,
+					'already_paid'   => true,
+					'booking_id'     => $existing_id,
+					'message'        => 'You have already booked and paid for this vehicle! Check your bookings in "My Bookings".',
+				) );
+			} else {
+				wp_send_json_success( array(
+					'already_booked' => true,
+					'already_paid'   => false,
+					'booking_id'     => $existing_id,
+					'message'        => 'This vehicle is already booked by you. Redirecting to payment option...',
+				) );
+			}
+			return;
+		}
+	}
+
 	$post_title = $name . ' — ' . $car_title . ' (' . date('d M Y') . ')';
 
 	$post_id = wp_insert_post( array(
@@ -4518,6 +4604,15 @@ function rikshawale_ajax_submit_booking() {
 	update_post_meta( $post_id, '_booking_date', $date );
 	update_post_meta( $post_id, '_booking_message', $message );
 	update_post_meta( $post_id, '_booking_status', 'Pending' );
+
+	if ( $user_id ) {
+		update_user_meta( $user_id, 'phone_number', $phone );
+		if ( ! empty( $alt_phone ) ) update_user_meta( $user_id, 'alternate_phone', $alt_phone );
+		if ( ! empty( $city ) ) {
+			update_user_meta( $user_id, 'city', $city );
+			update_user_meta( $user_id, 'user_place', $city );
+		}
+	}
 
 	// Email Admin Notification
 	$to      = get_option( 'admin_email' );
@@ -5049,14 +5144,17 @@ function rikshawale_add_places_mega_menu_to_nav( $items, $args ) {
 		}
 
 		$mega_menu_item  = '<li class="nav-item dropdown position-static mega-places-menu-item ms-lg-2">';
-		$mega_menu_item .= '<a class="nav-link dropdown-toggle fw-bold text-dark d-inline-flex align-items-center gap-1 py-2" href="#" id="placesNavMegaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">';
+		$mega_menu_item .= '<a class="nav-link dropdown-toggle fw-bold text-dark d-inline-flex align-items-center gap-1 py-2" href="javascript:void(0);" id="placesNavMegaDropdown" role="button" aria-expanded="false" style="font-size: 0.95rem; cursor: pointer;">';
 		$mega_menu_item .= '<i class="fa-solid fa-location-dot text-danger"></i> <span id="currentPlacesLabel">' . $current_place_label . '</span>';
 		$mega_menu_item .= '</a>';
 		$mega_menu_item .= '<div class="dropdown-menu w-100 shadow-lg border-0 rounded-4 p-4 mt-1 mega-dropdown-panel" aria-labelledby="placesNavMegaDropdown" style="left: 0; right: 0; background: #ffffff; border-top: 3px solid var(--primary-color, #db2d2e) !important;">';
 		$mega_menu_item .= '<div class="container" style="max-width: 1140px;">';
-		$mega_menu_item .= '<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pb-3 mb-3 border-bottom">';
+		$mega_menu_item .= '<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pb-3 mb-3 border-bottom position-relative">';
 		$mega_menu_item .= '<div><h6 class="fw-bold text-dark mb-0 fs-6"><i class="fa-solid fa-city text-danger me-2"></i> Buy / Filter Riksha by City & Place</h6><p class="text-muted extra-small mb-0 mt-1">Select your city to view available commercial rikshas & vehicles</p></div>';
+		$mega_menu_item .= '<div class="d-flex align-items-center gap-2">';
 		$mega_menu_item .= '<a href="' . esc_url( home_url( '/inventory/' ) ) . '" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold extra-small text-nowrap">View All Places &rarr;</a>';
+		$mega_menu_item .= '<button type="button" class="places-close-btn" id="closePlacesMegaDropdown" aria-label="Close Places Popup" title="Close"><i class="fa-solid fa-xmark"></i></button>';
+		$mega_menu_item .= '</div>';
 		$mega_menu_item .= '</div>';
 		$mega_menu_item .= '<div class="row g-3">' . $location_links_html . '</div>';
 		$mega_menu_item .= '</div>';

@@ -347,11 +347,11 @@
                         <div class="row g-2 mb-2">
                             <div class="col-6">
                                 <label class="form-label small fw-bold">City / State</label>
-                                <input type="text" class="form-control rounded-3" name="booking_city" placeholder="e.g. Delhi">
+                                <input type="text" class="form-control rounded-3" name="booking_city" id="bookingCityInput" placeholder="e.g. Delhi">
                             </div>
                             <div class="col-6">
                                 <label class="form-label small fw-bold">Preferred Visit Date</label>
-                                <input type="date" class="form-control rounded-3" name="booking_date">
+                                <input type="date" class="form-control rounded-3" name="booking_date" id="bookingDateInput">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -365,9 +365,9 @@
                 </div>
 
                 <div id="bookingStep2" class="d-none text-center py-4">
-                    <i class="fa-solid fa-circle-check text-success" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <h5 class="fw-bold text-dark mb-2">Inquiry Submitted Successfully!</h5>
-                    <p class="text-muted small mb-4">Please complete your payment to confirm the booking.</p>
+                    <i id="step2Icon" class="fa-solid fa-circle-check text-success" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h5 class="fw-bold text-dark mb-2" id="step2Title">Inquiry Submitted Successfully!</h5>
+                    <p class="text-muted small mb-4" id="step2Desc">Please complete your payment to confirm the booking.</p>
                     <button type="button" id="btnPayRazorpay" class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%); border: none;">
                         <i class="fa-solid fa-credit-card me-2"></i> Pay with Razorpay
                     </button>
@@ -393,6 +393,130 @@
 </div>
 
 <script>
+// Step 2: Initialize Payment Step
+function initPaymentStep(bookingId, carId, carTitle, isAlreadyBooked, isAlreadyPaid) {
+    document.getElementById('bookingStep1').classList.add('d-none');
+    document.getElementById('bookingStep2').classList.remove('d-none');
+    document.getElementById('bookingSteps').setAttribute('data-step', '2');
+    document.getElementById('step1Circle').innerHTML = '<i class="fa-solid fa-check"></i>';
+
+    var iconEl = document.getElementById('step2Icon');
+    var titleEl = document.getElementById('step2Title');
+    var descEl = document.getElementById('step2Desc');
+    var payBtn = document.getElementById('btnPayRazorpay');
+
+    if (isAlreadyPaid) {
+        if (iconEl) iconEl.className = 'fa-solid fa-circle-check text-success';
+        if (titleEl) titleEl.innerText = 'Vehicle Already Booked & Paid!';
+        if (descEl) descEl.innerText = 'You have already booked and completed payment for this vehicle.';
+        if (payBtn) {
+            payBtn.className = 'btn btn-outline-primary w-100 py-3 rounded-3 fw-bold';
+            payBtn.style.background = '';
+            payBtn.innerHTML = '<i class="fa-solid fa-list-check me-2"></i> View in My Bookings';
+            payBtn.disabled = false;
+            payBtn.onclick = function() {
+                var modalEl = document.getElementById('bookingModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                fetchUserBookings();
+                var myModal = new bootstrap.Modal(document.getElementById('myBookingsModal'));
+                myModal.show();
+            };
+        }
+        return;
+    }
+
+    if (isAlreadyBooked) {
+        if (iconEl) iconEl.className = 'fa-solid fa-clock-rotate-left text-warning';
+        if (titleEl) titleEl.innerText = 'Vehicle Already Booked!';
+        if (descEl) descEl.innerText = 'You have already booked this vehicle. Please complete your payment below to confirm.';
+    } else {
+        if (iconEl) iconEl.className = 'fa-solid fa-circle-check text-success';
+        if (titleEl) titleEl.innerText = 'Inquiry Submitted Successfully!';
+        if (descEl) descEl.innerText = 'Please complete your payment to confirm the booking.';
+    }
+
+    if (payBtn) {
+        payBtn.className = 'btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm';
+        payBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #047857 100%)';
+        payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Preparing Payment...';
+        payBtn.disabled = true;
+
+        var rzFd = new FormData();
+        rzFd.append('action', 'rikshawale_create_razorpay_order');
+        rzFd.append('car_id', carId);
+
+        fetch(rikshawale_ajax.url, { method: 'POST', body: rzFd })
+        .then(r => r.json())
+        .then(rzData => {
+            if (rzData.success) {
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="fa-solid fa-credit-card me-2"></i> Pay with Razorpay';
+
+                payBtn.onclick = function() {
+                    var options = {
+                        "key": rzData.data.key_id,
+                        "amount": rzData.data.amount,
+                        "currency": "INR",
+                        "name": "Rikshawale",
+                        "description": "Vehicle Booking: " + carTitle,
+                        "order_id": rzData.data.order_id,
+                        "handler": function (response){
+                            payBtn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Payment Successful!';
+                            payBtn.disabled = true;
+
+                            var payFd = new FormData();
+                            payFd.append('action', 'rikshawale_update_booking_payment');
+                            payFd.append('booking_id', bookingId);
+                            payFd.append('payment_id', response.razorpay_payment_id);
+                            payFd.append('amount', rzData.data.amount / 100);
+                            fetch(rikshawale_ajax.url, { method: 'POST', body: payFd });
+
+                            setTimeout(() => {
+                                var modalEl = document.getElementById('bookingModal');
+                                var modal = bootstrap.Modal.getInstance(modalEl);
+                                if (modal) modal.hide();
+                                window.location.reload();
+                            }, 2000);
+                        },
+                        "prefill": {
+                            "name": document.getElementById('bookingNameInput').value,
+                            "email": document.getElementById('bookingEmailInput').value,
+                            "contact": document.getElementById('bookingPhoneInput').value
+                        },
+                        "theme": {
+                            "color": "#db2d2e"
+                        }
+                    };
+
+                    if (typeof Razorpay === 'undefined') {
+                        var script = document.createElement('script');
+                        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                        script.onload = function() {
+                            var rzp1 = new Razorpay(options);
+                            rzp1.open();
+                        };
+                        document.head.appendChild(script);
+                    } else {
+                        var rzp1 = new Razorpay(options);
+                        rzp1.open();
+                    }
+                };
+            } else {
+                payBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Payment Setup Failed';
+                var notice = document.getElementById('bookingNotice');
+                if (notice) {
+                    notice.className = 'alert py-2 small mb-3 alert-danger';
+                    notice.innerHTML = 'Payment Error: ' + rzData.data.message;
+                    notice.classList.remove('d-none');
+                    var step2 = document.getElementById('bookingStep2');
+                    step2.insertBefore(notice, payBtn);
+                }
+            }
+        });
+    }
+}
+
 // Trigger Booking Modal
 function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
     document.getElementById('bookingCarId').value = carId;
@@ -406,26 +530,53 @@ function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
         document.getElementById('bookingCarImg').style.display = 'none';
     }
 
-    if (rikshawale_ajax.is_logged_in) {
-        document.getElementById('bookingNameInput').value = rikshawale_ajax.user_name || '';
-        document.getElementById('bookingEmailInput').value = rikshawale_ajax.user_email || '';
-        document.getElementById('bookingPhoneInput').value = rikshawale_ajax.user_phone || '';
+    // Auto-fill fields: Precedence is logged-in user profile/meta > localStorage previous values
+    var nameVal = (rikshawale_ajax.is_logged_in && rikshawale_ajax.user_name) ? rikshawale_ajax.user_name : (localStorage.getItem('rw_booking_name') || '');
+    var emailVal = (rikshawale_ajax.is_logged_in && rikshawale_ajax.user_email) ? rikshawale_ajax.user_email : (localStorage.getItem('rw_booking_email') || '');
+    var phoneVal = (rikshawale_ajax.is_logged_in && rikshawale_ajax.user_phone) ? rikshawale_ajax.user_phone : (localStorage.getItem('rw_booking_phone') || '');
+    var altPhoneVal = (rikshawale_ajax.is_logged_in && rikshawale_ajax.user_alt_phone) ? rikshawale_ajax.user_alt_phone : (localStorage.getItem('rw_booking_alt_phone') || '');
+    var cityVal = (rikshawale_ajax.is_logged_in && rikshawale_ajax.user_city) ? rikshawale_ajax.user_city : (localStorage.getItem('rw_booking_city') || '');
+
+    if (document.getElementById('bookingNameInput')) document.getElementById('bookingNameInput').value = nameVal;
+    if (document.getElementById('bookingEmailInput')) document.getElementById('bookingEmailInput').value = emailVal;
+    if (document.getElementById('bookingPhoneInput')) document.getElementById('bookingPhoneInput').value = phoneVal;
+    if (document.getElementById('bookingAltPhoneInput')) document.getElementById('bookingAltPhoneInput').value = altPhoneVal;
+    if (document.getElementById('bookingCityInput')) document.getElementById('bookingCityInput').value = cityVal;
+
+    // Preferred Visit Date defaults to today's / current date
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var dd = String(today.getDate()).padStart(2, '0');
+    var todayStr = yyyy + '-' + mm + '-' + dd;
+    var dateInput = document.getElementById('bookingDateInput');
+    if (dateInput) {
+        dateInput.value = todayStr;
+        dateInput.min = todayStr;
     }
 
     var bookingNotice = document.getElementById('bookingNotice');
     if (bookingNotice) bookingNotice.className = 'alert d-none py-2 small mb-3';
 
-    // Reset steps UI
-    if (document.getElementById('bookingStep1')) {
-        document.getElementById('bookingStep1').classList.remove('d-none');
-        document.getElementById('bookingStep2').classList.add('d-none');
-        document.getElementById('bookingSteps').setAttribute('data-step', '1');
-        document.getElementById('step1Circle').innerHTML = '1';
-        
-        var btn = document.querySelector('#rikshawaleBookingForm [type="submit"]');
-        if(btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';
+    // Check if user has already booked this exact vehicle!
+    var bookedInfo = (rikshawale_ajax.user_booked_cars && rikshawale_ajax.user_booked_cars[carId]) ? rikshawale_ajax.user_booked_cars[carId] : null;
+
+    if (bookedInfo) {
+        // Vehicle already booked by this user -> Go straight to payment option
+        initPaymentStep(bookedInfo.booking_id, carId, carTitle, true, bookedInfo.is_paid);
+    } else {
+        // Reset steps UI to Step 1
+        if (document.getElementById('bookingStep1')) {
+            document.getElementById('bookingStep1').classList.remove('d-none');
+            document.getElementById('bookingStep2').classList.add('d-none');
+            document.getElementById('bookingSteps').setAttribute('data-step', '1');
+            document.getElementById('step1Circle').innerHTML = '1';
+            
+            var btn = document.querySelector('#rikshawaleBookingForm [type="submit"]');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';
+            }
         }
     }
 
@@ -540,6 +691,19 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Submitting Booking...';
 
+            var nameVal     = document.getElementById('bookingNameInput') ? document.getElementById('bookingNameInput').value : '';
+            var phoneVal    = document.getElementById('bookingPhoneInput') ? document.getElementById('bookingPhoneInput').value : '';
+            var altPhoneVal = document.getElementById('bookingAltPhoneInput') ? document.getElementById('bookingAltPhoneInput').value : '';
+            var emailVal    = document.getElementById('bookingEmailInput') ? document.getElementById('bookingEmailInput').value : '';
+            var cityVal     = document.getElementById('bookingCityInput') ? document.getElementById('bookingCityInput').value : '';
+
+            // Remember in localStorage for future bookings
+            if (nameVal) localStorage.setItem('rw_booking_name', nameVal);
+            if (phoneVal) localStorage.setItem('rw_booking_phone', phoneVal);
+            if (altPhoneVal) localStorage.setItem('rw_booking_alt_phone', altPhoneVal);
+            if (emailVal) localStorage.setItem('rw_booking_email', emailVal);
+            if (cityVal) localStorage.setItem('rw_booking_city', cityVal);
+
             var fd = new FormData(bookingForm);
             fd.append('action', 'rikshawale_submit_booking');
             fd.append('nonce', rikshawale_ajax.booking_nonce);
@@ -547,94 +711,39 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(rikshawale_ajax.url, { method: 'POST', body: fd })
             .then(r => r.json())
             .then(data => {
-                notice.className = 'alert py-2 small mb-3 alert-' + (data.success ? 'success' : 'danger');
-                notice.innerHTML = data.data.message;
                 if (data.success) {
-                    // Transition to Step 2
-                    document.getElementById('bookingStep1').classList.add('d-none');
-                    document.getElementById('bookingStep2').classList.remove('d-none');
-                    document.getElementById('bookingSteps').setAttribute('data-step', '2');
-                    document.getElementById('step1Circle').innerHTML = '<i class="fa-solid fa-check"></i>';
+                    var carId = document.getElementById('bookingCarId').value;
+                    var carTitle = document.getElementById('bookingCarTitleInput').value;
 
-                    var payBtn = document.getElementById('btnPayRazorpay');
-                    payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Preparing Payment...';
-                    payBtn.disabled = true;
+                    // Update memory state of booked cars
+                    if (!rikshawale_ajax.user_booked_cars) rikshawale_ajax.user_booked_cars = {};
+                    rikshawale_ajax.user_booked_cars[carId] = {
+                        booking_id: data.data.booking_id,
+                        status: data.data.already_paid ? 'Paid' : 'Pending',
+                        is_paid: !!data.data.already_paid
+                    };
 
-                    var rzFd = new FormData();
-                    rzFd.append('action', 'rikshawale_create_razorpay_order');
-                    rzFd.append('car_id', document.getElementById('bookingCarId').value);
-                    
-                    fetch(rikshawale_ajax.url, { method: 'POST', body: rzFd })
-                    .then(r => r.json())
-                    .then(rzData => {
-                        if (rzData.success) {
-                            payBtn.disabled = false;
-                            payBtn.innerHTML = '<i class="fa-solid fa-credit-card me-2"></i> Pay with Razorpay';
-                            
-                            payBtn.onclick = function() {
-                                var options = {
-                                    "key": rzData.data.key_id,
-                                    "amount": rzData.data.amount,
-                                    "currency": "INR",
-                                    "name": "Rikshawale",
-                                    "description": "Vehicle Booking: " + document.getElementById('bookingCarTitleInput').value,
-                                    "order_id": rzData.data.order_id,
-                                    "handler": function (response){
-                                        payBtn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Payment Successful!';
-                                        payBtn.disabled = true;
-                                        
-                                        var payFd = new FormData();
-                                        payFd.append('action', 'rikshawale_update_booking_payment');
-                                        payFd.append('booking_id', data.data.booking_id);
-                                        payFd.append('payment_id', response.razorpay_payment_id);
-                                        payFd.append('amount', rzData.data.amount / 100);
-                                        fetch(rikshawale_ajax.url, { method: 'POST', body: payFd });
-
-                                        setTimeout(() => {
-                                            var modalEl = document.getElementById('bookingModal');
-                                            var modal = bootstrap.Modal.getInstance(modalEl);
-                                            if (modal) modal.hide();
-                                            window.location.reload();
-                                        }, 2000);
-                                    },
-                                    "prefill": {
-                                        "name": document.getElementById('bookingNameInput').value,
-                                        "email": document.getElementById('bookingEmailInput').value,
-                                        "contact": document.getElementById('bookingPhoneInput').value
-                                    },
-                                    "theme": {
-                                        "color": "#db2d2e"
-                                    }
-                                };
-                                
-                                if (typeof Razorpay === 'undefined') {
-                                    var script = document.createElement('script');
-                                    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                                    script.onload = function() {
-                                        var rzp1 = new Razorpay(options);
-                                        rzp1.open();
-                                    };
-                                    document.head.appendChild(script);
-                                } else {
-                                    var rzp1 = new Razorpay(options);
-                                    rzp1.open();
-                                }
-                            };
-                        } else {
-                            payBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Payment Setup Failed';
-                            notice.className = 'alert py-2 small mb-3 alert-danger';
-                            notice.innerHTML = 'Payment Error: ' + rzData.data.message;
-                            notice.classList.remove('d-none');
-                            
-                            // Re-insert notice in step 2 so user can see error
-                            var step2 = document.getElementById('bookingStep2');
-                            step2.insertBefore(notice, payBtn);
-                        }
-                    });
+                    initPaymentStep(
+                        data.data.booking_id,
+                        carId,
+                        carTitle,
+                        !!data.data.already_booked,
+                        !!data.data.already_paid
+                    );
                 } else {
+                    notice.className = 'alert py-2 small mb-3 alert-danger';
+                    notice.innerHTML = data.data.message;
+                    notice.classList.remove('d-none');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';
                 }
+            })
+            .catch(err => {
+                notice.className = 'alert py-2 small mb-3 alert-danger';
+                notice.innerHTML = 'An unexpected error occurred. Please try again.';
+                notice.classList.remove('d-none');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Confirm & Submit Booking';
             });
         });
     }

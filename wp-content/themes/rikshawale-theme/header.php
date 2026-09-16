@@ -197,21 +197,75 @@
             padding-left: 20px !important;
         }
 
-        /* 2. SHOW SUBMENUS ONLY ON HOVER (DESKTOP) */
+        /* 2. SHOW SUBMENUS ONLY ON HOVER (DESKTOP) - EXCLUDING PLACES MEGA MENU */
         @media (min-width: 992px) {
-            .navbar-nav li:hover > ul.sub-menu,
-            .navbar-nav li:hover > ul.children,
-            .navbar-nav li:hover > .dropdown-menu,
-            .navbar-nav .menu-item-has-children:hover > .sub-menu,
-            .navbar-nav .page_item_has_children:hover > ul.children,
-            .navbar-nav .dropdown:hover > .dropdown-menu,
-            .mega-places-menu-item:hover .mega-dropdown-panel {
+            .navbar-nav li:not(.mega-places-menu-item):hover > ul.sub-menu,
+            .navbar-nav li:not(.mega-places-menu-item):hover > ul.children,
+            .navbar-nav li:not(.mega-places-menu-item):hover > .dropdown-menu:not(.mega-dropdown-panel),
+            .navbar-nav .menu-item-has-children:not(.mega-places-menu-item):hover > .sub-menu,
+            .navbar-nav .page_item_has_children:not(.mega-places-menu-item):hover > ul.children,
+            .navbar-nav .dropdown:not(.mega-places-menu-item):hover > .dropdown-menu:not(.mega-dropdown-panel) {
                 display: block !important;
                 opacity: 1 !important;
                 visibility: visible !important;
                 transform: translateY(0) !important;
                 animation: fadeInSubmenu 0.2s ease-in-out !important;
             }
+        }
+
+        /* Places Mega Menu: Show on Click Only */
+        .navbar-nav .mega-places-menu-item .mega-dropdown-panel.show,
+        .navbar-nav .mega-places-menu-item.show .mega-dropdown-panel {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            animation: fadeInSubmenu 0.2s ease-in-out !important;
+        }
+
+        /* Places Mega Menu Close Button */
+        .places-close-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            max-width: 32px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 50% !important;
+            background-color: #f1f5f9 !important;
+            color: #64748b !important;
+            border: 1px solid #cbd5e1 !important;
+            font-size: 14px !important;
+            line-height: 1 !important;
+            cursor: pointer !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+            transition: all 0.2s ease !important;
+            transform: none !important;
+        }
+        .places-close-btn:hover {
+            background-color: #fee2e2 !important;
+            color: #dc2626 !important;
+            border-color: #fca5a5 !important;
+            padding: 0 !important;
+            transform: scale(1.08) !important;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2) !important;
+        }
+        .places-close-btn:active {
+            transform: scale(0.95) !important;
+            padding: 0 !important;
+        }
+        .places-close-btn i {
+            display: inline-block !important;
+            line-height: 1 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .navbar-nav .mega-dropdown-panel .btn-outline-danger:hover {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
         }
 
         @keyframes fadeInSubmenu {
@@ -227,9 +281,25 @@
     </style>
 
     <script>
+    function saveUserSelectedPlace(placeName) {
+        document.cookie = "user_selected_place=" + encodeURIComponent(placeName) + "; path=/; max-age=" + (365*24*60*60);
+        var lbl = document.getElementById('currentPlacesLabel');
+        if (lbl) {
+            lbl.textContent = placeName;
+        }
+        var formData = new FormData();
+        formData.append('action', 'rikshawale_save_user_place');
+        formData.append('place', placeName);
+        fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
+            method: 'POST',
+            body: formData
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Desktop Hover for standard dropdowns (excluding Places)
         if (window.innerWidth >= 992) {
-            document.querySelectorAll('.navbar-nav .dropdown, .navbar-nav .menu-item-has-children, .navbar-nav li').forEach(function(everydropdown) {
+            document.querySelectorAll('.navbar-nav .dropdown:not(.mega-places-menu-item), .navbar-nav .menu-item-has-children:not(.mega-places-menu-item)').forEach(function(everydropdown) {
                 everydropdown.addEventListener('mouseenter', function() {
                     let el_link = this.querySelector('a[data-bs-toggle="dropdown"], a.dropdown-toggle');
                     let el_menu = this.querySelector('.dropdown-menu, .sub-menu');
@@ -250,20 +320,65 @@
                         el_link.setAttribute('aria-expanded', 'false');
                     }
                 });
-    function saveUserSelectedPlace(placeName) {
-        document.cookie = "user_selected_place=" + encodeURIComponent(placeName) + "; path=/; max-age=" + (365*24*60*60);
-        var lbl = document.getElementById('currentPlacesLabel');
-        if (lbl) {
-            lbl.textContent = placeName;
+            });
         }
-        var formData = new FormData();
-        formData.append('action', 'rikshawale_save_user_place');
-        formData.append('place', placeName);
-        fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
-            method: 'POST',
-            body: formData
+
+        // Places Mega Menu Click Toggle & Close Handlers
+        var placesToggle = document.getElementById('placesNavMegaDropdown');
+        var placesItem = document.querySelector('.mega-places-menu-item');
+        var placesPanel = placesItem ? placesItem.querySelector('.mega-dropdown-panel') : null;
+
+        function openPlacesMenu() {
+            if (placesPanel) placesPanel.classList.add('show');
+            if (placesItem) placesItem.classList.add('show');
+            if (placesToggle) {
+                placesToggle.setAttribute('aria-expanded', 'true');
+                placesToggle.classList.add('show');
+            }
+        }
+
+        function closePlacesMenu() {
+            if (placesPanel) placesPanel.classList.remove('show');
+            if (placesItem) placesItem.classList.remove('show');
+            if (placesToggle) {
+                placesToggle.setAttribute('aria-expanded', 'false');
+                placesToggle.classList.remove('show');
+            }
+        }
+
+        if (placesToggle) {
+            placesToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var isOpen = placesPanel && placesPanel.classList.contains('show');
+                if (isOpen) {
+                    closePlacesMenu();
+                } else {
+                    openPlacesMenu();
+                }
+            });
+        }
+
+        // Global click listener: Close button or Outside click
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#closePlacesMegaDropdown')) {
+                e.preventDefault();
+                e.stopPropagation();
+                closePlacesMenu();
+                return;
+            }
+            if (placesItem && !placesItem.contains(e.target)) {
+                closePlacesMenu();
+            }
         });
-    }
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePlacesMenu();
+            }
+        });
+    });
     </script>
 </head>
 <body <?php body_class(); ?>>
@@ -359,15 +474,69 @@
         </div>
     </nav>
 
+    <?php
+    $current_uid      = get_current_user_id();
+    $user_alt_phone   = '';
+    $user_city        = '';
+    $user_booked_cars = array();
+
+    if ( $current_uid ) {
+        $user_alt_phone = get_user_meta( $current_uid, 'alternate_phone', true ) ?: get_user_meta( $current_uid, 'alt_phone', true );
+        $user_city      = get_user_meta( $current_uid, 'city', true ) ?: get_user_meta( $current_uid, 'user_place', true );
+        if ( empty( $user_city ) && ! empty( $_COOKIE['user_selected_place'] ) ) {
+            $user_city = sanitize_text_field( wp_unslash( $_COOKIE['user_selected_place'] ) );
+        }
+
+        // Fetch bookings for this user to get alternate phone, city, and booked car IDs
+        $user_bookings = get_posts( array(
+            'post_type'      => 'riksha_booking',
+            'post_status'    => 'any',
+            'posts_per_page' => 100,
+            'meta_key'       => '_booking_user_id',
+            'meta_value'     => $current_uid,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ) );
+
+        if ( ! empty( $user_bookings ) ) {
+            foreach ( $user_bookings as $ub ) {
+                if ( empty( $user_alt_phone ) ) {
+                    $saved_alt = get_post_meta( $ub->ID, '_booking_alt_phone', true );
+                    if ( ! empty( $saved_alt ) ) {
+                        $user_alt_phone = $saved_alt;
+                    }
+                }
+                if ( empty( $user_city ) ) {
+                    $saved_c = get_post_meta( $ub->ID, '_booking_city', true );
+                    if ( ! empty( $saved_c ) ) {
+                        $user_city = $saved_c;
+                    }
+                }
+                $c_id     = get_post_meta( $ub->ID, '_booking_car_id', true );
+                $c_status = get_post_meta( $ub->ID, '_booking_status', true );
+                if ( $c_id && ! isset( $user_booked_cars[ $c_id ] ) ) {
+                    $user_booked_cars[ $c_id ] = array(
+                        'booking_id' => $ub->ID,
+                        'status'     => $c_status,
+                        'is_paid'    => ( stripos( (string)$c_status, 'paid' ) !== false ),
+                    );
+                }
+            }
+        }
+    }
+    ?>
     <script>
     var rikshawale_ajax = {
         url: "<?php echo esc_url( admin_url('admin-ajax.php') ); ?>",
         auth_nonce: "<?php echo wp_create_nonce('rikshawale_auth_nonce'); ?>",
         booking_nonce: "<?php echo wp_create_nonce('rikshawale_booking_nonce'); ?>",
         is_logged_in: <?php echo is_user_logged_in() ? 'true' : 'false'; ?>,
-        user_name: "<?php echo is_user_logged_in() ? esc_js( wp_get_current_user()->display_name ) : ''; ?>",
+        user_name: "<?php echo is_user_logged_in() ? esc_js( wp_get_current_user()->display_name ?: wp_get_current_user()->user_login ) : ''; ?>",
         user_email: "<?php echo is_user_logged_in() ? esc_js( wp_get_current_user()->user_email ) : ''; ?>",
-        user_phone: "<?php echo is_user_logged_in() ? esc_js( get_user_meta( get_current_user_id(), 'phone_number', true ) ) : ''; ?>"
+        user_phone: "<?php echo is_user_logged_in() ? esc_js( get_user_meta( get_current_user_id(), 'phone_number', true ) ) : ''; ?>",
+        user_alt_phone: "<?php echo esc_js( $user_alt_phone ); ?>",
+        user_city: "<?php echo esc_js( $user_city ); ?>",
+        user_booked_cars: <?php echo json_encode( $user_booked_cars ); ?>
     };
     </script>
 </header>
