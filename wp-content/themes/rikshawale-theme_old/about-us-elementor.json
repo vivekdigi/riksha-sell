@@ -1,0 +1,134 @@
+{
+	"version": "0.4",
+	"title": "About Us Page Template",
+	"type": "page",
+	"content": [
+		{
+			"id": "sec1",
+			"elType": "section",
+			"isInner": false,
+			"settings": {
+				"padding": { "unit": "px", "top": "60", "bottom": "60", "left": "0", "right": "0" },
+				"background_background": "classic"
+			},
+			"elements": [
+				{
+					"id": "col1",
+					"elType": "column",
+					"isInner": false,
+					"settings": { "_column_size": 50 },
+					"elements": [
+						{
+							"id": "img1",
+							"elType": "widget",
+							"widgetType": "image",
+							"settings": {
+								"image": { "url": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" },
+								"image_size": "full"
+							}
+						}
+					]
+				},
+				{
+					"id": "col2",
+					"elType": "column",
+					"isInner": false,
+					"settings": { "_column_size": 50 },
+					"elements": [
+						{
+							"id": "head1",
+							"elType": "widget",
+							"widgetType": "heading",
+							"settings": {
+								"title": "Best Solution Provides Electric Vehicle",
+								"header_size": "h2"
+							}
+						},
+						{
+							"id": "text1",
+							"elType": "widget",
+							"widgetType": "text-editor",
+							"settings": {
+								"editor": "<p>Rikshawale is India’s premier certified pre-owned three-wheeler & electric vehicle marketplace. We provide everything you need to build an amazing dealership experience.</p>"
+							}
+						},
+						{
+							"id": "btn1",
+							"elType": "widget",
+							"widgetType": "button",
+							"settings": {
+								"text": "View More Our Services",
+								"link": { "url": "#" }
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "sec2",
+			"elType": "section",
+			"isInner": false,
+			"settings": {
+				"padding": { "unit": "px", "top": "70", "bottom": "70", "left": "0", "right": "0" },
+				"background_background": "classic",
+				"background_color": "#0f172a"
+			},
+			"elements": [
+				{
+					"id": "col3",
+					"elType": "column",
+					"isInner": false,
+					"settings": { "_column_size": 50 },
+					"elements": [
+						{
+							"id": "head2",
+							"elType": "widget",
+							"widgetType": "heading",
+							"settings": {
+								"title": "Why Choose Our Car Services",
+								"title_color": "#ffffff",
+								"header_size": "h2"
+							}
+						},
+						{
+							"id": "iconbox1",
+							"elType": "widget",
+							"widgetType": "icon-box",
+							"settings": {
+								"title_text": "Brake Check & Services",
+								"description_text": "Rigorous 40-point inspection and complete mechanical refurbishment for total reliability."
+							}
+						},
+						{
+							"id": "iconbox2",
+							"elType": "widget",
+							"widgetType": "icon-box",
+							"settings": {
+								"title_text": "Online Appointment",
+								"description_text": "Book instant test drives or doorstep vehicle evaluations with our verified team."
+							}
+						}
+					]
+				},
+				{
+					"id": "col4",
+					"elType": "column",
+					"isInner": false,
+					"settings": { "_column_size": 50 },
+					"elements": [
+						{
+							"id": "img2",
+							"elType": "widget",
+							"widgetType": "image",
+							"settings": {
+								"image": { "url": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80" },
+								"image_size": "full"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

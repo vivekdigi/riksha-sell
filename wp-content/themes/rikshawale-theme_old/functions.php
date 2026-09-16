@@ -5830,7 +5830,7 @@ add_action('wp_ajax_rikshawale_create_razorpay_order', 'rikshawale_create_razorp
 add_action('wp_ajax_nopriv_rikshawale_create_razorpay_order', 'rikshawale_create_razorpay_order');
 
 // Hide Plugins Menu from admin
-/* add_action( 'admin_menu', 'hide_plugins_menu_from_admin', 999 );
+add_action( 'admin_menu', 'hide_plugins_menu_from_admin', 999 );
 function hide_plugins_menu_from_admin() {
     remove_menu_page( 'plugins.php' );
-} */
+}

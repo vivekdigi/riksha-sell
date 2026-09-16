@@ -1,0 +1,315 @@
+{
+  "version": "0.4",
+  "title": "About Us - Cardealer Potenza Style",
+  "type": "page",
+  "content": [
+    {
+      "id": "sec_hero_about",
+      "elType": "section",
+      "isInner": false,
+      "settings": {
+        "layout": "full_width",
+        "gap": "extended",
+        "padding": { "unit": "px", "top": "70", "bottom": "70", "left": "0", "right": "0", "isLinked": false },
+        "background_background": "classic",
+        "background_color": "#ffffff"
+      },
+      "elements": [
+        {
+          "id": "col_hero_img",
+          "elType": "column",
+          "isInner": false,
+          "settings": { "_column_size": 50, "padding": { "unit": "px", "top": "0", "bottom": "0", "left": "15", "right": "15", "isLinked": false } },
+          "elements": [
+            {
+              "id": "w_hero_img",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": { "url": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" },
+                "image_size": "full",
+                "border_radius": { "unit": "px", "top": "8", "bottom": "8", "left": "8", "right": "8", "isLinked": true }
+              }
+            }
+          ]
+        },
+        {
+          "id": "col_hero_content",
+          "elType": "column",
+          "isInner": false,
+          "settings": { "_column_size": 50, "padding": { "unit": "px", "top": "0", "bottom": "0", "left": "30", "right": "15", "isLinked": false } },
+          "elements": [
+            {
+              "id": "w_sub_title_1",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "ABOUT ELECTRIC VEHICLE ——",
+                "header_size": "h6",
+                "title_color": "#db2d2e",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 13 },
+                "typography_font_weight": "600",
+                "typography_letter_spacing": { "unit": "px", "size": 1.5 }
+              }
+            },
+            {
+              "id": "w_main_title_1",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Best Solution Provides Electric Vehicle",
+                "header_size": "h2",
+                "title_color": "#111111",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 36 },
+                "typography_font_weight": "700",
+                "typography_line_height": { "unit": "em", "size": 1.25 }
+              }
+            },
+            {
+              "id": "w_desc_1",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p style=\"color: #666666; font-size: 15px; line-height: 1.7;\">Car Dealer is the best premium HTML5 Template. We provide everything you need to build an amazing dealership website developed especially for car sellers, dealers or auto motor retailers.</p>"
+              }
+            },
+            {
+              "id": "w_iconbox_charging",
+              "elType": "widget",
+              "widgetType": "icon-box",
+              "settings": {
+                "selected_icon": { "value": "fas fa-charging-station", "library": "fa-solid" },
+                "title_text": "Charging Station",
+                "description_text": "Suitable for any car dealer websites, business or corporate websites.",
+                "position": "left",
+                "icon_color": "#db2d2e",
+                "icon_size": { "unit": "px", "size": 32 },
+                "title_color": "#111111"
+              }
+            },
+            {
+              "id": "w_iconbox_auto_return",
+              "elType": "widget",
+              "widgetType": "icon-box",
+              "settings": {
+                "selected_icon": { "value": "fas fa-car-side", "library": "fa-solid" },
+                "title_text": "Auto Return Service",
+                "description_text": "Suitable for any car dealer websites, business or corporate websites.",
+                "position": "left",
+                "icon_color": "#db2d2e",
+                "icon_size": { "unit": "px", "size": 32 },
+                "title_color": "#111111"
+              }
+            },
+            {
+              "id": "w_btn_services",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "VIEW MORE OUR SERVICES",
+                "button_type": "default",
+                "background_color": "#db2d2e",
+                "button_text_color": "#ffffff",
+                "border_radius": { "unit": "px", "top": "2", "bottom": "2", "left": "2", "right": "2", "isLinked": true },
+                "padding": { "unit": "px", "top": "14", "bottom": "14", "left": "30", "right": "30", "isLinked": false }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec_partners",
+      "elType": "section",
+      "isInner": false,
+      "settings": {
+        "padding": { "unit": "px", "top": "35", "bottom": "35", "left": "0", "right": "0", "isLinked": false },
+        "background_background": "classic",
+        "background_color": "#ffffff",
+        "border_border": "top",
+        "border_width": { "unit": "px", "top": "1", "bottom": "1", "left": "0", "right": "0", "isLinked": false },
+        "border_color": "#eeeeee"
+      },
+      "elements": [
+        {
+          "id": "col_partners_full",
+          "elType": "column",
+          "isInner": false,
+          "settings": { "_column_size": 100 },
+          "elements": [
+            {
+              "id": "w_partners_head",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "OUR PARTNERS & SUPPORTERS ———",
+                "align": "center",
+                "title_color": "#999999",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 13 },
+                "typography_font_weight": "600",
+                "typography_letter_spacing": { "unit": "px", "size": 2 }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec_why_choose_split",
+      "elType": "section",
+      "isInner": false,
+      "settings": {
+        "layout": "full_width",
+        "gap": "no",
+        "background_background": "classic",
+        "background_color": "#0d121d"
+      },
+      "elements": [
+        {
+          "id": "col_why_choose_content",
+          "elType": "column",
+          "isInner": false,
+          "settings": {
+            "_column_size": 50,
+            "padding": { "unit": "px", "top": "70", "bottom": "70", "left": "80", "right": "50", "isLinked": false },
+            "background_background": "classic",
+            "background_color": "#0d121d"
+          },
+          "elements": [
+            {
+              "id": "w_sub_title_2",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "OUR CAR SERVICES ——",
+                "header_size": "h6",
+                "title_color": "#db2d2e",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 13 },
+                "typography_font_weight": "600",
+                "typography_letter_spacing": { "unit": "px", "size": 1.5 }
+              }
+            },
+            {
+              "id": "w_main_title_2",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Why Choose Our Car Services",
+                "header_size": "h2",
+                "title_color": "#ffffff",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 36 },
+                "typography_font_weight": "700"
+              }
+            },
+            {
+              "id": "w_desc_2",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p style=\"color: #94a3b8; font-size: 15px; line-height: 1.7;\">Car Dealer is the most evolving, creative, modern and multipurpose auto dealer Premium WordPress Theme. Suitable for any car dealer websites, business or corporate websites.</p>"
+              }
+            },
+            {
+              "id": "w_iconbox_brake",
+              "elType": "widget",
+              "widgetType": "icon-box",
+              "settings": {
+                "selected_icon": { "value": "fas fa-cogs", "library": "fa-solid" },
+                "title_text": "Brake Check & Services",
+                "description_text": "Suitable for any car dealer websites, business or corporate websites.",
+                "position": "left",
+                "icon_color": "#ffffff",
+                "primary_color": "#db2d2e",
+                "title_color": "#ffffff"
+              }
+            },
+            {
+              "id": "w_iconbox_online_app",
+              "elType": "widget",
+              "widgetType": "icon-box",
+              "settings": {
+                "selected_icon": { "value": "fas fa-calendar-check", "library": "fa-solid" },
+                "title_text": "Online Appointment",
+                "description_text": "Suitable for any car dealer websites, business or corporate websites.",
+                "position": "left",
+                "icon_color": "#ffffff",
+                "primary_color": "#db2d2e",
+                "title_color": "#ffffff"
+              }
+            }
+          ]
+        },
+        {
+          "id": "col_why_choose_img",
+          "elType": "column",
+          "isInner": false,
+          "settings": { "_column_size": 50 },
+          "elements": [
+            {
+              "id": "w_mechanic_img",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": { "url": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1000&q=80" },
+                "image_size": "full"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec_testimonials",
+      "elType": "section",
+      "isInner": false,
+      "settings": {
+        "padding": { "unit": "px", "top": "70", "bottom": "70", "left": "0", "right": "0", "isLinked": false },
+        "background_background": "classic",
+        "background_color": "#ffffff"
+      },
+      "elements": [
+        {
+          "id": "col_testi_head",
+          "elType": "column",
+          "isInner": false,
+          "settings": { "_column_size": 100 },
+          "elements": [
+            {
+              "id": "w_testi_subtitle",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "OUR TESTIMONIAL ——",
+                "align": "center",
+                "title_color": "#db2d2e",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 13 },
+                "typography_font_weight": "600",
+                "typography_letter_spacing": { "unit": "px", "size": 1.5 }
+              }
+            },
+            {
+              "id": "w_testi_maintitle",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "What Our Clients Say About",
+                "align": "center",
+                "header_size": "h2",
+                "title_color": "#111111",
+                "typography_typography": "custom",
+                "typography_font_size": { "unit": "px", "size": 36 },
+                "typography_font_weight": "700"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

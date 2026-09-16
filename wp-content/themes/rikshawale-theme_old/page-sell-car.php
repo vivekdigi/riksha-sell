@@ -107,10 +107,10 @@ $states = array(
                     <div class="row g-3 mb-4" id="feature-pills-row">
                 <?php
                 $pills = array(
-                    array( 'Fast Review',       'QuicK review' ),
+                    array( 'Fast Review',       'Quick vehicle details review' ),
                     array( 'Verified Buying',   'Instant fair valuation' ),
-                    array( 'Instant Payment',   'Secure payment' ),
-                    array( 'Zero Hassle',       'Free doorstep' ),
+                    array( 'Instant Payment',   'Secure payment transfer' ),
+                    array( 'Zero Hassle',       'Free doorstep inspection' ),
                 );
                 foreach ( $pills as $pill ) : ?>
                 <div class="col-6 col-md-3">
@@ -129,7 +129,7 @@ $states = array(
                 <!-- ===== STEP 0: RC VERIFICATION ===== -->
                 <div id="step-0-container">
                     <div class="mb-4 text-center">
-                        <h4 class="fw-bold" style="color: #0f172a;">Sell Your Riksha</h4>
+                        <h4 class="fw-bold" style="color: #0f172a;">Verify Your Riksha</h4>
                         <p class="text-muted small">Enter your registration number to auto-fill details and get a quick valuation.</p>
                     </div>
                     <div class="row g-3 mb-3 justify-content-center">
@@ -141,7 +141,7 @@ $states = array(
                     <div id="verify-error-msg" class="alert alert-danger mx-auto mt-3" style="max-width: 500px; display: none;"></div>
                     <div class="d-flex align-items-center justify-content-center flex-column gap-3 pt-3 mt-4">
                         <button type="button" id="verify-rc-btn" class="btn btn-primary rounded-3 px-5 py-3 fw-bold shadow-sm w-100" style="max-width: 300px; font-size:0.95rem; letter-spacing:0.5px; background: #2563eb; border: none;">
-                            CONTINUE <i class="fa-solid fa-arrow-right ms-2"></i>
+                            VERIFY & CONTINUE <i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                         <button type="button" id="skip-verify-btn" class="btn btn-outline-secondary rounded-3 px-4 py-2 shadow-sm w-100 mt-2" style="max-width: 300px; font-size: 0.9rem; font-weight: 500;">
                             Skip & fill details manually
