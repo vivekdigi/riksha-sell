@@ -14,7 +14,6 @@ $default_sections = array(
     'about_us',
     'inventory',
     'key_challenges',
-    'video_section',
     'new_arrivals',
     'contact_banner',
     'our_team',
@@ -436,65 +435,7 @@ foreach ( $section_order as $sec_key ) {
             endif;
             break;
 
-        case 'video_section':
-            $has_any_video = false;
-            for ( $v = 1; $v <= 4; $v++ ) {
-                if ( get_theme_mod("video_{$v}_url", '') ) { $has_any_video = true; break; }
-            }
-            if ( $has_any_video ) :
-            ?>
-            <section class="video-section py-3 my-1">
-                <div class="container">
-                    <div class="text-center mb-5">
-                        <h2 class="fw-bold reveal"><?php echo esc_html( get_theme_mod('video_section_title', 'Watch Us In Action') ); ?></h2>
-                        <p class="text-muted reveal reveal-delay-1"><?php echo esc_html( get_theme_mod('video_section_subtitle', 'Explore our latest arrivals and customer stories') ); ?></p>
-                        <div class="gradient-divider"></div>
-                    </div>
-                    <div class="row g-3">
-                        <?php for ( $v = 1; $v <= 4; $v++ ) :
-                            $video_url   = get_theme_mod("video_{$v}_url", '');
-                            $video_thumb = get_theme_mod("video_{$v}_thumb", '');
-                            if ( ! $video_url ) continue;
 
-                            $is_youtube = ( strpos($video_url, 'youtube.com') !== false || strpos($video_url, 'youtu.be') !== false );
-                            $is_vimeo   = strpos($video_url, 'vimeo.com') !== false;
-
-                            if ( $is_youtube ) {
-                                preg_match('/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/', $video_url, $yt_matches);
-                                $yt_id = $yt_matches[1] ?? '';
-                                $embed_url = "https://www.youtube.com/embed/{$yt_id}?autoplay=1&mute=1&loop=1&playlist={$yt_id}&controls=1&rel=0";
-                            }
-                            if ( $is_vimeo ) {
-                                preg_match('/vimeo\.com\/(\d+)/', $video_url, $vi_matches);
-                                $vi_id = $vi_matches[1] ?? '';
-                                $embed_url = "https://player.vimeo.com/video/{$vi_id}?autoplay=1&muted=1&loop=1";
-                            }
-                        ?>
-                        <div class="col-md-3 col-sm-6 reveal reveal-delay-<?php echo $v; ?>">
-                            <div class="video-grid-item">
-                                <?php if ( $is_youtube || $is_vimeo ) : ?>
-                                    <iframe src="<?php echo esc_url($embed_url); ?>" title="Video <?php echo $v; ?>" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-                                <?php else : ?>
-                                    <video
-                                        autoplay muted loop playsinline
-                                        <?php if ( $video_thumb ) echo 'poster="' . esc_url($video_thumb) . '"'; ?>
-                                        preload="metadata">
-                                        <source src="<?php echo esc_url($video_url); ?>" type="video/<?php echo pathinfo(parse_url($video_url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'mp4'; ?>">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                <?php endif; ?>
-                                <?php if ( $video_thumb && !$is_youtube && !$is_vimeo ) : ?>
-                                    <div class="video-play-btn"><i class="fa-solid fa-play"></i></div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <?php endfor; ?>
-                    </div>
-                </div>
-            </section>
-            <?php
-            endif;
-            break;
 
         case 'new_arrivals':
             ?>

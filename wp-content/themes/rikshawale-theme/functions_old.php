@@ -1501,13 +1501,12 @@ function rikshawale_customize_register( $wp_customize ) {
 		'about_us'       => __( '4. Welcome & About Us Section', 'rikshawale-theme' ),
 		'inventory'      => __( '5. Riksha Inventory Slider', 'rikshawale-theme' ),
 		'key_challenges' => __( '6. Key Challenges & Market Insight', 'rikshawale-theme' ),
-		'video_section'  => __( '7. 4-Video Autoplay Grid', 'rikshawale-theme' ),
-		'new_arrivals'   => __( '8. New Arrivals Slider', 'rikshawale-theme' ),
-		'contact_banner' => __( '9. Contact Support Split Banner', 'rikshawale-theme' ),
-		'our_team'       => __( '10. Meet Our Team Section', 'rikshawale-theme' ),
-		'why_choose'     => __( '11. Why Choose Rikshawale', 'rikshawale-theme' ),
-		'testimonials'   => __( '12. Customer Testimonials', 'rikshawale-theme' ),
-		'faq'            => __( '13. FAQ Accordion Section', 'rikshawale-theme' ),
+		'new_arrivals'   => __( '7. New Arrivals Slider', 'rikshawale-theme' ),
+		'contact_banner' => __( '8. Contact Support Split Banner', 'rikshawale-theme' ),
+		'our_team'       => __( '9. Meet Our Team Section', 'rikshawale-theme' ),
+		'why_choose'     => __( '10. Why Choose Rikshawale', 'rikshawale-theme' ),
+		'testimonials'   => __( '11. Customer Testimonials', 'rikshawale-theme' ),
+		'faq'            => __( '12. FAQ Accordion Section', 'rikshawale-theme' ),
 	);
 
 	$default_order = implode( ',', array_keys( $section_labels ) );
@@ -2529,49 +2528,12 @@ function rikshawale_customize_register( $wp_customize ) {
 	$wp_customize->add_control( 'inventory_description', array( 'type' => 'textarea', 'label' => 'Inventory Section Description', 'section' => 'rikshawale_inventory_section' ) );
 
 	/* =====================================================
-	   2. PROMO BANNERS SECTION
-	   ===================================================== */
-	$wp_customize->add_section( 'rikshawale_promo_banners', array(
-		'title'    => __( '2. Promo Image Banners', 'rikshawale-theme' ),
-		'panel'    => 'rikshawale_homepage_panel',
-		'priority' => 20,
-	) );
-
-	foreach ( array( 1, 2 ) as $b ) {
-		$wp_customize->add_setting( "promo_banner{$b}_image", array( 'default' => '', 'sanitize_callback' => 'esc_url_raw', 'transport' => 'refresh' ) );
-		$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "promo_banner{$b}_image", array( 'label' => "Banner {$b} Image Upload", 'section' => 'rikshawale_promo_banners' ) ) );
-	}
-
-	/* =====================================================
-	   3. VIDEO SECTION (4 VIDEOS)
-	   ===================================================== */
-	$wp_customize->add_section( 'rikshawale_video_section', array(
-		'title'    => __( '3. Video Section (4 Videos)', 'rikshawale-theme' ),
-		'panel'    => 'rikshawale_homepage_panel',
-		'priority' => 30,
-	) );
-
-	$wp_customize->add_setting( 'video_section_title', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
-	$wp_customize->add_control( 'video_section_title', array( 'type' => 'text', 'label' => 'Video Section Title', 'section' => 'rikshawale_video_section' ) );
-
-	$wp_customize->add_setting( 'video_section_subtitle', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
-	$wp_customize->add_control( 'video_section_subtitle', array( 'type' => 'text', 'label' => 'Video Section Subtitle', 'section' => 'rikshawale_video_section' ) );
-
-	for ( $v = 1; $v <= 4; $v++ ) {
-		$wp_customize->add_setting( "video_{$v}_url", array( 'default' => '', 'sanitize_callback' => 'esc_url_raw', 'transport' => 'refresh' ) );
-		$wp_customize->add_control( "video_{$v}_url", array( 'type' => 'text', 'label' => "Video {$v} URL (Uploaded MP4 file link or YouTube video link)", 'section' => 'rikshawale_video_section' ) );
-
-		$wp_customize->add_setting( "video_{$v}_thumb", array( 'default' => '', 'sanitize_callback' => 'esc_url_raw', 'transport' => 'refresh' ) );
-		$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "video_{$v}_thumb", array( 'label' => "Video {$v} Poster Image (Optional)", 'section' => 'rikshawale_video_section' ) ) );
-	}
-
-	/* =====================================================
-	   4. NEW ARRIVALS SECTION
+	   2. NEW ARRIVALS SECTION
 	   ===================================================== */
 	$wp_customize->add_section( 'rikshawale_new_arrivals_section', array(
-		'title'    => __( '4. New Arrivals Section', 'rikshawale-theme' ),
+		'title'    => __( '2. New Arrivals Section', 'rikshawale-theme' ),
 		'panel'    => 'rikshawale_homepage_panel',
-		'priority' => 40,
+		'priority' => 20,
 	) );
 	$wp_customize->add_setting( 'new_arrivals_subtitle', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
 	$wp_customize->add_control( 'new_arrivals_subtitle', array( 'type' => 'text', 'label' => 'New Arrivals Subtitle/Eyebrow', 'section' => 'rikshawale_new_arrivals_section' ) );
