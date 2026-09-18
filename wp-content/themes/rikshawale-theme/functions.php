@@ -10,6 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Require One-Click Demo Importer
 require_once get_template_directory() . '/inc/demo-importer.php';
 
+// Require Custom Profile Picture and Name Sync Manager
+require_once get_template_directory() . '/inc/user-profile-avatar.php';
+
 function rikshawale_theme_setup() {
 	// Add support for Featured Images (Post Thumbnails)
 	add_theme_support( 'post-thumbnails' );
