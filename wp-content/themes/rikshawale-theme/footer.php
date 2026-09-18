@@ -423,6 +423,21 @@
 </style>
 
 <script>
+// GA4 Custom Funnel Event Tracking Helper
+window.dataLayer = window.dataLayer || [];
+function rwTrackGA4Event(eventName, eventParams) {
+    eventParams = eventParams || {};
+    try {
+        if (typeof gtag === 'function') {
+            gtag('event', eventName, eventParams);
+        }
+        window.dataLayer.push(Object.assign({ event: eventName }, eventParams));
+        console.log('[GA4 Funnel Event]', eventName, eventParams);
+    } catch (e) {
+        console.warn('GA4 tracking error:', e);
+    }
+}
+
 // Step 2: Initialize Payment Step
 function initPaymentStep(bookingId, carId, carTitle, isAlreadyBooked, isAlreadyPaid) {
     document.getElementById('bookingStep1').classList.add('d-none');
@@ -495,11 +510,22 @@ function initPaymentStep(bookingId, carId, carTitle, isAlreadyBooked, isAlreadyP
                             payBtn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Payment Successful!';
                             payBtn.disabled = true;
 
+                            // GA4 Track: Purchase / Booking Payment Successful
+                            var paidAmount = (rzData.data && rzData.data.amount) ? (rzData.data.amount / 100) : 500;
+                            rwTrackGA4Event('purchase', {
+                                transaction_id: response.razorpay_payment_id,
+                                value: paidAmount,
+                                currency: 'INR',
+                                booking_id: bookingId,
+                                item_id: carId,
+                                item_name: carTitle
+                            });
+
                             var payFd = new FormData();
                             payFd.append('action', 'rikshawale_update_booking_payment');
                             payFd.append('booking_id', bookingId);
                             payFd.append('payment_id', response.razorpay_payment_id);
-                            payFd.append('amount', rzData.data.amount / 100);
+                            payFd.append('amount', paidAmount);
                             fetch(rikshawale_ajax.url, { method: 'POST', body: payFd });
 
                             setTimeout(() => {
@@ -559,6 +585,14 @@ function triggerVehicleBooking(carId, carTitle, carPrice, carImg) {
     } else {
         document.getElementById('bookingCarImg').style.display = 'none';
     }
+
+    // GA4 Track: Booking Modal Opened / Funnel Step (begin_checkout)
+    rwTrackGA4Event('begin_checkout', {
+        item_id: carId,
+        item_name: carTitle,
+        price: carPrice || '',
+        currency: 'INR'
+    });
 
     // Auto-fill fields: Precedence is logged-in user profile/meta > localStorage previous values
     var nameVal = (rikshawale_ajax.is_logged_in && rikshawale_ajax.user_name) ? rikshawale_ajax.user_name : (localStorage.getItem('rw_booking_name') || '');
@@ -794,6 +828,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         status: data.data.already_paid ? 'Paid' : 'Pending',
                         is_paid: !!data.data.already_paid
                     };
+
+                    // GA4 Track: Booking Inquiry Submitted / Lead Generated (generate_lead)
+                    rwTrackGA4Event('generate_lead', {
+                        item_id: carId,
+                        item_name: carTitle,
+                        booking_id: data.data.booking_id,
+                        lead_type: 'vehicle_booking',
+                        currency: 'INR',
+                        value: 500
+                    });
 
                     initPaymentStep(
                         data.data.booking_id,

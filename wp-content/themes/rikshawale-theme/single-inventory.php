@@ -1070,7 +1070,27 @@ function scrollThumbCarousel(direction) {
   </div>
 </div>
 
-<?php endwhile;
+<?php endwhile; ?>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var gaData = {
+        item_id: '<?php echo esc_js($post_id); ?>',
+        item_name: '<?php echo esc_js(get_the_title($post_id)); ?>',
+        price: <?php echo esc_js($numeric_price); ?>,
+        currency: 'INR'
+    };
+    if (typeof rwTrackGA4Event === 'function') {
+        rwTrackGA4Event('view_item', gaData);
+    } else {
+        window.dataLayer = window.dataLayer || [];
+        if (typeof gtag === 'function') {
+            gtag('event', 'view_item', gaData);
+        }
+    }
+});
+</script>
+
+<?php
 get_footer();
 
