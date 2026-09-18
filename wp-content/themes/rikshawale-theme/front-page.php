@@ -5,6 +5,9 @@
 
 get_header(); ?>
 
+<main id="primary" class="site-main">
+<h1 class="visually-hidden"><?php bloginfo( 'name' ); ?> - New & Used Rikshaws, Commercial Vehicles, Specifications & Quotes</h1>
+
 <!-- Dynamic Re-orderable Homepage Sections -->
 <?php
 $default_sections = array(
@@ -47,7 +50,7 @@ foreach ( $section_order as $sec_key ) {
 
                 if ( $slider_query->have_posts() ) :
                 ?>
-                <div id="rikshawaleCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
                     <div class="carousel-indicators">
                         <?php 
                         $slide_index = 0;
@@ -55,7 +58,7 @@ foreach ( $section_order as $sec_key ) {
                         ?>
                             <button type="button" data-bs-target="#rikshawaleCarousel" data-bs-slide-to="<?php echo $slide_index; ?>" class="<?php echo $slide_index === 0 ? 'active' : ''; ?>" aria-current="<?php echo $slide_index === 0 ? 'true' : 'false'; ?>" aria-label="Slide <?php echo $slide_index + 1; ?>"></button>
                         <?php 
-                            $slide_index++;
+                        $slide_index++;
                         endwhile; 
                         $slider_query->rewind_posts(); 
                         ?>
@@ -70,7 +73,20 @@ foreach ( $section_order as $sec_key ) {
                             }
                         ?>
                             <div class="carousel-item <?php echo $slide_index === 0 ? 'active' : ''; ?>">
-                                <img src="<?php echo esc_url( $thumbnail_url ); ?>" class="d-block w-100" alt="<?php the_title_attribute(); ?>">
+                                <img src="<?php echo esc_url( $thumbnail_url ); ?>" 
+                                     class="d-block w-100" 
+                                     alt="<?php the_title_attribute(); ?>"
+                                     width="1920" 
+                                     height="650"
+                                     style="aspect-ratio: 16/6; object-fit: cover;"
+                                     <?php if ( $slide_index === 0 ) : ?>
+                                         fetchpriority="high"
+                                         loading="eager"
+                                         decoding="async"
+                                     <?php else : ?>
+                                         loading="lazy"
+                                         decoding="async"
+                                     <?php endif; ?>>
                             </div>
                         <?php 
                             $slide_index++;
@@ -78,21 +94,29 @@ foreach ( $section_order as $sec_key ) {
                         wp_reset_postdata();
                         ?>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#rikshawaleCarousel" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#rikshawaleCarousel" data-bs-slide="prev" aria-label="Previous Slide">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#rikshawaleCarousel" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#rikshawaleCarousel" data-bs-slide="next" aria-label="Next Slide">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
                 </div>
                 <?php else : ?>
                 <!-- Fallback Slider if no posts exist -->
-                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <img src="https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png" class="d-block w-100" alt="Rikshawale Welcome">
+                            <img src="https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png" 
+                                 class="d-block w-100" 
+                                 alt="Rikshawale Welcome"
+                                 width="1920" 
+                                 height="650"
+                                 style="aspect-ratio: 16/6; object-fit: cover;"
+                                 fetchpriority="high"
+                                 loading="eager"
+                                 decoding="async">
                         </div>
                     </div>
                 </div>
@@ -195,7 +219,7 @@ foreach ( $section_order as $sec_key ) {
                                     <div class="carousel-inner rounded-4">
                                         <?php foreach ( array_values( $slides ) as $idx => $s_url ) : ?>
                                         <div class="carousel-item <?php echo $idx === 0 ? 'active' : ''; ?>">
-                                            <img src="<?php echo esc_url( $s_url ); ?>" alt="About Rikshawale Banner <?php echo $idx + 1; ?>" class="w-100 h-auto rounded-4 d-block shadow-sm" style="object-fit: cover; max-height: 480px;">
+                                            <img src="<?php echo esc_url( $s_url ); ?>" alt="About Rikshawale Banner <?php echo $idx + 1; ?>" class="w-100 h-auto rounded-4 d-block shadow-sm" style="object-fit: cover; max-height: 480px;" width="580" height="400" loading="lazy" decoding="async">
                                         </div>
                                         <?php endforeach; ?>
                                     </div>
@@ -309,7 +333,7 @@ foreach ( $section_order as $sec_key ) {
                                                 <span class="extra-small text-white-50">Arriving Soon</span>
                                             </div>
                                         <?php else : ?>
-                                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>" width="320" height="200" loading="lazy" decoding="async" style="aspect-ratio: 16/10; object-fit: cover;">
                                         <?php endif; ?>
                                     </a>
                                     <div class="car-card-content">
@@ -493,7 +517,7 @@ foreach ( $section_order as $sec_key ) {
                                                 <span class="extra-small text-white-50">Arriving Soon</span>
                                             </div>
                                         <?php else : ?>
-                                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>">
+                                            <img src="<?php echo esc_url($thumb); ?>" alt="<?php the_title_attribute(); ?>" width="320" height="200" loading="lazy" decoding="async" style="aspect-ratio: 16/10; object-fit: cover;">
                                         <?php endif; ?>
                                     </a>
                                     <div class="car-card-content">
@@ -603,7 +627,7 @@ foreach ( $section_order as $sec_key ) {
                                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 p-3">
                                     <div class="row g-0 align-items-center">
                                         <div class="col-md-5 text-center p-2">
-                                            <img src="<?php echo esc_url($t_photo); ?>" class="img-fluid rounded-4 object-fit-cover w-100" style="height: 180px;" alt="<?php the_title_attribute(); ?>">
+                                            <img src="<?php echo esc_url($t_photo); ?>" class="img-fluid rounded-4 object-fit-cover w-100" style="height: 180px; aspect-ratio: 4/3;" width="240" height="180" loading="lazy" decoding="async" alt="<?php the_title_attribute(); ?>">
                                         </div>
                                         <div class="col-md-7 p-3">
                                             <h5 class="fw-bold text-dark mb-1"><?php the_title(); ?></h5>
@@ -670,7 +694,7 @@ foreach ( $section_order as $sec_key ) {
                                     <div class="testimonial-card">
                                         <?php if ( has_post_thumbnail() ) : ?>
                                             <div class="testimonial-img">
-                                                <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title() ) ); ?>
+                                                <?php the_post_thumbnail( 'medium', array( 'alt' => get_the_title(), 'loading' => 'lazy', 'decoding' => 'async' ) ); ?>
                                             </div>
                                         <?php endif; ?>
                                         <div class="testimonial-card-body">
@@ -831,12 +855,19 @@ foreach ( $section_order as $sec_key ) {
         }, { passive: true });
     }
 
-    // ---- Cursor Glow Trail ----
+    // ---- Cursor Glow Trail (Throttled via requestAnimationFrame) ----
     var glow = document.getElementById('cursor-glow');
     if (glow && window.matchMedia('(pointer: fine)').matches) {
+        var glowTicking = false;
         document.addEventListener('mousemove', function(e) {
-            glow.style.left = e.clientX + 'px';
-            glow.style.top  = e.clientY + 'px';
+            if (!glowTicking) {
+                requestAnimationFrame(function() {
+                    glow.style.left = e.clientX + 'px';
+                    glow.style.top  = e.clientY + 'px';
+                    glowTicking = false;
+                });
+                glowTicking = true;
+            }
         }, { passive: true });
     }
 
@@ -983,5 +1014,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+</main>
 
 <?php get_footer(); ?>

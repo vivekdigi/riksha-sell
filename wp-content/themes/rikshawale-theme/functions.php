@@ -58,6 +58,22 @@ function rikshawale_theme_scripts() {
 add_action( 'wp_enqueue_scripts', 'rikshawale_theme_scripts' );
 
 /**
+ * Add defer attribute to non-critical front-end scripts
+ */
+function rikshawale_defer_scripts( $tag, $handle, $src ) {
+	if ( is_admin() ) {
+		return $tag;
+	}
+	if ( in_array( $handle, array( 'bootstrap-js' ), true ) ) {
+		if ( false === strpos( $tag, 'defer' ) ) {
+			return str_replace( ' src', ' defer src', $tag );
+		}
+	}
+	return $tag;
+}
+add_filter( 'script_loader_tag', 'rikshawale_defer_scripts', 10, 3 );
+
+/**
  * Register Custom Post Type: Riksha
  */
 function rikshawale_register_riksha_cpt() {
@@ -663,6 +679,21 @@ function rikshawale_disable_richedit_for_services( $default ) {
     return $default;
 }
 add_filter( 'user_can_richedit', 'rikshawale_disable_richedit_for_services' );
+
+/**
+ * Fix Elementor AI dependency notice (elementor-v2-ui, elementor-v2-icons)
+ * Prevents WordPress from displaying the "WP_Scripts::add called incorrectly" notice on admin pages.
+ */
+function rikshawale_fix_elementor_ai_dependencies() {
+    if ( ! wp_script_is( 'elementor-v2-ui', 'registered' ) ) {
+        wp_register_script( 'elementor-v2-ui', false );
+    }
+    if ( ! wp_script_is( 'elementor-v2-icons', 'registered' ) ) {
+        wp_register_script( 'elementor-v2-icons', false );
+        wp_register_style( 'elementor-v2-icons', false );
+    }
+}
+add_action( 'admin_enqueue_scripts', 'rikshawale_fix_elementor_ai_dependencies', 0 );
 
 /**
  * Register Custom Post Type: Riksha Inventory

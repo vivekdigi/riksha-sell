@@ -3,7 +3,28 @@
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta name="description" content="<?php echo esc_attr( get_bloginfo( 'description' ) ?: 'Find the best new & used passenger and cargo e-rickshaws, auto rickshaws, verified deals, specifications and price quotes.' ); ?>">
+    
+    <!-- Preconnect to CDN & Font origins to reduce latency -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <?php 
+    // Preload LCP hero image on front page for fastest paint
+    if ( is_front_page() ) {
+        $lcp_hero_banner = 'https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png';
+        $hero_posts = get_posts( array( 'post_type' => 'riksha', 'posts_per_page' => 1, 'post_status' => 'publish' ) );
+        if ( ! empty( $hero_posts ) && has_post_thumbnail( $hero_posts[0]->ID ) ) {
+            $lcp_hero_banner = wp_get_attachment_image_url( get_post_thumbnail_id( $hero_posts[0]->ID ), 'full' ) ?: $lcp_hero_banner;
+        }
+        if ( $lcp_hero_banner ) {
+            echo '<link rel="preload" as="image" href="' . esc_url( $lcp_hero_banner ) . '" fetchpriority="high">' . "\n";
+        }
+    }
+    ?>
+
     <?php wp_head(); ?>
     <style>
         /* Force FontAwesome Font Family */
