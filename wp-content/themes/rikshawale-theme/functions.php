@@ -91,7 +91,7 @@ function rikshawale_register_riksha_cpt() {
 		'hierarchical'        => false,
 		'menu_position'      => 5,
 		'menu_icon'          => 'dashicons-car',
-		'supports'           => array( 'title', 'thumbnail', 'excerpt', 'custom-fields' ),
+		'supports'           => array( 'title', 'thumbnail' ),
 		'show_in_rest'       => false, // Disables Gutenberg block editor
 	);
 
@@ -133,8 +133,8 @@ function rikshawale_register_testimonial_cpt() {
 		'hierarchical'        => false,
 		'menu_position'      => 6,
 		'menu_icon'          => 'dashicons-testimonial',
-		'supports'           => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
-		'show_in_rest'       => true,
+		'supports'           => array( 'title', 'editor', 'thumbnail' ),
+		'show_in_rest'       => false, // Disables Gutenberg block editor
 	);
 
 	register_post_type( 'testimonial', $args );
@@ -228,7 +228,7 @@ function rikshawale_register_faq_cpt() {
 		'has_archive'     => false,
 		'hierarchical'    => false,
 		'supports'        => array( 'title', 'editor' ),
-		'show_in_rest'    => true,
+		'show_in_rest'    => false, // Disables Gutenberg block editor
 	);
 	register_post_type( 'riksha_faq', $args );
 }
@@ -474,8 +474,8 @@ function rikshawale_register_services_cpt() {
 		'hierarchical'        => false,
 		'menu_position'      => 7,
 		'menu_icon'          => 'dashicons-grid-view',
-		'supports'           => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'page-attributes' ),
-		'show_in_rest'       => true,
+		'supports'           => array( 'title', 'editor' ),
+		'show_in_rest'       => false, // Disables Gutenberg block editor (removes block widgets, block options)
 	);
 
 	register_post_type( 'riksha_service', $args );
@@ -559,39 +559,110 @@ function rikshawale_save_team_meta($post_id) {
 add_action( 'save_post', 'rikshawale_save_team_meta' );
 
 /**
- * Service Icon Metabox
+ * Simplify Services (riksha_service), FAQs (riksha_faq) & Testimonials (testimonial) backend editing screen:
+ * Hide Visual/Code tabs and TinyMCE/Quicktags toolbar for a clean, plain text Description/Answer/Review.
  */
-function rikshawale_add_service_metabox() {
-    add_meta_box(
-        'service_icon_metabox',
-        __( 'Service Icon / Emoji', 'rikshawale-theme' ),
-        'rikshawale_render_service_metabox',
-        'riksha_service',
-        'side',
-        'default'
-    );
-}
-add_action( 'add_meta_boxes', 'rikshawale_add_service_metabox' );
-
-function rikshawale_render_service_metabox($post) {
-    wp_nonce_field( 'rikshawale_save_service_meta', 'rikshawale_service_nonce' );
-    $icon = get_post_meta( $post->ID, '_service_icon', true );
-    ?>
-    <p>
-        <label for="service_icon"><strong>Icon or Emoji (leave empty for auto-icon):</strong></label><br>
-        <input type="text" id="service_icon" name="service_icon" value="<?php echo esc_attr($icon); ?>" class="widefat" placeholder="e.g. 🔍, 🤝, 💳, 📄, 🛡️, 📉">
-    </p>
-    <?php
-}
-
-function rikshawale_save_service_meta($post_id) {
-    if ( ! isset( $_POST['rikshawale_service_nonce'] ) || ! wp_verify_nonce( $_POST['rikshawale_service_nonce'], 'rikshawale_save_service_meta' ) ) return;
-    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
-    if ( isset( $_POST['service_icon'] ) ) {
-        update_post_meta( $post_id, '_service_icon', sanitize_text_field( $_POST['service_icon'] ) );
+function rikshawale_simplify_services_backend() {
+    $screen = get_current_screen();
+    if ( $screen && in_array( $screen->post_type, array( 'riksha_service', 'riksha_faq', 'testimonial' ), true ) ) {
+        remove_action( 'media_buttons', 'media_buttons' );
+        ?>
+        <style type="text/css">
+            /* Hide Visual / Code tabs and formatting toolbar */
+            body.post-type-riksha_service #wp-content-editor-tools,
+            body.post-type-riksha_service .wp-editor-tabs,
+            body.post-type-riksha_service .mce-toolbar-grp,
+            body.post-type-riksha_service .mce-top-part,
+            body.post-type-riksha_service #ed_toolbar,
+            body.post-type-riksha_service .quicktags-toolbar,
+            body.post-type-riksha_service .mce-statusbar,
+            body.post-type-riksha_faq #wp-content-editor-tools,
+            body.post-type-riksha_faq .wp-editor-tabs,
+            body.post-type-riksha_faq .mce-toolbar-grp,
+            body.post-type-riksha_faq .mce-top-part,
+            body.post-type-riksha_faq #ed_toolbar,
+            body.post-type-riksha_faq .quicktags-toolbar,
+            body.post-type-riksha_faq .mce-statusbar,
+            body.post-type-testimonial #wp-content-editor-tools,
+            body.post-type-testimonial .wp-editor-tabs,
+            body.post-type-testimonial .mce-toolbar-grp,
+            body.post-type-testimonial .mce-top-part,
+            body.post-type-testimonial #ed_toolbar,
+            body.post-type-testimonial .quicktags-toolbar,
+            body.post-type-testimonial .mce-statusbar {
+                display: none !important;
+            }
+            body.post-type-riksha_service #postdivrich:before {
+                content: "Service Description:";
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                color: #1d2327;
+                margin-top: 14px;
+                margin-bottom: 6px;
+            }
+            body.post-type-riksha_faq #postdivrich:before {
+                content: "FAQ Answer:";
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                color: #1d2327;
+                margin-top: 14px;
+                margin-bottom: 6px;
+            }
+            body.post-type-testimonial #postdivrich:before {
+                content: "Testimonial Content / Review:";
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                color: #1d2327;
+                margin-top: 14px;
+                margin-bottom: 6px;
+            }
+            body.post-type-riksha_service #wp-content-wrap,
+            body.post-type-riksha_faq #wp-content-wrap,
+            body.post-type-testimonial #wp-content-wrap {
+                border: 1px solid #8c8f94 !important;
+                border-radius: 4px !important;
+                background: #fff !important;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            }
+            body.post-type-riksha_service #content,
+            body.post-type-riksha_faq #content,
+            body.post-type-testimonial #content {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 12px 14px !important;
+                font-size: 14px !important;
+                line-height: 1.6 !important;
+                min-height: 130px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                outline: none !important;
+            }
+            body.post-type-riksha_service #content_ifr,
+            body.post-type-riksha_faq #content_ifr,
+            body.post-type-testimonial #content_ifr {
+                border: none !important;
+                min-height: 130px !important;
+            }
+        </style>
+        <?php
     }
 }
-add_action( 'save_post', 'rikshawale_save_service_meta' );
+add_action( 'admin_head', 'rikshawale_simplify_services_backend' );
+
+/**
+ * Disable rich editor (TinyMCE) for riksha_service, riksha_faq and testimonial so they use a simple native textarea.
+ */
+function rikshawale_disable_richedit_for_services( $default ) {
+    $screen = get_current_screen();
+    if ( $screen && in_array( $screen->post_type, array( 'riksha_service', 'riksha_faq', 'testimonial' ), true ) ) {
+        return false;
+    }
+    return $default;
+}
+add_filter( 'user_can_richedit', 'rikshawale_disable_richedit_for_services' );
 
 /**
  * Register Custom Post Type: Riksha Inventory
