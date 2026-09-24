@@ -51,6 +51,7 @@ foreach ( $section_order as $sec_key ) {
                 if ( $slider_query->have_posts() ) :
                 ?>
                 <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+                    <?php if ( $slider_query->post_count > 1 ) : ?>
                     <div class="carousel-indicators">
                         <?php 
                         $slide_index = 0;
@@ -63,6 +64,7 @@ foreach ( $section_order as $sec_key ) {
                         $slider_query->rewind_posts(); 
                         ?>
                     </div>
+                    <?php endif; ?>
                     <div class="carousel-inner">
                         <?php 
                         $slide_index = 0;

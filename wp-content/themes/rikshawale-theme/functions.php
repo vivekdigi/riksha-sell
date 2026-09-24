@@ -53,7 +53,7 @@ function rikshawale_theme_scripts() {
 	wp_enqueue_style( 'bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css', array(), '5.3.2' );
 	
 	// Load main style.css
-	wp_enqueue_style( 'rikshawale-theme-style', get_stylesheet_uri(), array( 'bootstrap-css', 'font-awesome-6' ), '1.0.0' );
+	wp_enqueue_style( 'rikshawale-theme-style', get_stylesheet_uri(), array( 'bootstrap-css', 'font-awesome-6' ), filemtime( get_stylesheet_directory() . '/style.css' ) );
 
 	// Load Google Fonts (Montserrat & Roboto)
 	wp_enqueue_style( 'google-fonts', 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap', array(), null );

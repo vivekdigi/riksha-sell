@@ -680,15 +680,118 @@ a:hover {
     border-radius: 6px;
 }
 
-/* Global Carousel Indicator touch-target helper */
+/* =========================================================
+   GLOBAL CAROUSEL INDICATORS (SLIDER BULLETS) - SLEEK CIRCLES
+   ========================================================= */
+.carousel-indicators {
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+    left: 0;
+    z-index: 5;
+    display: inline-flex !important;
+    justify-content: center;
+    align-items: center;
+    width: fit-content !important;
+    max-width: 90%;
+    margin: 0 auto !important;
+    padding: 6px 14px !important;
+    background: rgba(15, 23, 42, 0.42) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 30px !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+    gap: 8px !important;
+}
+
+/* Individual Indicator Dot (Small, Crisp Circle) */
 .carousel-indicators [data-bs-target] {
-    box-sizing: content-box;
-    width: 30px;
-    height: 4px;
-    padding: 10px 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    cursor: pointer;
+    position: relative;
+    box-sizing: border-box !important;
+    flex: 0 0 auto !important;
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+    max-width: 10px !important;
+    max-height: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    border-radius: 50% !important;
+    background-color: rgba(255, 255, 255, 0.45) !important;
+    background-clip: padding-box !important;
+    opacity: 0.75 !important;
+    cursor: pointer !important;
+    text-indent: -9999px;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.25s ease,
+                border-color 0.25s ease,
+                opacity 0.25s ease,
+                box-shadow 0.25s ease !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+    outline: none !important;
+}
+
+/* Extended Touch/Click Area for Mobile Ease */
+.carousel-indicators [data-bs-target]::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -8px;
+    right: -8px;
+}
+
+/* Hover Effect */
+.carousel-indicators [data-bs-target]:hover {
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+    transform: scale(1.25);
+}
+
+/* Active State: Highlighted Circle with Primary Brand Color & Glow */
+.carousel-indicators [data-bs-target].active {
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+    border-radius: 50% !important;
+    background-color: var(--primary-color, #db2d2e) !important;
+    border-color: #ffffff !important;
+    opacity: 1 !important;
+    transform: scale(1.25);
+    box-shadow: 0 0 0 3px rgba(219, 45, 46, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Fine-tune for About Us Section Carousel */
+#aboutUsCarousel .carousel-indicators {
+    bottom: 12px;
+    margin-bottom: 0 !important;
+    padding: 5px 12px !important;
+    gap: 7px !important;
+}
+
+#aboutUsCarousel .carousel-indicators [data-bs-target] {
+    width: 9px !important;
+    height: 9px !important;
+    min-width: 9px !important;
+    min-height: 9px !important;
+    max-width: 9px !important;
+    max-height: 9px !important;
+}
+
+#aboutUsCarousel .carousel-indicators [data-bs-target].active {
+    width: 9px !important;
+    height: 9px !important;
+}
+
+/* Fine-tune for Hero Slider */
+#rikshawaleCarousel .carousel-indicators {
+    bottom: 22px;
 }
 
 /* Split-Car Contact Banner Styling */
