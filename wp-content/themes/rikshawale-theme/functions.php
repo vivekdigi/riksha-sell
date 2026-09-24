@@ -40,22 +40,28 @@ add_action( 'after_setup_theme', 'rikshawale_theme_setup' );
  * Enqueue scripts and styles (Bootstrap 5 & Custom Styles)
  */
 function rikshawale_theme_scripts() {
+	// Deregister legacy FontAwesome 4 registered by Elementor or other plugins to prevent handle collisions
+	wp_deregister_style( 'font-awesome' );
+	wp_dequeue_style( 'font-awesome' );
+
+	// Enqueue FontAwesome 6 Icons (Free Solid, Regular, Brands)
+	wp_enqueue_style( 'font-awesome-6', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', array(), '6.5.2' );
+	wp_register_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', array(), '6.5.2' );
+	wp_enqueue_style( 'font-awesome' );
+
 	// Load Bootstrap 5 CSS
 	wp_enqueue_style( 'bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css', array(), '5.3.2' );
 	
 	// Load main style.css
-	wp_enqueue_style( 'rikshawale-theme-style', get_stylesheet_uri(), array( 'bootstrap-css' ), '1.0.0' );
+	wp_enqueue_style( 'rikshawale-theme-style', get_stylesheet_uri(), array( 'bootstrap-css', 'font-awesome-6' ), '1.0.0' );
 
 	// Load Google Fonts (Montserrat & Roboto)
 	wp_enqueue_style( 'google-fonts', 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap', array(), null );
 
-	// Load FontAwesome 6 Icons
-	wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0' );
-
 	// Load Bootstrap 5 JS Bundle (with Popper)
 	wp_enqueue_script( 'bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js', array(), '5.3.2', true );
 }
-add_action( 'wp_enqueue_scripts', 'rikshawale_theme_scripts' );
+add_action( 'wp_enqueue_scripts', 'rikshawale_theme_scripts', 20 );
 
 /**
  * Add defer attribute to non-critical front-end scripts

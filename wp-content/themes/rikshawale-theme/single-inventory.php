@@ -1086,7 +1086,11 @@ document.addEventListener('DOMContentLoaded', function() {
         window.dataLayer = window.dataLayer || [];
         if (typeof gtag === 'function') {
             gtag('event', 'view_item', gaData);
+            gtag('event', 'Vehicle Viewed', gaData);
+            gtag('event', 'vehicle_viewed', gaData);
         }
+        window.dataLayer.push(Object.assign({ event: 'view_item' }, gaData));
+        window.dataLayer.push(Object.assign({ event: 'Vehicle Viewed' }, gaData));
     }
 });
 </script>

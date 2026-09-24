@@ -3,7 +3,7 @@
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?php echo esc_attr( get_bloginfo( 'description' ) ?: 'Find the best new & used passenger and cargo e-rickshaws, auto rickshaws, verified deals, specifications and price quotes.' ); ?>">
+    <!-- Rank Math handles meta description and SEO tags dynamically -->
     
     <!-- Preconnect to CDN & Font origins to reduce latency -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,11 +25,65 @@
     }
     ?>
 
+    <!-- Font Awesome 6 Global CDN (Guarantees icons render everywhere) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <?php wp_head(); ?>
+    <script>
+    // Global GA4 Event Tracking Helper (Fires standard & custom funnel event names)
+    window.dataLayer = window.dataLayer || [];
+    function rwTrackGA4Event(eventName, eventParams) {
+        eventParams = eventParams || {};
+        try {
+            var aliasMap = {
+                'view_item': ['Vehicle Viewed', 'vehicle_viewed'],
+                'begin_checkout': ['Booking Clicked', 'booking_clicked'],
+                'purchase': ['Booking Paid', 'booking_paid']
+            };
+
+            var eventsToFire = [eventName];
+            if (aliasMap[eventName]) {
+                eventsToFire = eventsToFire.concat(aliasMap[eventName]);
+            }
+
+            eventsToFire.forEach(function(evt) {
+                if (typeof gtag === 'function') {
+                    gtag('event', evt, eventParams);
+                }
+                window.dataLayer.push(Object.assign({ event: evt }, eventParams));
+            });
+
+            console.log('[GA4 Funnel Events Fired]', eventsToFire, eventParams);
+        } catch (e) {
+            console.warn('GA4 tracking error:', e);
+        }
+    }
+    </script>
     <style>
-        /* Force FontAwesome Font Family */
-        .fa, .fab, .fas, .far, .fa-solid, .fa-brands {
-            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        /* Force FontAwesome Font Family correctly for Free Solid, Regular, and Brands */
+        .fa-solid, .fas {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+        .fa-regular, .far {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 400 !important;
+        }
+        .fa-brands, .fab {
+            font-family: "Font Awesome 6 Brands" !important;
+            font-weight: 400 !important;
+        }
+        .fa:not(.fa-brands):not(.fab) {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands {
+            -webkit-font-smoothing: antialiased;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
         }
         /* Apply Customizer settings inline to override defaults dynamically */
         :root {
