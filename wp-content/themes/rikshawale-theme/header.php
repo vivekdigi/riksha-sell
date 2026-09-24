@@ -16,10 +16,21 @@
     if ( is_front_page() ) {
         $lcp_hero_banner = 'https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png';
         $hero_posts = get_posts( array( 'post_type' => 'riksha', 'posts_per_page' => 1, 'post_status' => 'publish' ) );
-        if ( ! empty( $hero_posts ) && has_post_thumbnail( $hero_posts[0]->ID ) ) {
-            $lcp_hero_banner = wp_get_attachment_image_url( get_post_thumbnail_id( $hero_posts[0]->ID ), 'full' ) ?: $lcp_hero_banner;
-        }
-        if ( $lcp_hero_banner ) {
+        if ( ! empty( $hero_posts ) ) {
+            $first_hero_id = $hero_posts[0]->ID;
+            $desk_thumb = wp_get_attachment_image_url( get_post_thumbnail_id( $first_hero_id ), 'full' );
+            if ( $desk_thumb ) {
+                $lcp_hero_banner = $desk_thumb;
+            }
+            $mob_id = get_post_meta( $first_hero_id, '_riksha_mobile_banner_id', true );
+            $mob_url = $mob_id ? wp_get_attachment_image_url( $mob_id, 'full' ) : get_post_meta( $first_hero_id, '_riksha_mobile_banner_url', true );
+            if ( $mob_url ) {
+                echo '<link rel="preload" as="image" href="' . esc_url( $mob_url ) . '" media="(max-width: 767.98px)" fetchpriority="high">' . "\n";
+                echo '<link rel="preload" as="image" href="' . esc_url( $lcp_hero_banner ) . '" media="(min-width: 768px)" fetchpriority="high">' . "\n";
+            } elseif ( $lcp_hero_banner ) {
+                echo '<link rel="preload" as="image" href="' . esc_url( $lcp_hero_banner ) . '" fetchpriority="high">' . "\n";
+            }
+        } elseif ( $lcp_hero_banner ) {
             echo '<link rel="preload" as="image" href="' . esc_url( $lcp_hero_banner ) . '" fetchpriority="high">' . "\n";
         }
     }

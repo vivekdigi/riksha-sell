@@ -69,26 +69,35 @@ foreach ( $section_order as $sec_key ) {
                         <?php 
                         $slide_index = 0;
                         while ( $slider_query->have_posts() ) : $slider_query->the_post(); 
-                            $thumbnail_url = wp_get_attachment_image_url( get_post_thumbnail_id( get_the_ID() ), 'full' );
+                            $thumbnail_id  = get_post_thumbnail_id( get_the_ID() );
+                            $thumbnail_url = $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'full' ) : '';
                             if ( ! $thumbnail_url ) {
                                 $thumbnail_url = 'https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png'; // Local fallback
                             }
+
+                            $mobile_banner_id  = get_post_meta( get_the_ID(), '_riksha_mobile_banner_id', true );
+                            $mobile_banner_url = $mobile_banner_id ? wp_get_attachment_image_url( $mobile_banner_id, 'full' ) : get_post_meta( get_the_ID(), '_riksha_mobile_banner_url', true );
                         ?>
                             <div class="carousel-item <?php echo $slide_index === 0 ? 'active' : ''; ?>">
-                                <img src="<?php echo esc_url( $thumbnail_url ); ?>" 
-                                     class="d-block w-100" 
-                                     alt="<?php the_title_attribute(); ?>"
-                                     width="1920" 
-                                     height="650"
-                                     style="aspect-ratio: 16/6; object-fit: cover;"
-                                     <?php if ( $slide_index === 0 ) : ?>
-                                         fetchpriority="high"
-                                         loading="eager"
-                                         decoding="async"
-                                     <?php else : ?>
-                                         loading="lazy"
-                                         decoding="async"
-                                     <?php endif; ?>>
+                                <picture class="d-block w-100 h-100">
+                                    <?php if ( ! empty( $mobile_banner_url ) ) : ?>
+                                        <source media="(max-width: 767.98px)" srcset="<?php echo esc_url( $mobile_banner_url ); ?>">
+                                    <?php endif; ?>
+                                    <img src="<?php echo esc_url( $thumbnail_url ); ?>" 
+                                         class="d-block w-100 h-100 hero-banner-img" 
+                                         alt="<?php the_title_attribute(); ?>"
+                                         width="1920" 
+                                         height="650"
+                                         style="object-fit: cover;"
+                                         <?php if ( $slide_index === 0 ) : ?>
+                                             fetchpriority="high"
+                                             loading="eager"
+                                             decoding="async"
+                                         <?php else : ?>
+                                             loading="lazy"
+                                             decoding="async"
+                                         <?php endif; ?>>
+                                </picture>
                             </div>
                         <?php 
                             $slide_index++;

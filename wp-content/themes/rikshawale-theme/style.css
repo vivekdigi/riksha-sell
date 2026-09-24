@@ -145,10 +145,12 @@ a:hover {
     height: 600px;
 }
 
+.hero-slider .carousel-item picture,
 .hero-slider .carousel-item img {
     object-fit: cover;
     height: 100%;
     width: 100%;
+    display: block;
 }
 
 .hero-slider .carousel-caption {
