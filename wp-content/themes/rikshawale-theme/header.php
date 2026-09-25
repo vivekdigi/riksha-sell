@@ -22,12 +22,7 @@
             if ( $desk_thumb ) {
                 $lcp_hero_banner = $desk_thumb;
             }
-            $mob_id = get_post_meta( $first_hero_id, '_riksha_mobile_banner_id', true );
-            $mob_url = $mob_id ? wp_get_attachment_image_url( $mob_id, 'full' ) : get_post_meta( $first_hero_id, '_riksha_mobile_banner_url', true );
-            if ( $mob_url ) {
-                echo '<link rel="preload" as="image" href="' . esc_url( $mob_url ) . '" media="(max-width: 767.98px)" fetchpriority="high">' . "\n";
-                echo '<link rel="preload" as="image" href="' . esc_url( $lcp_hero_banner ) . '" media="(min-width: 768px)" fetchpriority="high">' . "\n";
-            } elseif ( $lcp_hero_banner ) {
+            if ( $lcp_hero_banner ) {
                 echo '<link rel="preload" as="image" href="' . esc_url( $lcp_hero_banner ) . '" fetchpriority="high">' . "\n";
             }
         } elseif ( $lcp_hero_banner ) {
@@ -538,11 +533,13 @@
                 <div class="d-flex align-items-center gap-2 ms-lg-3 my-2 my-lg-0">
 
                     <?php if ( is_user_logged_in() ) : 
-                        $current_u = wp_get_current_user();
+                        $current_u    = wp_get_current_user();
+                        $u_raw_name   = $current_u->display_name ?: $current_u->user_login;
+                        $u_short_name = explode( ' ', trim( $u_raw_name ) )[0];
                     ?>
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-dark dropdown-toggle rounded-pill px-3 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-user-circle me-1 text-primary"></i> <?php echo esc_html( $current_u->display_name ?: $current_u->user_login ); ?>
+                            <button class="btn btn-sm btn-outline-dark dropdown-toggle rounded-pill fw-bold d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.8rem; padding: 0.22rem 0.65rem;">
+                                <i class="fa-solid fa-user-circle me-1 text-primary"></i> <span class="d-inline-block text-truncate" style="max-width: 90px; vertical-align: middle;"><?php echo esc_html( $u_short_name ?: $u_raw_name ); ?></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm rounded-3 border-0">
                                 <li><button class="dropdown-item py-2" type="button" data-bs-toggle="modal" data-bs-target="#myBookingsModal" onclick="fetchUserBookings()"><i class="fa-solid fa-calendar-check me-2 text-primary"></i> My Bookings</button></li>
@@ -551,8 +548,8 @@
                             </ul>
                         </div>
                     <?php else : ?>
-                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#authModal">
-                            <i class="fa-solid fa-user-lock me-1"></i> Login / Register
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#authModal" style="font-size: 0.8rem; padding: 0.22rem 0.65rem;">
+                            <i class="fa-solid fa-user-lock me-1"></i> Login
                         </button>
                     <?php endif; ?>
                 </div>

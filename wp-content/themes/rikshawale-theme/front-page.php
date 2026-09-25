@@ -50,7 +50,7 @@ foreach ( $section_order as $sec_key ) {
 
                 if ( $slider_query->have_posts() ) :
                 ?>
-                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000" data-bs-touch="true">
                     <?php if ( $slider_query->post_count > 1 ) : ?>
                     <div class="carousel-indicators">
                         <?php 
@@ -75,29 +75,21 @@ foreach ( $section_order as $sec_key ) {
                                 $thumbnail_url = 'https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png'; // Local fallback
                             }
 
-                            $mobile_banner_id  = get_post_meta( get_the_ID(), '_riksha_mobile_banner_id', true );
-                            $mobile_banner_url = $mobile_banner_id ? wp_get_attachment_image_url( $mobile_banner_id, 'full' ) : get_post_meta( get_the_ID(), '_riksha_mobile_banner_url', true );
                         ?>
                             <div class="carousel-item <?php echo $slide_index === 0 ? 'active' : ''; ?>">
-                                <picture class="d-block w-100 h-100">
-                                    <?php if ( ! empty( $mobile_banner_url ) ) : ?>
-                                        <source media="(max-width: 767.98px)" srcset="<?php echo esc_url( $mobile_banner_url ); ?>">
-                                    <?php endif; ?>
-                                    <img src="<?php echo esc_url( $thumbnail_url ); ?>" 
-                                         class="d-block w-100 h-100 hero-banner-img" 
-                                         alt="<?php the_title_attribute(); ?>"
-                                         width="1920" 
-                                         height="650"
-                                         style="object-fit: cover;"
-                                         <?php if ( $slide_index === 0 ) : ?>
-                                             fetchpriority="high"
-                                             loading="eager"
-                                             decoding="async"
-                                         <?php else : ?>
-                                             loading="lazy"
-                                             decoding="async"
-                                         <?php endif; ?>>
-                                </picture>
+                                <img src="<?php echo esc_url( $thumbnail_url ); ?>" 
+                                     class="d-block w-100 hero-banner-img" 
+                                     alt="<?php the_title_attribute(); ?>"
+                                     width="1920" 
+                                     height="650"
+                                     <?php if ( $slide_index === 0 ) : ?>
+                                         fetchpriority="high"
+                                         loading="eager"
+                                         decoding="async"
+                                     <?php else : ?>
+                                         loading="lazy"
+                                         decoding="async"
+                                     <?php endif; ?>>
                             </div>
                         <?php 
                             $slide_index++;
@@ -116,15 +108,14 @@ foreach ( $section_order as $sec_key ) {
                 </div>
                 <?php else : ?>
                 <!-- Fallback Slider if no posts exist -->
-                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+                <div id="rikshawaleCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000" data-bs-touch="true">
                     <div class="carousel-inner">
                         <div class="carousel-item active">
                             <img src="https://rikshadealer.questdigiflex.in/wp-content/uploads/2026/08/ebd8348b-742b-4c06-b9dd-f22b8099b61e.png" 
-                                 class="d-block w-100" 
+                                 class="d-block w-100 hero-banner-img" 
                                  alt="Rikshawale Welcome"
                                  width="1920" 
                                  height="650"
-                                 style="aspect-ratio: 16/6; object-fit: cover;"
                                  fetchpriority="high"
                                  loading="eager"
                                  decoding="async">
@@ -242,7 +233,7 @@ foreach ( $section_order as $sec_key ) {
                             <div class="ps-lg-4 text-start">
                                 <span class="text-uppercase fw-bold text-muted d-block mb-2" style="font-size: 0.85rem; letter-spacing: 2px;"><?php echo esc_html( get_theme_mod( 'welcome_subtitle', '' ) ); ?></span>
                                 <h2 class="display-6 fw-bold mb-3 text-dark" style="text-transform: uppercase; font-family: var(--font-heading); font-weight: 800;"><?php echo esc_html( get_theme_mod( 'welcome_title', '' ) ); ?></h2>
-                                <div class="gradient-divider ms-0 mb-4" style="margin-left: 0 !important; background: linear-gradient(90deg, #0ea5e9, #ff6b35);"></div>
+                                <div class="gradient-divider mb-4" style="background: linear-gradient(90deg, #0ea5e9, #ff6b35);"></div>
                                 <p class="lead text-muted mb-4" style="font-size: 0.98rem; line-height: 1.8;">
                                     <?php echo nl2br( esc_html( get_theme_mod( 'welcome_description', '' ) ) ); ?>
                                 </p>

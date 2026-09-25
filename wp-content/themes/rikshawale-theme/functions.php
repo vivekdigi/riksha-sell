@@ -121,141 +121,6 @@ function rikshawale_register_riksha_cpt() {
 }
 add_action( 'init', 'rikshawale_register_riksha_cpt' );
 
-/**
- * Add Mobile Banner Image Metabox to 'riksha' post type
- */
-function rikshawale_add_riksha_mobile_banner_metabox() {
-    add_meta_box(
-        'riksha_mobile_banner_meta',
-        __( 'Mobile Banner Image (Responsive)', 'rikshawale-theme' ),
-        'rikshawale_render_riksha_mobile_banner_metabox',
-        'riksha',
-        'side',
-        'low'
-    );
-}
-add_action( 'add_meta_boxes', 'rikshawale_add_riksha_mobile_banner_metabox' );
-
-/**
- * Render Mobile Banner Image Metabox Content
- */
-function rikshawale_render_riksha_mobile_banner_metabox( $post ) {
-    wp_nonce_field( 'rikshawale_save_riksha_mobile_banner', 'rikshawale_riksha_mobile_banner_nonce' );
-
-    $mobile_banner_id  = get_post_meta( $post->ID, '_riksha_mobile_banner_id', true );
-    $mobile_banner_url = $mobile_banner_id ? wp_get_attachment_image_url( $mobile_banner_id, 'medium_large' ) : get_post_meta( $post->ID, '_riksha_mobile_banner_url', true );
-    ?>
-    <div id="riksha_mobile_banner_container" style="text-align: center;">
-        <div id="riksha_mobile_banner_preview" style="margin-bottom: 12px;">
-            <?php if ( ! empty( $mobile_banner_url ) ) : ?>
-                <img src="<?php echo esc_url( $mobile_banner_url ); ?>" alt="Mobile Banner Preview" style="max-width: 100%; height: auto; max-height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid #ccd0d4; padding: 3px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08);">
-            <?php else : ?>
-                <div style="padding: 20px 10px; border: 2px dashed #ccd0d4; border-radius: 6px; color: #646970; background: #f6f7f7;">
-                    <i class="dashicons dashicons-smartphone" style="font-size: 28px; width: 28px; height: 28px; display: block; margin: 0 auto 6px auto; color: #8c8f94;"></i>
-                    <span style="font-size: 12px; font-weight: 500; display: block;"><?php _e( 'No mobile banner selected', 'rikshawale-theme' ); ?></span>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <input type="hidden" id="riksha_mobile_banner_id" name="riksha_mobile_banner_id" value="<?php echo esc_attr( $mobile_banner_id ); ?>">
-        <input type="hidden" id="riksha_mobile_banner_url" name="riksha_mobile_banner_url" value="<?php echo esc_attr( $mobile_banner_url ); ?>">
-
-        <p style="margin: 8px 0;">
-            <button type="button" class="button button-primary" id="riksha_upload_mobile_banner_btn" style="width: 100%; margin-bottom: 6px;">
-                <span class="dashicons dashicons-upload" style="vertical-align: middle; margin-top: -2px; font-size: 16px;"></span>
-                <?php _e( 'Select / Upload Mobile Banner', 'rikshawale-theme' ); ?>
-            </button>
-            <button type="button" class="button button-link-delete" id="riksha_remove_mobile_banner_btn" style="display: <?php echo ! empty( $mobile_banner_url ) ? 'inline-block' : 'none'; ?>; font-size: 12px; text-decoration: none;">
-                <?php _e( 'Remove Mobile Banner', 'rikshawale-theme' ); ?>
-            </button>
-        </p>
-
-        <p class="description" style="font-size: 11px; color: #646970; text-align: left; margin-top: 10px; line-height: 1.4;">
-            <span class="dashicons dashicons-info" style="font-size: 13px; width: 13px; height: 13px; vertical-align: middle;"></span>
-            <?php _e( 'Optimized for mobile screens (≤768px). Recommended ratio: 4:3 or 1:1 (e.g. 750×600 or 1080×1080). If left empty, the desktop Featured Image will be used automatically.', 'rikshawale-theme' ); ?>
-        </p>
-    </div>
-
-    <script>
-    jQuery(document).ready(function($){
-        var frame;
-        $('#riksha_upload_mobile_banner_btn').on('click', function(e){
-            e.preventDefault();
-            if (frame) {
-                frame.open();
-                return;
-            }
-            frame = wp.media({
-                title: '<?php echo esc_js( __( 'Select Mobile Banner Image', 'rikshawale-theme' ) ); ?>',
-                button: { text: '<?php echo esc_js( __( 'Use as Mobile Banner', 'rikshawale-theme' ) ); ?>' },
-                library: { type: 'image' },
-                multiple: false
-            });
-
-            frame.on('select', function(){
-                var attachment = frame.state().get('selection').first().toJSON();
-                var imgUrl = (attachment.sizes && attachment.sizes.medium_large) ? attachment.sizes.medium_large.url : attachment.url;
-                
-                $('#riksha_mobile_banner_id').val(attachment.id);
-                $('#riksha_mobile_banner_url').val(attachment.url);
-
-                $('#riksha_mobile_banner_preview').html(
-                    '<img src="' + imgUrl + '" alt="Mobile Banner Preview" style="max-width: 100%; height: auto; max-height: 180px; object-fit: contain; border-radius: 6px; border: 1px solid #ccd0d4; padding: 3px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08);">'
-                );
-                $('#riksha_remove_mobile_banner_btn').show();
-            });
-
-            frame.open();
-        });
-
-        $('#riksha_remove_mobile_banner_btn').on('click', function(e){
-            e.preventDefault();
-            $('#riksha_mobile_banner_id').val('');
-            $('#riksha_mobile_banner_url').val('');
-            $('#riksha_mobile_banner_preview').html(
-                '<div style="padding: 20px 10px; border: 2px dashed #ccd0d4; border-radius: 6px; color: #646970; background: #f6f7f7;">' +
-                    '<i class="dashicons dashicons-smartphone" style="font-size: 28px; width: 28px; height: 28px; display: block; margin: 0 auto 6px auto; color: #8c8f94;"></i>' +
-                    '<span style="font-size: 12px; font-weight: 500; display: block;"><?php echo esc_js( __( 'No mobile banner selected', 'rikshawale-theme' ) ); ?></span>' +
-                '</div>'
-            );
-            $(this).hide();
-        });
-    });
-    </script>
-    <?php
-}
-
-/**
- * Save Mobile Banner Image Metadata
- */
-function rikshawale_save_riksha_mobile_banner_meta( $post_id ) {
-    if ( ! isset( $_POST['rikshawale_riksha_mobile_banner_nonce'] ) || ! wp_verify_nonce( $_POST['rikshawale_riksha_mobile_banner_nonce'], 'rikshawale_save_riksha_mobile_banner' ) ) {
-        return;
-    }
-
-    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-        return;
-    }
-
-    if ( ! current_user_can( 'edit_post', $post_id ) ) {
-        return;
-    }
-
-    if ( isset( $_POST['riksha_mobile_banner_id'] ) ) {
-        $banner_id = intval( $_POST['riksha_mobile_banner_id'] );
-        if ( $banner_id > 0 ) {
-            update_post_meta( $post_id, '_riksha_mobile_banner_id', $banner_id );
-            $url = wp_get_attachment_image_url( $banner_id, 'full' );
-            if ( $url ) {
-                update_post_meta( $post_id, '_riksha_mobile_banner_url', esc_url_raw( $url ) );
-            }
-        } else {
-            delete_post_meta( $post_id, '_riksha_mobile_banner_id' );
-            delete_post_meta( $post_id, '_riksha_mobile_banner_url' );
-        }
-    }
-}
-add_action( 'save_post_riksha', 'rikshawale_save_riksha_mobile_banner_meta' );
 
 /**
  * Add Columns to 'riksha' Admin List Table
@@ -266,7 +131,7 @@ function rikshawale_riksha_columns( $columns ) {
         if ( $key === 'title' ) {
             $new_columns[$key] = $title;
             $new_columns['riksha_desktop_banner'] = __( 'Desktop Banner', 'rikshawale-theme' );
-            $new_columns['riksha_mobile_banner']  = __( 'Mobile Banner', 'rikshawale-theme' );
+
         } else {
             $new_columns[$key] = $title;
         }
@@ -283,14 +148,6 @@ function rikshawale_riksha_custom_column_content( $column, $post_id ) {
             echo $thumb ? $thumb : '<span class="text-muted">—</span>';
         } else {
             echo '<span style="color:#999;">' . __( 'No desktop image', 'rikshawale-theme' ) . '</span>';
-        }
-    } elseif ( 'riksha_mobile_banner' === $column ) {
-        $mobile_id = get_post_meta( $post_id, '_riksha_mobile_banner_id', true );
-        if ( $mobile_id ) {
-            $thumb = wp_get_attachment_image( $mobile_id, array( 60, 50 ), false, array( 'style' => 'border-radius: 4px; border: 1px solid #ddd; object-fit: cover;' ) );
-            echo $thumb ? $thumb : '<span class="text-muted">—</span>';
-        } else {
-            echo '<span style="color:#999; font-style: italic;">' . __( 'Uses desktop fallback', 'rikshawale-theme' ) . '</span>';
         }
     }
 }
