@@ -534,6 +534,29 @@ a:hover {
     }
 }
 
+@media (max-width: 767.98px) {
+    .hero-slider .carousel-item {
+        height: 380px;
+    }
+    .hero-slider .carousel-item picture,
+    .hero-slider .carousel-item img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    #rikshawaleCarousel .carousel-indicators {
+        bottom: 12px;
+        padding: 4px 10px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-slider .carousel-item {
+        height: 320px;
+    }
+}
+
 /* Responsive Horizontal Scroll Inventory Carousel */
 .inventory-carousel-section {
     padding: 60px 0;
