@@ -17,7 +17,8 @@ while ( have_posts() ) : the_post();
     $driven_km    = get_post_meta( $post_id, '_car_driven_km', true ) ?: ( get_post_meta( $post_id, '_car_mileage', true ) ?: '67,000 Km' );
     $fuel         = get_post_meta( $post_id, '_car_fuel', true ) ?: 'Petrol';
     $transmission = get_post_meta( $post_id, '_car_transmission', true ) ?: 'Automatic';
-    $rto          = get_post_meta( $post_id, '_car_exterior', true ) ?: 'UP';
+    $reg_no       = get_post_meta( $post_id, '_car_reg_no', true ) ?: ( get_post_meta( $post_id, '_seller_reg_no', true ) ?: ( get_post_meta( $post_id, '_car_exterior', true ) ?: '' ) );
+    $rto          = ! empty( $reg_no ) ? $reg_no : '-';
     $insurance    = 'Comprehensive';
     $color        = get_post_meta( $post_id, '_car_color', true ) ?: 'White';
     
@@ -278,8 +279,8 @@ while ( have_posts() ) : the_post();
                             <strong class="text-dark fs-6"><?php echo esc_html($driven_km); ?></strong>
                         </div>
                         <div class="col-4">
-                            <span class="d-block text-muted small">RTO</span>
-                            <strong class="text-dark fs-6"><?php echo esc_html($rto); ?></strong>
+                            <span class="d-block text-muted small">Reg No</span>
+                            <strong class="text-dark fs-6"><?php echo esc_html(!empty($reg_no) ? $reg_no : '-'); ?></strong>
                         </div>
 
                         <div class="col-4">

@@ -1012,6 +1012,7 @@ function rikshawale_render_inventory_metabox( $post ) {
     $color           = get_post_meta( $post->ID, '_car_color', true );
     $mfg_year        = get_post_meta( $post->ID, '_car_mfg_year', true ) ?: get_post_meta( $post->ID, '_car_year', true );
     $reg_year        = get_post_meta( $post->ID, '_car_reg_year', true );
+    $reg_no          = get_post_meta( $post->ID, '_car_reg_no', true ) ?: ( get_post_meta( $post->ID, '_seller_reg_no', true ) ?: '' );
     $raw_owner       = get_post_meta( $post->ID, '_car_owner_type', true ) ?: get_post_meta( $post->ID, '_riksha_owner_type', true );
     $owner_type      = rikshawale_normalize_owner_type( $raw_owner );
     $brand_name      = get_post_meta( $post->ID, '_car_brand_name', true );
@@ -1123,10 +1124,18 @@ function rikshawale_render_inventory_metabox( $post ) {
         <tr>
             <th><label for="car_video_url"><?php _e( 'Riksha Video URL / File Link', 'rikshawale-theme' ); ?></label></th>
             <td>
-                <input type="text" id="car_video_url" name="car_video_url" value="<?php echo esc_attr( $video_url ); ?>" class="regular-text" placeholder="e.g. https://www.youtube.com/watch?v=... or http://localhost/.../video.mp4">
-                <p class="description"><?php _e( 'YouTube video link or uploaded MP4 video URL. Displayed right after photo gallery slides on vehicle detail page.', 'rikshawale-theme' ); ?></p>
-                <?php if ( ! empty( $video_url ) ) : ?>
-                    <div style="margin-top:8px; max-width:400px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="car_video_url" name="car_video_url" value="<?php echo esc_attr( $video_url ); ?>" class="regular-text" placeholder="e.g. https://www.youtube.com/watch?v=... or upload MP4 video">
+                    <button type="button" class="button button-secondary riksha-upload-video-btn" data-target="car_video_url">
+                        <span class="dashicons dashicons-video-alt3" style="vertical-align: middle;"></span> <?php _e( 'Upload Video', 'rikshawale-theme' ); ?>
+                    </button>
+                    <button type="button" class="button button-link-delete riksha-remove-video-btn" data-target="car_video_url" style="<?php echo $video_url ? '' : 'display:none;'; ?>">
+                        <?php _e( 'Remove Video', 'rikshawale-theme' ); ?>
+                    </button>
+                </div>
+                <p class="description"><?php _e( 'YouTube video link or upload an MP4/WebM video file directly. Displayed right after photo gallery slides on vehicle detail page.', 'rikshawale-theme' ); ?></p>
+                <div id="preview_car_video_url" style="margin-top:8px; max-width:400px;">
+                    <?php if ( ! empty( $video_url ) ) : ?>
                         <?php if ( strpos( $video_url, 'youtube.com' ) !== false || strpos( $video_url, 'youtu.be' ) !== false ) :
                             preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $video_url, $yt_match );
                             $yt_id = $yt_match[1] ?? '';
@@ -1135,8 +1144,8 @@ function rikshawale_render_inventory_metabox( $post ) {
                         <?php else : ?>
                             <video src="<?php echo esc_url($video_url); ?>" controls style="width:100%; max-height:220px; background:#000; border-radius:6px;"></video>
                         <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </td>
         </tr>
         <tr>
@@ -1146,6 +1155,13 @@ function rikshawale_render_inventory_metabox( $post ) {
         <tr>
             <th><label for="car_reg_year"><?php _e( 'Registration Year *', 'rikshawale-theme' ); ?></label></th>
             <td><input type="text" id="car_reg_year" name="car_reg_year" value="<?php echo esc_attr( $reg_year ); ?>" class="regular-text" placeholder="e.g. 2022"></td>
+        </tr>
+        <tr>
+            <th><label for="car_reg_no"><?php _e( 'Registration Number (Reg No)', 'rikshawale-theme' ); ?></label></th>
+            <td>
+                <input type="text" id="car_reg_no" name="car_reg_no" value="<?php echo esc_attr( $reg_no ); ?>" class="regular-text" placeholder="e.g. RJ14CV0002 or UP32AB1234" style="text-transform:uppercase;">
+                <p class="description"><?php _e( 'Vehicle registration number (displayed on single vehicle page in place of RTO).', 'rikshawale-theme' ); ?></p>
+            </td>
         </tr>
         <tr>
             <th><label for="car_owner_type"><?php _e( 'Owner Type *', 'rikshawale-theme' ); ?></label></th>
@@ -1280,6 +1296,60 @@ function rikshawale_render_inventory_metabox( $post ) {
             $('#preview_' + targetId).html('');
             $(this).hide();
         });
+
+        // Riksha Video Uploader
+        $('.riksha-upload-video-btn').on('click', function(e){
+            e.preventDefault();
+            var targetId   = $(this).data('target');
+            var inputField = $('#' + targetId);
+            var previewBox = $('#preview_' + targetId);
+            var removeBtn  = $(this).siblings('.riksha-remove-video-btn');
+
+            var frame = wp.media({
+                title: 'Select or Upload Riksha Video',
+                button: { text: 'Use this video' },
+                library: { type: 'video' },
+                multiple: false
+            });
+
+            frame.on('select', function(){
+                var attachment = frame.state().get('selection').first().toJSON();
+                inputField.val(attachment.url);
+                previewBox.html('<video src="' + attachment.url + '" controls style="width:100%; max-height:220px; background:#000; border-radius:6px; margin-top:8px;"></video>');
+                removeBtn.show();
+            });
+
+            frame.open();
+        });
+
+        $('.riksha-remove-video-btn').on('click', function(e){
+            e.preventDefault();
+            var targetId = $(this).data('target');
+            $('#' + targetId).val('');
+            $('#preview_' + targetId).html('');
+            $(this).hide();
+        });
+
+        $('#car_video_url').on('input change', function(){
+            var val = $(this).val().trim();
+            var removeBtn  = $(this).siblings('.riksha-remove-video-btn');
+            var previewBox = $('#preview_car_video_url');
+            if (!val) {
+                previewBox.html('');
+                removeBtn.hide();
+                return;
+            }
+            removeBtn.show();
+            if (val.indexOf('youtube.com') !== -1 || val.indexOf('youtu.be') !== -1) {
+                var match = val.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i);
+                var ytId = match ? match[1] : '';
+                if (ytId) {
+                    previewBox.html('<iframe width="100%" height="220" src="https://www.youtube.com/embed/' + ytId + '" frameborder="0" allowfullscreen style="border-radius:6px;"></iframe>');
+                }
+            } else if (val.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) || val.indexOf('/uploads/') !== -1) {
+                previewBox.html('<video src="' + val + '" controls style="width:100%; max-height:220px; background:#000; border-radius:6px; margin-top:8px;"></video>');
+            }
+        });
     });
     </script>
     <?php
@@ -1321,6 +1391,7 @@ function rikshawale_save_inventory_meta( $post_id ) {
         'car_video_url',
         'car_mfg_year',
         'car_reg_year',
+        'car_reg_no',
         'car_owner_type',
         'car_brand_name',
         'car_model_name',
@@ -1343,7 +1414,11 @@ function rikshawale_save_inventory_meta( $post_id ) {
 
     foreach ( $fields as $field ) {
         if ( isset( $_POST[$field] ) ) {
-            update_post_meta( $post_id, '_' . $field, sanitize_text_field( $_POST[$field] ) );
+            $val = sanitize_text_field( $_POST[$field] );
+            if ( $field === 'car_reg_no' ) {
+                $val = strtoupper( trim( $val ) );
+            }
+            update_post_meta( $post_id, '_' . $field, $val );
         }
     }
 }
@@ -2997,6 +3072,7 @@ function rikshawale_handle_sell_car_submission() {
         '_seller_whatsapp'     => $seller_wa,
         '_seller_city'         => $seller_city,
         '_seller_reg_no'       => $seller_reg_no,
+        '_car_reg_no'          => $seller_reg_no,
         '_seller_state'        => $seller_state,
         '_car_mfg_year'        => $mfg_year,
         '_car_reg_year'        => $reg_year,
@@ -3920,7 +3996,7 @@ function rikshawale_approve_car_submission_handler() {
 
     // Copy all car meta
     $meta_keys = array(
-        '_car_mfg_year', '_car_reg_year', '_car_owner_type',
+        '_car_mfg_year', '_car_reg_year', '_car_reg_no', '_car_owner_type',
         '_car_brand_name', '_car_model_name', '_car_variant',
         '_car_driven_km', '_car_fuel', '_car_transmission',
         '_car_expected_price', '_car_video_url',
@@ -3951,6 +4027,9 @@ function rikshawale_approve_car_submission_handler() {
     }
 
     // Save formatted Indicative Price in Inventory
+    if ( empty( $m('_car_reg_no') ) && ! empty( $m('_seller_reg_no') ) ) {
+        update_post_meta( $inventory_id, '_car_reg_no', $m('_seller_reg_no') );
+    }
     $ai_min = $m('_car_ai_valuation_min');
     $ai_max = $m('_car_ai_valuation_max');
     if ( $ai_min && $ai_max ) {
@@ -4021,7 +4100,7 @@ function rikshawale_add_inventory_ai_metabox() {
     foreach ( $post_types as $pt ) {
         add_meta_box(
             'rikshawale_inventory_ai_details',
-            '🤖 AI Indicative Price & Condition Details',
+            '🤖 AI Engine Calculate Estimated Price',
             'rikshawale_render_inventory_ai_metabox',
             $pt,
             'side',
@@ -4043,36 +4122,19 @@ function rikshawale_render_inventory_ai_metabox( $post ) {
     ?>
     <div style="padding: 6px 0;">
         <div style="background: #1e3a8a; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: center;">
-            <label style="color: #bfdbfe; font-size: 11px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">Estimated Market Resale Price</label>
+            <label style="color: #bfdbfe; font-size: 11px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">AI Engine Calculate Estimated Price</label>
             <input type="text" name="_car_ai_exact_price" value="<?php echo esc_attr($exact_price); ?>" placeholder="e.g. Rs. 55,764.21" style="width:100%; text-align:center; padding:6px 8px; border-radius:4px; border:1px solid #3b82f6; font-size: 16px; font-weight: bold; background: #fff; color: #1e3a8a;">
         </div>
 
-        <p style="margin-bottom: 8px;">
-            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Indicative / Incentive Price (Range)</label>
-            <input type="text" name="_car_indicative_price" value="<?php echo esc_attr($indicative); ?>" placeholder="e.g. ₹1,20,000 – ₹1,40,000" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
-        </p>
-        <div style="display:flex; gap:8px; margin-bottom:8px;">
-            <div style="flex:1;">
-                <label style="font-weight:600; display:block; font-size:11px; color:#64748b;">AI Min Price (₹)</label>
-                <input type="text" name="_car_ai_valuation_min" value="<?php echo esc_attr($val_min); ?>" placeholder="120000" style="width:100%; padding:4px 6px;">
-            </div>
-            <div style="flex:1;">
-                <label style="font-weight:600; display:block; font-size:11px; color:#64748b;">AI Max Price (₹)</label>
-                <input type="text" name="_car_ai_valuation_max" value="<?php echo esc_attr($val_max); ?>" placeholder="140000" style="width:100%; padding:4px 6px;">
-            </div>
+        <!-- Hidden AI Detail fields to only display Estimated Market Resale Price -->
+        <div style="display:none;">
+            <input type="hidden" name="_car_indicative_price" value="<?php echo esc_attr($indicative); ?>">
+            <input type="hidden" name="_car_ai_valuation_min" value="<?php echo esc_attr($val_min); ?>">
+            <input type="hidden" name="_car_ai_valuation_max" value="<?php echo esc_attr($val_max); ?>">
+            <input type="hidden" name="_car_ai_condition_score" value="<?php echo esc_attr($score); ?>">
+            <input type="hidden" name="_car_ai_depreciation" value="<?php echo esc_attr($depreciation); ?>">
+            <textarea name="_car_ai_summary" style="display:none;"><?php echo esc_textarea($summary); ?></textarea>
         </div>
-        <p style="margin-bottom: 8px;">
-            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Condition Rating Score (1-10)</label>
-            <input type="text" name="_car_ai_condition_score" value="<?php echo esc_attr($score); ?>" placeholder="8.5" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
-        </p>
-        <p style="margin-bottom: 8px;">
-            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">Depreciation Percentage (%)</label>
-            <input type="text" name="_car_ai_depreciation" value="<?php echo esc_attr($depreciation); ?>" placeholder="e.g. 68.1" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">
-        </p>
-        <p style="margin-bottom: 0;">
-            <label style="font-weight:600; display:block; font-size:12px; color:#1e293b;">AI Condition Summary</label>
-            <textarea name="_car_ai_summary" rows="3" style="width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1; font-size:12px;"><?php echo esc_textarea($summary); ?></textarea>
-        </p>
     </div>
     <?php
 }
